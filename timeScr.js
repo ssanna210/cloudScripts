@@ -4,3 +4,8 @@ handlers.currTimeSeconds = function()
 	return now.getTime() / 1000;
 }
 
+handlers.currTime = function()
+{
+	var now = new Date();
+	return now;
+}
