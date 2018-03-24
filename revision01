@@ -1,0 +1,51 @@
+handlers.unlockChest = function (args, context) {
+
+    var request = {
+
+        PlayFabId: currentPlayerId,
+
+        ContainerItemInstanceId: 
+
+    };
+
+    var playerStatResult = server.UpdatePlayerStatistics(request);  
+
+    
+
+    return playerStatResult;
+
+};
+
+
+handlers.grantChest = function (args, context) {
+
+    var tableId = "dropTable_battleChest"; // CHEST drop table ID 
+
+    var DTresult = server.EvaluateRandomResultTable({ TableId : tableId });
+
+    var pull = server.GrantItemsToUser({ PlayFabId: currentPlayerId, ItemIds: [DTresult.ResultItemId] });
+
+    var results = pull.ItemGrantResults;
+
+    var instId = results.ItemInstanceId;
+
+    
+
+    return { message: instId };
+
+}
+
+handlers.userUpdate = function (args, context) {
+
+    server.UpdateUserInventoryItemCustomData({ 
+
+      PlayFabId: currentPlayerId, 
+
+      ItemInstanceId: instId 
+
+      Data: { Time: position }
+
+    });
+
+}
+
