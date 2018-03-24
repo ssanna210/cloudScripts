@@ -31,7 +31,7 @@ handlers.grantChest = function (args, context) {
 
     
 
-    return { message: instId };
+    return { "InstanceId": instId };
 
 }
 
