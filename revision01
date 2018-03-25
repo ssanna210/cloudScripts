@@ -1,3 +1,5 @@
+var DT_CHEST_BATTLE = "dropTable_battleChest"; // 전투 보상 상자의 드롭테이블
+
 handlers.unlockChest = function (args, context) {
 
     var request = {
@@ -19,9 +21,12 @@ handlers.unlockChest = function (args, context) {
 
 handlers.grantChest = function (args, context) {
 
-    var tableId = "dropTable_battleChest"; // CHEST drop table ID 
+    //Check the player's inventory to ensure that a "ReferralBadge" does not exist
+    var GetUserInventoryRequest = {
+            "PlayFabId": currentPlayerId
+    };    
 
-    var DTresult = server.EvaluateRandomResultTable({ TableId : tableId });
+    var DTresult = server.EvaluateRandomResultTable({ TableId : DT_CHEST_BATTLE });
 
     var pull = server.GrantItemsToUser({ PlayFabId: currentPlayerId, ItemIds: [DTresult.ResultItemId] });
 
