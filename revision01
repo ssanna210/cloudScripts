@@ -1,18 +1,16 @@
 var DT_CHEST_BATTLE = "dropTable_battleChest"; // 전투 보상 상자의 드롭테이블
+var IC_CHEST_BATTLE = "battleChest"; // 전투 보상 상자의 ItemClass
 
 handlers.unlockChest = function (args, context) {
-
-    var request = {
-
-        PlayFabId: currentPlayerId,
-
-        ContainerItemInstanceId: 
-
-    };
-
-    var playerStatResult = server.UpdatePlayerStatistics(request);  
-
+    //보상 상자 남은 시간 체크
     
+    //상자 열기
+    var request = {
+        PlayFabId: currentPlayerId,
+        ContainerItemInstanceId: 
+    };
+    
+    var playerStatResult = server.UpdatePlayerStatistics(request);  
 
     return playerStatResult;
 
@@ -21,22 +19,37 @@ handlers.unlockChest = function (args, context) {
 
 handlers.grantChest = function (args, context) {
 
-    //Check the player's inventory to ensure that a "ReferralBadge" does not exist
-    var GetUserInventoryRequest = {
+    try {
+        //인벤토리 체크
+        var GetUserInventoryRequest = {
             "PlayFabId": currentPlayerId
-    };    
+        };  
+        var GetUserInventoryResult = server.GetUserInventory(GetUserInventoryRequest);
+        for(var index in GetUserInventoryResult.Inventory)
+        {
+            if(GetUserInventoryResult.Inventory[index].ItemClass === IC_CHEST_BATTLE)
+            {
+                throw "You are only allowed one Referral Badge.";
+            }
+        }        
 
-    var DTresult = server.EvaluateRandomResultTable({ TableId : DT_CHEST_BATTLE });
+        var DTresult = server.EvaluateRandomResultTable({ TableId : DT_CHEST_BATTLE });
 
-    var pull = server.GrantItemsToUser({ PlayFabId: currentPlayerId, ItemIds: [DTresult.ResultItemId] });
+        var pull = server.GrantItemsToUser({ PlayFabId: currentPlayerId, ItemIds: [DTresult.ResultItemId] });
 
-    var results = pull.ItemGrantResults;
+        var results = pull.ItemGrantResults;
 
-    var instId = results.ItemInstanceId;
+        var instId = results.ItemInstanceId;
 
     
 
-    return { "InstanceId": instId };
+        return { "InstanceId": instId };
+    } catch(e) {
+        var retObj = {};
+        retObj["errorDetails"] = "Error: " + e;
+        return retObj;
+    }
+    
 
 }
 
