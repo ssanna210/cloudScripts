@@ -8,18 +8,7 @@ var MAXIMUM_CHEST_BATTLE = 4; // 전투 보상 상자 최대 수량
 handlers.unlockChest = function (args, context) {
     try {
         // 상자 정보 가져오기
-        var GetUserInventoryRequest = {
-            "PlayFabId": currentPlayerId
-        };
-        var GetUserInventoryResult = server.GetUserInventory(GetUserInventoryRequest);
-        
-        for(var index in GetUserInventoryResult.Inventory)
-        {
-            if(GetUserInventoryResult.Inventory[index].ItemInstanceId === args.ItemInstanceId)
-            {
-                throw "You are only allowed one Referral Badge.";
-            }
-        }
+        var chestDataResult = GetItemData(args.InstanceId);
         
         //보상 상자 남은 시간 체크
         
@@ -27,10 +16,32 @@ handlers.unlockChest = function (args, context) {
         //상자 열기
         var request = {
             PlayFabId: currentPlayerId,
-            ContainerItemInstanceId: 
+            ContainerItemInstanceId: args.InstanceId
         };
         
-        var playerStatResult = server.UpdatePlayerStatistics(request);  
+        var result = server.UnlockContainerInstance(request);  
+        return result;
+    } catch(e) {
+        var retObj = {};
+        retObj["errorDetails"] = "Error: " + e;
+        return retObj;
+    }
+    
+
+};
+
+handlers.openStartChest = function (args, context) {
+    try {
+        // 상자 정보 가져오기
+        var chestDataResult = GetItemData(args.InstanceId);        
+        
+        // 보상 상자 시간 설정
+        
+    var result = UpdateUserInventoryItemCustomData(UpdateUserInventoryItemCustomDataRequest);
+        
+        
+        // 보상 상자 
+        
         return playerStatResult;
     } catch(e) {
         var retObj = {};
@@ -110,6 +121,24 @@ function ProcessGrantChest()
 
     return instId; // 상자 InstanceId 값 리턴
 }
+
+function GetItemData(id) {
+    var itemResult;
+    var GetUserInventoryRequest = {
+            "PlayFabId": currentPlayerId
+    };
+    var GetUserInventoryResult = server.GetUserInventory(GetUserInventoryRequest);
+    
+    for(var index in GetUserInventoryResult.Inventory)
+    {
+        if(GetUserInventoryResult.Inventory[index].ItemInstanceId === id)
+        {
+            itemResult = GetUserInventoryResult.Inventory[index];
+        }
+    }
+    return itemResult;
+}
+
 
 
 handlers.userUpdate = function (args, context) {
