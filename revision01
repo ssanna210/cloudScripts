@@ -36,8 +36,21 @@ handlers.openStartChest = function (args, context) {
         var chestDataResult = GetItemData(args.InstanceId);        
         
         // 보상 상자 시간 설정
+        var unLockDate = new Date();
+        var currentTime = unLockDate.getTime();
         
-    var result = UpdateUserInventoryItemCustomData(UpdateUserInventoryItemCustomDataRequest);
+        unLockDate.setDate(currentTime + (chestDataResult.time * 1000));
+        
+        
+        var UpdateUserInventoryItemCustomDataRequest= { 
+            "PlayFabId": currentPlayerId,
+            "ItemInstanceId": args.InstanceId,
+            "Data": {
+                
+            }
+        }
+        
+        var result = UpdateUserInventoryItemCustomData(UpdateUserInventoryItemCustomDataRequest);
         
         
         // 보상 상자 
