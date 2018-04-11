@@ -40,6 +40,47 @@ handlers.openStartChest = function (args, context) {
         }else {
             // 보상 상자 시간 설정
             var unLockDate = new Date();
+            var currentTime = new Date();
+            var waitTime = parseInt(chestDataResult.time);
+                
+            unLockDate.setDate(currentTime.getTime() + (waitTime * 1000 * 60));
+
+            var UpdateUserInventoryItemCustomDataRequest= { 
+                "PlayFabId": currentPlayerId,
+                "ItemInstanceId": args.InstanceId,
+                "Data": {
+                    "openTime" : unLockDate,
+                    "startTime" : currentTime
+                }
+            }
+
+            var result = UpdateUserInventoryItemCustomData(UpdateUserInventoryItemCustomDataRequest);
+            
+        }
+        
+        // 보상 상자         
+        return result;
+        
+    } catch(e) {
+        var retObj = {};
+        retObj["errorDetails"] = "Error: " + e;
+        return retObj;
+    }
+    
+
+};
+
+// 동영상 광고 보상 시간단축 함수
+handlers.videoChest = function (args, context) {
+    try {
+        // 상자 정보 가져오기
+        var chestDataResult = GetItemData(args.InstanceId);        
+        
+        if(chestDataResult == null) {
+            throw "해당 아이템 찾지 못함";
+        }else {
+            // 보상 상자 시간 설정
+            var unLockDate = new Date();
             var currentTime = unLockDate.getTime();
             var waitTime = parseInt(chestDataResult.time);
         
@@ -59,7 +100,6 @@ handlers.openStartChest = function (args, context) {
         
         // 보상 상자         
         return result;
-        
     } catch(e) {
         var retObj = {};
         retObj["errorDetails"] = "Error: " + e;
