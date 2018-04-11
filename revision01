@@ -43,7 +43,7 @@ handlers.openStartChest = function (args, context) {
             var currentTime = new Date();
             var waitTime = parseInt(chestDataResult.time);
                 
-            unLockDate.setDate(currentTime.getTime() + (waitTime * 1000 * 60));
+            unLockDate.setTime(currentTime.getTime() + (waitTime * 1000 * 60));
 
             var UpdateUserInventoryItemCustomDataRequest= { 
                 "PlayFabId": currentPlayerId,
@@ -80,12 +80,17 @@ handlers.videoChest = function (args, context) {
             throw "해당 아이템 찾지 못함";
         }else {
             // 보상 상자 시간 설정
-            var unLockDate = new Date();
-            var currentTime = unLockDate.getTime();
-            var waitTime = parseInt(chestDataResult.time);
-        
-            unLockDate.setDate(currentTime + (waitTime * 1000));
-
+            var unLockDate = new Date( chestDataResult.openTime );
+            var currentTime = new Date();
+            var startTime = new Date( chestDataResult.startTime );
+            var reduceTime = 30 * 60 * 1000; //단축되는 시간
+            
+            unLockDate.setTime(unLockDate.getTime() - reduceTime);
+            
+            if(unLockDate.getTime() < startTime.getTime()) {
+                   unLockDate.setTime(startTime.getTime());
+            }
+            
             var UpdateUserInventoryItemCustomDataRequest= { 
                 "PlayFabId": currentPlayerId,
                 "ItemInstanceId": args.InstanceId,
