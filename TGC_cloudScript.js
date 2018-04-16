@@ -4,6 +4,7 @@ var IC_CHEST_BATTLE = "battleChest"; // 전투 보상 상자의 ItemClass
 var KEY_PLAYER_CHESTS_BATTLE = "playerBattleChests"; // 전투 보상 상자배열의 키값 
 var MAXIMUM_CHEST_BATTLE = 4; // 전투 보상 상자 최대 수량
 
+
 // 전투 보상 상자 여는 함수
 handlers.unlockChest = function (args, context) {
     try {
@@ -21,6 +22,7 @@ handlers.unlockChest = function (args, context) {
         
         var result = server.UnlockContainerInstance(request);  
         return result;
+        
     } catch(e) {
         var retObj = {};
         retObj["errorDetails"] = "Error: " + e;
@@ -117,6 +119,7 @@ handlers.videoChest = function (args, context) {
 // 전투 보상 상자 수여 함수
 handlers.grantChest = function (args, context) {
     try {
+        
         //상자 정보 가져오기
         var GetUserDataRequest= { 
             "PlayFabId": currentPlayerId,
