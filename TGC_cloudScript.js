@@ -52,7 +52,8 @@ handlers.openStartChest = function (args, context) {
                 "ItemInstanceId": args.InstanceId,
                 "Data": {
                     "openTime" : unLockDate,
-                    "startTime" : currentTime
+                    "startTime" : currentTime,
+                    "state" : "OPENING"
                 }
             }
 
