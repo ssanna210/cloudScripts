@@ -159,7 +159,7 @@ handlers.grantChest = function (args, context) {
                 {
                     // 보상상자 갯수 다참, 추가 불가능
                     // this is not an error, but the referrer does not get thier reward.
-                    log.info("Player:" + args.referralCode + " has hit the maximum number of referrals (" + MAXIMUM_REFERRALS + ")." );
+                    log.info("Player:" + args.referralCode + " has hit the maximum number of referrals (" + MAXIMUM_CHEST_BATTLE + ")." );
                 }
             }
             else
