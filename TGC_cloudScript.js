@@ -10,10 +10,21 @@ handlers.unlockChest = function (args, context) {
     try {
         // 상자 정보 가져오기
         var chestDataResult = GetItemData(args.InstanceId);
+        if(chestDataResult == null) {
+            throw "해당 아이템 찾지 못함";
+        }
         
-        //보상 상자 남은 시간 체크
+        if(chestDataResult.CustomData.hasOwnProperty("openTime")) {
+            var unLockDate = new Date( chestDataResult.CustomData.openTime );
+            var currentTime = new Date();
+            
+            if(currentTime.getTime() < unLockDate.getTime()) {
+                throw "상자 언락 할 시간이 안됨";
+            }
+        }else {
+            throw "상자에 openTime 키가 없음";
+        }
         
-    
         //상자 열기
         var request = {
             PlayFabId: currentPlayerId,
@@ -39,27 +50,25 @@ handlers.openStartChest = function (args, context) {
         
         if(chestDataResult == null) {
             throw "해당 아이템 찾지 못함";
-        }else {
-            // 보상 상자 시간 설정
-            var unLockDate = new Date();
-            var currentTime = new Date();
-            var waitTime = parseInt(chestDataResult.time);
-                
-            unLockDate.setTime(currentTime.getTime() + (waitTime * 1000 * 60));
-
-            var UpdateUserInventoryItemCustomDataRequest= { 
-                "PlayFabId": currentPlayerId,
-                "ItemInstanceId": args.InstanceId,
-                "Data": {
-                    "openTime" : unLockDate,
-                    "startTime" : currentTime,
-                    "state" : "OPENING"
-                }
-            }
-
-            var result = UpdateUserInventoryItemCustomData(UpdateUserInventoryItemCustomDataRequest);
-            
         }
+        // 보상 상자 시간 설정
+        var unLockDate = new Date();
+        var currentTime = new Date();
+        var waitTime = parseInt(chestDataResult.CustomData.time);
+                
+        unLockDate.setTime(currentTime.getTime() + (waitTime * 1000 * 60));
+
+        var UpdateUserInventoryItemCustomDataRequest= { 
+            "PlayFabId": currentPlayerId,
+            "ItemInstanceId": args.InstanceId,
+            "Data": {
+                "openTime" : unLockDate,
+                "startTime" : currentTime,
+                "state" : "OPENING"
+            }
+        }
+
+        var result = UpdateUserInventoryItemCustomData(UpdateUserInventoryItemCustomDataRequest);
         
         // 보상 상자         
         return result;
@@ -81,33 +90,32 @@ handlers.videoChest = function (args, context) {
         
         if(chestDataResult == null) {
             throw "해당 아이템 찾지 못함";
-        }else {
-            // 보상 상자 시간 설정
-            var unLockDate = new Date( chestDataResult.openTime );
-            var currentTime = new Date();
-            var startTime = new Date( chestDataResult.startTime );
-            var reduceTime = 30 * 60 * 1000; //단축되는 시간
-            
-            unLockDate.setTime(unLockDate.getTime() - reduceTime);
-            
-            if(unLockDate.getTime() < startTime.getTime()) {
-                   unLockDate.setTime(startTime.getTime());
-            }
-            
-            var UpdateUserInventoryItemCustomDataRequest= { 
-                "PlayFabId": currentPlayerId,
-                "ItemInstanceId": args.InstanceId,
-                "Data": {
-                    "openTime" : unLockDate
-                }
-            }
-
-            var result = UpdateUserInventoryItemCustomData(UpdateUserInventoryItemCustomDataRequest);
-            
         }
+        
+        // 보상 상자 시간 설정
+        var unLockDate = new Date( chestDataResult.CustomData.openTime );
+        var startTime = new Date( chestDataResult.CustomData.startTime );
+        var reduceTime = 30 * 60 * 1000; //단축되는 시간
+            
+        unLockDate.setTime(unLockDate.getTime() - reduceTime);
+            
+        if(unLockDate.getTime() < startTime.getTime()) {
+            unLockDate.setTime(startTime.getTime());
+        }
+            
+        var UpdateUserInventoryItemCustomDataRequest= { 
+            "PlayFabId": currentPlayerId,
+            "ItemInstanceId": args.InstanceId,
+            "Data": {
+                "openTime" : unLockDate
+            }
+        }
+
+        var result = UpdateUserInventoryItemCustomData(UpdateUserInventoryItemCustomDataRequest);    
         
         // 보상 상자         
         return result;
+        
     } catch(e) {
         var retObj = {};
         retObj["errorDetails"] = "Error: " + e;
@@ -139,7 +147,7 @@ handlers.grantChest = function (args, context) {
         {
             // This was a valid referral code, now we need to extract the JSON array
             chestValues = JSON.parse(GetUserDataResult.Data[KEY_PLAYER_CHESTS_BATTLE].Value);
-            if(Array.isArray(referralValues))
+            if(Array.isArray(chestValues))
             {
                 // need to ensure we have not exceded the MAXIMUM_CHEST_BATTLE
                 if(chestValues.length < MAXIMUM_CHEST_BATTLE)
