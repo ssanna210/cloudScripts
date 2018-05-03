@@ -132,11 +132,19 @@ handlers.grantChest = function (args, context) {
         //상자 정보 가져오기
         var GetUserDataRequest= { 
             "PlayFabId": currentPlayerId,
-            "Keys": [ KEY_PLAYER_CHESTS_BATTLE ]
+            "Key": args.key
         }
         var GetUserDataResult = server.GetUserData(GetUserDataRequest);
         
         var chestValues = [];
+        
+        if(!GetUserDataResult.Data.hasOwnProperty(args.key))
+        {
+            //처음으로 보상상자를 보냄
+            chestValues.push(ProcessGrantChest());
+        }else {
+            
+        }
         
         if(!GetUserDataResult.Data.hasOwnProperty(KEY_PLAYER_CHESTS_BATTLE))
         {
