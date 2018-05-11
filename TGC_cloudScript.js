@@ -136,47 +136,17 @@ handlers.grantChest = function (args, context) {
         }
         var GetUserDataResult = server.GetUserData(GetUserDataRequest);
         
-        var chestValues = [];
+        var chestValue = "NONE";
         
-        if(!GetUserDataResult.Data.hasOwnProperty(args.key))
-        {
-            //처음으로 보상상자를 보냄
-            chestValues.push(ProcessGrantChest());
-        }else {
-            
-        }
-        
-        if(!GetUserDataResult.Data.hasOwnProperty(KEY_PLAYER_CHESTS_BATTLE))
-        {
-            //처음으로 보상상자를 보냄
-            chestValues.push(ProcessGrantChest());
-        }
-        else
-        {
-            // This was a valid referral code, now we need to extract the JSON array
-            chestValues = JSON.parse(GetUserDataResult.Data[KEY_PLAYER_CHESTS_BATTLE].Value);
-            if(Array.isArray(chestValues))
-            {
-                // need to ensure we have not exceded the MAXIMUM_CHEST_BATTLE
-                if(chestValues.length < MAXIMUM_CHEST_BATTLE)
-                {
-                    // 보상상자 추가 가능, so we will add the current player 
-                    chestValues.push(ProcessGrantChest());
-                }
-                else
-                {
-                    // 보상상자 갯수 다참, 추가 불가능
-                    // this is not an error, but the referrer does not get thier reward.
-                    log.info("Player:" + args.referralCode + " has hit the maximum number of referrals (" + MAXIMUM_CHEST_BATTLE + ")." );
-                }
+        if(GetUserDataResult.Data.hasOwnProperty(args.key)) {
+            if(GetUserDataResult.Data[args.key].Value == "NONE") {
+                chestValue = ProcessGrantChest();
             }
-            else
-            {
-                throw "An error occured when parsing player's battle chest data.";
-            }
+        } else {
+            chestValue = ProcessGrantChest();
         }
-        
-        UpdateUserDataRequest.Data[KEY_PLAYER_CHESTS_BATTLE] = JSON.stringify(chestValues);
+
+        UpdateUserDataRequest.Data[args.key] = chestValue;
         var UpdateUserDataResult = server.UpdateUserData(UpdateUserDataRequest);
 
         return UpdateUserDataResult;
@@ -220,8 +190,6 @@ function GetItemData(id) {
     }
     return itemResult;
 }
-
-
 
 handlers.userUpdate = function (args, context) {
 
