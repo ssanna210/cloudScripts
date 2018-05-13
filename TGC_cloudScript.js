@@ -147,6 +147,11 @@ handlers.grantChest = function (args, context) {
         }
 
         UpdateUserDataRequest.Data[args.key] = chestValue;
+        var UpdateUserDataRequest = {
+            "PlayFabId": currentPlayerId,
+            "Data": { args.key : chestValue }
+        }; 
+        
         var UpdateUserDataResult = server.UpdateUserData(UpdateUserDataRequest);
 
         return UpdateUserDataResult;
