@@ -193,18 +193,3 @@ function GetItemData(id) {
     }
     return itemResult;
 }
-
-handlers.userUpdate = function (args, context) {
-
-    server.UpdateUserInventoryItemCustomData({ 
-
-      PlayFabId: currentPlayerId, 
-
-      ItemInstanceId: instId 
-
-      Data: { Time: position }
-
-    });
-
-}
-
