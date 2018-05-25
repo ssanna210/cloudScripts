@@ -1,6 +1,6 @@
 var PER_WIN_CHEST = 3; // 전투 보상 상자 얻기위한 승리 수 
 var DT_CHEST_BATTLE = "dropTable_battleChest"; // 전투 보상 상자의 드롭테이블
-var IC_CHEST_BATTLE = "battleChest"; // 전투 보상 상자의 ItemClass
+var IC_CHEST_BATTLE = "BattleChest"; // 전투 보상 상자의 ItemClass
 var KEY_PLAYER_CHESTS_BATTLE = "playerBattleChests"; // 전투 보상 상자배열의 키값 
 var MAXIMUM_CHEST_BATTLE = 4; // 전투 보상 상자 최대 수량
 
@@ -128,33 +128,31 @@ handlers.videoChest = function (args, context) {
 // 전투 보상 상자 수여 함수
 handlers.grantChest = function (args, context) {
     try {
+        // 상자 개수 체크
+        var GetUserInventoryRequest = {
+            "PlayFabId": currentPlayerId
+        };
+        var GetUserInventoryResult = server.GetUserInventory(GetUserInventoryRequest);
         
-        //상자 정보 가져오기
-        var GetUserDataRequest= { 
-            "PlayFabId": currentPlayerId,
-            "Key": args.key
+        var _cnt = 0;
+        for(var item in GetUserInventoryResult.Inventory)
+        {
+            if(item.ItemClass === IC_CHEST_BATTLE)
+            {
+                _cnt++;
+            }
         }
-        var GetUserDataResult = server.GetUserData(GetUserDataRequest);
         
+        // 상자 수여
         var chestValue = "NONE";
         
-        if(GetUserDataResult.Data.hasOwnProperty(args.key)) {
-            if(GetUserDataResult.Data[args.key].Value == "NONE") {
-                chestValue = ProcessGrantChest();
-            }
-        } else {
-            chestValue = ProcessGrantChest();
+        if(_cnt <= MAXIMUM_CHEST_BATTLE) {
+            chestValue = ProcessGrantChest();   
+        }else {
+            throw "상자 제한수 초과!";    
         }
 
-        UpdateUserDataRequest.Data[args.key] = chestValue;
-        var UpdateUserDataRequest = {
-            "PlayFabId": currentPlayerId,
-            "Data": { args.key : chestValue }
-        }; 
-        
-        var UpdateUserDataResult = server.UpdateUserData(UpdateUserDataRequest);
-
-        return UpdateUserDataResult;
+        return chestValue;
         
     } catch(e) {
         var retObj = {};
