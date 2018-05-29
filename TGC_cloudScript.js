@@ -68,7 +68,7 @@ handlers.openStartChest = function (args, context) {
             }
         }
 
-        var result = UpdateUserInventoryItemCustomData(UpdateUserInventoryItemCustomDataRequest);
+        var result = server.UpdateUserInventoryItemCustomData(UpdateUserInventoryItemCustomDataRequest);
         
         // 보상 상자         
         return result;
@@ -111,7 +111,7 @@ handlers.videoChest = function (args, context) {
             }
         }
 
-        var result = UpdateUserInventoryItemCustomData(UpdateUserInventoryItemCustomDataRequest);    
+        var result = server.UpdateUserInventoryItemCustomData(UpdateUserInventoryItemCustomDataRequest);    
         
         // 보상 상자         
         return result;
@@ -180,7 +180,7 @@ function ProcessGrantChest()
             "Data": results[0].CustomData
         }
 
-    var UpdateUserInventoryItemCustomDataResult = UpdateUserInventoryItemCustomData(UpdateUserInventoryItemCustomDataRequest); 
+    var UpdateUserInventoryItemCustomDataResult = server.UpdateUserInventoryItemCustomData(UpdateUserInventoryItemCustomDataRequest); 
     
     return instId; // 상자 InstanceId 값 리턴
 }
