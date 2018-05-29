@@ -174,14 +174,6 @@ function ProcessGrantChest()
     var results = pull.ItemGrantResults;
     var instId = results[0].ItemInstanceId;
     
-    var UpdateUserInventoryItemCustomDataRequest= { 
-            "PlayFabId": currentPlayerId,
-            "ItemInstanceId": instId,
-            "Data": results[0].CustomData
-        }
-
-    var UpdateUserInventoryItemCustomDataResult = server.UpdateUserInventoryItemCustomData(UpdateUserInventoryItemCustomDataRequest); 
-    
     return instId; // 상자 InstanceId 값 리턴
 }
 
