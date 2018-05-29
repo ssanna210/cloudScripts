@@ -172,18 +172,16 @@ function ProcessGrantChest()
         ItemIds: [DTresult.ResultItemId]
     });
     var results = pull.ItemGrantResults;
-    var instId = results.ItemInstanceId;
+    var instId = results[0].ItemInstanceId;
     
     var UpdateUserInventoryItemCustomDataRequest= { 
             "PlayFabId": currentPlayerId,
             "ItemInstanceId": instId,
-            "Data": {
-                "openTime" : unLockDate
-            }
+            "Data": results[0].CustomData
         }
 
-        var result = UpdateUserInventoryItemCustomData(UpdateUserInventoryItemCustomDataRequest); 
-
+    var UpdateUserInventoryItemCustomDataResult = UpdateUserInventoryItemCustomData(UpdateUserInventoryItemCustomDataRequest); 
+    
     return instId; // 상자 InstanceId 값 리턴
 }
 
