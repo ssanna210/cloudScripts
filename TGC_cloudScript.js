@@ -59,9 +59,11 @@ handlers.openStartChest = function (args, context) {
         }
         
         // 보상 상자 시간 설정
+        var customObj = JSON.parse(catalogDataResult.CustomData);
+        
         var unLockDate = new Date();
         var currentTime = new Date();
-        var waitTime = parseInt(catalogDataResult.CustomData.time);
+        var waitTime = parseInt(customObj.time);
                 
         unLockDate.setTime(currentTime.getTime() + (waitTime * 1000 * 60));
 
