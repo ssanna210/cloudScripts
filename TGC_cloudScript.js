@@ -135,9 +135,9 @@ handlers.grantChest = function (args, context) {
         var GetUserInventoryResult = server.GetUserInventory(GetUserInventoryRequest);
         
         var _cnt = 0;
-        for(var item in GetUserInventoryResult.Inventory)
+        for(var index in GetUserInventoryResult.Inventory)
         {
-            if(item.ItemClass === IC_CHEST_BATTLE)
+            if(GetUserInventoryResult.Inventory[index].ItemClass === IC_CHEST_BATTLE)
             {
                 _cnt++;
             }
