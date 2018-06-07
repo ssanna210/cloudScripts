@@ -51,10 +51,17 @@ handlers.openStartChest = function (args, context) {
         if(chestDataResult == null) {
             throw "해당 아이템 찾지 못함";
         }
+        // 상자 카달로그 정보 가져오기
+        var catalogDataResult = GetItemCatalogData(chestDataResult.ItemId);
+        
+        if(catalogDataResult == null) {
+            throw "해당 아이템 카달로그 찾지 못함";
+        }
+        
         // 보상 상자 시간 설정
         var unLockDate = new Date();
         var currentTime = new Date();
-        var waitTime = parseInt(chestDataResult.CustomData.time);
+        var waitTime = parseInt(catalogDataResult.CustomData.time);
                 
         unLockDate.setTime(currentTime.getTime() + (waitTime * 1000 * 60));
 
