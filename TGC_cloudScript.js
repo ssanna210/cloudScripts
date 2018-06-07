@@ -146,7 +146,7 @@ handlers.grantChest = function (args, context) {
         // 상자 수여
         var chestValue = "NONE";
         
-        if(_cnt <= MAXIMUM_CHEST_BATTLE) {
+        if(_cnt < MAXIMUM_CHEST_BATTLE) {
             chestValue = ProcessGrantChest();   
         }else {
             throw "상자 제한수 초과!";    
