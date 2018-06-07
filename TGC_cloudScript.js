@@ -193,3 +193,20 @@ function GetItemData(id) {
     }
     return itemResult;
 }
+
+function GetItemCatalogData(id) {
+    var itemResult;
+    var GetCatalogItemsRequest = {
+            "PlayFabId": currentPlayerId
+    };
+    var GetCatalogItemsResult = server.GetCatalogItems(GetCatalogItemsRequest);
+    
+    for(var index in GetCatalogItemsResult.Catalog)
+    {
+        if(GetCatalogItemsResult.Catalog[index].ItemId === id)
+        {
+            itemResult = GetCatalogItemsResult.Catalog[index];
+        }
+    }
+    return itemResult;
+}
