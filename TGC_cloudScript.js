@@ -163,9 +163,13 @@ handlers.openGem = function (args, context) {
         var unLockDate = new Date();
         var currentTime = new Date();
         
-        if("openTime" in chestDataResult.CustomData) {
+        var chestCustomData = {};
+        if(chestDataResult.CustomData != null)
+            chestCustomData = chestDataResult.CustomData;
+        
+        if("openTime" in chestCustomData) {
             
-            unLockDate = new Date( chestDataResult.CustomData.openTime );
+            unLockDate = new Date( chestCustomData.openTime );
             
         }else {
             // LOCK 상태의 상자, 카달로그에서 정보를 받아온다
