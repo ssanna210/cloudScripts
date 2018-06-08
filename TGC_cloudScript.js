@@ -159,28 +159,44 @@ handlers.openGem = function (args, context) {
         }
         
         // 남은 시간으로 필요한 젬코스트 계산
+        
+        var unLockDate = new Date();
+        var currentTime = new Date();
+        
         if(chestDataResult.CustomData.hasOwnProperty("openTime")) {
             
-            var unLockDate = new Date( chestDataResult.CustomData.openTime );
-            var currentTime = new Date();
-            
-            var leftTime = unLockDate - currentTime; // 남은 시간 계산
-            var needGem = Math.ceil(leftTime / (MinutePerGem * 60 * 1000); // 필요한 젬코스트 계산식
-            
-            if(GetUserInventoryResult.Inventory.VirtualCurrency.GE < needGem) {
-                throw "GEM이 부족함";
-            }else {
-                var GemCostRequest = {
-                    "PlayFabId": currentPlayerId,
-                    "VirtualCurrency": VIRTUAL_CURRENCY_CODE,
-                    "Amount": needGem   
-                };
-                var GemCostResult = server.SubtractUserVirtualCurrency(); 
-            }
+            unLockDate = new Date( chestDataResult.CustomData.openTime );
             
         }else {
-            throw "상자에 openTime 키가 없음";
+            // LOCK 상태의 상자, 카달로그에서 정보를 받아온다
+            // 상자 카달로그 정보 가져오기
+            var catalogDataResult = GetItemCatalogData(chestDataResult.ItemId);
+        
+            if(catalogDataResult == null) {
+                throw "해당 아이템 카달로그 찾지 못함";
+            }
+            
+            // 보상 상자 시간 설정
+            var customObj = JSON.parse(catalogDataResult.CustomData);
+            
+            var waitTime = parseInt(customObj.time);
+            unLockDate.setTime(currentTime.getTime() + (waitTime * 1000 * 60));
         }
+        
+        var leftTime = unLockDate - currentTime; // 남은 시간 계산
+        var needGem = Math.ceil(leftTime / (MinutePerGem * 60 * 1000); // 필요한 젬코스트 계산식
+                                
+        if(GetUserInventoryResult.Inventory.VirtualCurrency.GE < needGem) {
+            throw "GEM이 부족함";
+        }else {
+            var GemCostRequest = {
+                "PlayFabId": currentPlayerId,
+                "VirtualCurrency": VIRTUAL_CURRENCY_CODE,
+                "Amount": needGem   
+            };
+            var GemCostResult = server.SubtractUserVirtualCurrency(); 
+        }
+        
         
         //상자 열기
         var request = {
