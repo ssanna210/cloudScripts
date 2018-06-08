@@ -163,7 +163,7 @@ handlers.openGem = function (args, context) {
         var unLockDate = new Date();
         var currentTime = new Date();
         
-        if(chestDataResult.CustomData.hasOwnProperty("openTime")) {
+        if("openTime" in chestDataResult.CustomData) {
             
             unLockDate = new Date( chestDataResult.CustomData.openTime );
             
