@@ -3,7 +3,8 @@ var DT_CHEST_BATTLE = "dropTable_battleChest"; // 전투 보상 상자의 드롭
 var IC_CHEST_BATTLE = "BattleChest"; // 전투 보상 상자의 ItemClass
 var KEY_PLAYER_CHESTS_BATTLE = "playerBattleChests"; // 전투 보상 상자배열의 키값 
 var MAXIMUM_CHEST_BATTLE = 4; // 전투 보상 상자 최대 수량
-
+var MinutePerGem = 12; // 젬당 분 계수
+var VIRTUAL_CURRENCY_CODE = "GE";
 
 // 전투 보상 상자 여는 함수
 handlers.unlockChest = function (args, context) {
@@ -133,6 +134,72 @@ handlers.videoChest = function (args, context) {
     
 
 };
+
+handlers.openGem = function (args, context) {
+    try {
+        // 유저 인벤토리 가져오기
+        var GetUserInventoryRequest = {
+            "PlayFabId": currentPlayerId
+        };
+        var GetUserInventoryResult = server.GetUserInventory(GetUserInventoryRequest);
+        
+        // 상자 정보 가져오기
+        var chestDataResult;
+        
+        for(var index in GetUserInventoryResult.Inventory)
+        {
+            if(GetUserInventoryResult.Inventory[index].ItemInstanceId === id)
+            {
+                chestDataResult = GetUserInventoryResult.Inventory[index];
+            }
+        }
+        
+        if(chestDataResult == null) {
+            throw "해당 아이템 찾지 못함";
+        }
+        
+        // 남은 시간으로 필요한 젬코스트 계산
+        if(chestDataResult.CustomData.hasOwnProperty("openTime")) {
+            
+            var unLockDate = new Date( chestDataResult.CustomData.openTime );
+            var currentTime = new Date();
+            
+            var leftTime = unLockDate - currentTime; // 남은 시간 계산
+            var needGem = Math.ceil(leftTime / (MinutePerGem * 60 * 1000); // 필요한 젬코스트 계산식
+            
+            if(GetUserInventoryResult.Inventory.VirtualCurrency.GE < needGem) {
+                throw "GEM이 부족함";
+            }else {
+                var GemCostRequest = {
+                    "PlayFabId": currentPlayerId,
+                    "VirtualCurrency": VIRTUAL_CURRENCY_CODE,
+                    "Amount": needGem   
+                };
+                var GemCostResult = server.SubtractUserVirtualCurrency(); 
+            }
+            
+        }else {
+            throw "상자에 openTime 키가 없음";
+        }
+        
+        //상자 열기
+        var request = {
+            PlayFabId: currentPlayerId,
+            ContainerItemInstanceId: args.InstanceId
+        };
+        
+        var result = server.UnlockContainerInstance(request);  
+        return result;
+        
+    } catch(e) {
+        var retObj = {};
+        retObj["errorDetails"] = "Error: " + e;
+        return retObj;
+    }
+    
+
+};
+
 
 // 전투 보상 상자 수여 함수
 handlers.grantChest = function (args, context) {
