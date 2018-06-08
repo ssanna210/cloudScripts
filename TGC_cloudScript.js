@@ -5,6 +5,7 @@ var KEY_PLAYER_CHESTS_BATTLE = "playerBattleChests"; // 전투 보상 상자배�
 var MAXIMUM_CHEST_BATTLE = 4; // 전투 보상 상자 최대 수량
 var MinutePerGem = 12; // 젬당 분 계수
 var VIRTUAL_CURRENCY_CODE = "GE";
+var REDUCETIME_AD = 30;
 
 // 전투 보상 상자 여는 함수
 handlers.unlockChest = function (args, context) {
@@ -105,7 +106,7 @@ handlers.videoChest = function (args, context) {
         // 보상 상자 시간 설정
         var unLockDate = new Date( chestDataResult.CustomData.openTime );
         var startTime = new Date( chestDataResult.CustomData.startTime );
-        var reduceTime = 30 * 60 * 1000; //단축되는 시간
+        var reduceTime = REDUCETIME_AD * 60 * 1000; //단축되는 시간
             
         unLockDate.setTime(unLockDate.getTime() - reduceTime);
             
