@@ -190,7 +190,7 @@ handlers.openGem = function (args, context) {
         var leftTime = unLockDate - currentTime; // 남은 시간 계산
         var needGem = Math.ceil(leftTime / (MinutePerGem * 60 * 1000)); // 필요한 젬코스트 계산식
                                 
-        if(GetUserInventoryResult.Inventory.VirtualCurrency.GE < needGem) {
+        if(GetUserInventoryResult.VirtualCurrency.GE < needGem) {
             throw "GEM이 부족함";
         }else {
             var GemCostRequest = {
