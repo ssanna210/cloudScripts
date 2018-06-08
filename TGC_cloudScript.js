@@ -148,7 +148,7 @@ handlers.openGem = function (args, context) {
         
         for(var index in GetUserInventoryResult.Inventory)
         {
-            if(GetUserInventoryResult.Inventory[index].ItemInstanceId === id)
+            if(GetUserInventoryResult.Inventory[index].ItemInstanceId === args.InstanceId)
             {
                 chestDataResult = GetUserInventoryResult.Inventory[index];
             }
