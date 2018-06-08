@@ -198,7 +198,7 @@ handlers.openGem = function (args, context) {
                 "VirtualCurrency": VIRTUAL_CURRENCY_CODE,
                 "Amount": needGem   
             };
-            var GemCostResult = server.SubtractUserVirtualCurrency(); 
+            var GemCostResult = server.SubtractUserVirtualCurrency(GemCostRequest); 
         }
         
         
