@@ -307,3 +307,22 @@ function GetItemCatalogData(id) {
     }
     return itemResult;
 }
+
+// 타이틀데이터 테스트용 함수
+handlers.testFunc = function (args, context) {
+    try {
+        var result = {};
+        result = {"titleKey" : testTitleDataKey,
+                  "titleInterKey" : testTitleInternalDataKey
+                 };
+        
+        return JSON.stringify(result);
+        
+    } catch(e) {
+        var retObj = {};
+        retObj["errorDetails"] = "Error: " + e;
+        return retObj;
+    }
+    
+
+}
