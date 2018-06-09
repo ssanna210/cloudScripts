@@ -312,7 +312,7 @@ function GetItemCatalogData(id) {
 handlers.testFunc = function (args, context) {
     try {
         var result = {};
-        result = {"titleKey" : testTitleDataKey,
+        result = {
                   "titleInterKey" : testTitleInternalDataKey
                  };
         
