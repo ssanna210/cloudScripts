@@ -223,7 +223,7 @@ handlers.openGem = function (args, context) {
 
 
 // 전투 보상 상자 수여 함수
-handlers.grantChest = function (args, context) {
+function grantChest () {
     try {
         // 상자 개수 체크
         var GetUserInventoryRequest = {
@@ -272,6 +272,72 @@ function ProcessGrantChest()
     var instId = results[0].ItemInstanceId;
     
     return instId; // 상자 InstanceId 값 리턴
+}
+
+/ 전투 보상 상자 수여 함수
+handlers.BattleResult = function (args, context) {
+    try {
+        // 유저 통계 가져오기
+        var GetPlayerStatisticsRequest = {
+            "PlayFabId": currentPlayerId,
+            "StatisticNames": [ "Trophy" ]
+        };
+        var GetPlayerStatisticsResult = server.GetPlayerStatistics(GetPlayerStatisticsRequest);
+        
+        // 유저 티어 가져오기
+        var GetUserDataRequest = {
+            "PlayFabId" : currentPlayerId,   
+            "Keys" : [ "Tier", "Rebirth" ]
+        }
+        var GetUserDataResult = server.GetUserData(GetUserDataRequest);
+        
+        // 트로피 관련 테이블 가져오기
+        
+        
+        // 트로피 계산
+        
+        // 보상 상자 체크 
+        
+        var chestValue = "NONE";
+        
+        if(args.isVictory) {
+            
+            
+            chestValue = grantChest();      
+        }
+        
+        // 상자 개수 체크
+        var GetUserInventoryRequest = {
+            "PlayFabId": currentPlayerId
+        };
+        var GetUserInventoryResult = server.GetUserInventory(GetUserInventoryRequest);
+        
+        var _cnt = 0;
+        for(var index in GetUserInventoryResult.Inventory)
+        {
+            if(GetUserInventoryResult.Inventory[index].ItemClass === IC_CHEST_BATTLE)
+            {
+                _cnt++;
+            }
+        }
+        
+        // 상자 수여
+        var chestValue = "NONE";
+        
+        if(_cnt < MAXIMUM_CHEST_BATTLE) {
+            chestValue = ProcessGrantChest();   
+        }else {
+            throw "상자 제한수 초과!";    
+        }
+
+        return chestValue;
+        
+    } catch(e) {
+        var retObj = {};
+        retObj["errorDetails"] = "Error: " + e;
+        return retObj;
+    }
+
 }
 
 function GetItemData(id) {
