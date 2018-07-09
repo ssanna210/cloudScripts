@@ -34,16 +34,58 @@ handlers.unlockChest = function (args, context) {
         };
         
         var result = server.UnlockContainerInstance(request);  
-        return result;
+        
+        //아이템 데이터 부여
+        var itemValues = [];
+        
+        for(var item in result.GrantedItems)
+        {
+            itemValues.push(MakeItemData(item));
+        }
+        
+        return itemValues;
         
     } catch(e) {
         var retObj = {};
         retObj["errorDetails"] = "Error: " + e;
         return retObj;
     }
-    
 
 };
+
+function MakeItemData(item) {
+    // 유저 티어 가져오기
+    var GetUserDataRequest = {
+        "PlayFabId" : currentPlayerId,   
+        "Keys" : [ "Tier", "Rebirth" ]
+    }
+    var GetUserDataResult = server.GetUserData(GetUserDataRequest);
+    
+    // 아이템 테이블 받아오기
+    var itemTableRequest = {
+        "Keys" : [ "ItemStatTable" ]
+    }
+    var itemTableData = JSON.parse( server.GetTitleInternalData(itemTableRequest) );
+    
+    // 아이템 카달로그 받아오기
+    var catalogDataResult = GetItemCatalogData(item.ItemId);
+    var customObj = JSON.parse(catalogDataResult.CustomData);
+    // 스탯 설정
+    var equipmentData;
+    for(var index in itemTableData.Equipments) {
+        if(itemTableData.Equipments[index].ItemID == item.ItemId)
+            equipmentData = itemTableData.Equipments[index];
+    }
+    // 스킬 설정
+    if(customObj.grade == "rare" || customObj.grade == "legend") {
+        
+    }
+    
+}
+
+function ProgressItemData(item) {
+           
+}
 
 handlers.openStartChest = function (args, context) {
     try {
@@ -274,7 +316,7 @@ function ProcessGrantChest()
     return instId; // 상자 InstanceId 값 리턴
 }
 
-/ 전투 보상 상자 수여 함수
+// 전투 결과 보상 함수
 handlers.BattleResult = function (args, context) {
     try {
         // 유저 통계 가져오기
