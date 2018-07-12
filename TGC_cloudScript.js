@@ -55,11 +55,11 @@ handlers.unlockChest = function (args, context) {
 
 function MakeItemData(item) {
     // 유저 티어 가져오기
-    var GetUserDataRequest = {
+    var GetUserInternalDataRequest = {
         "PlayFabId" : currentPlayerId,   
-        "Keys" : [ "Tier", "Rebirth" ]
+        "Keys" : [ "Tier", "Rebirth", "EquipAvailable" ]
     }
-    var GetUserDataResult = server.GetUserData(GetUserDataRequest);
+    var GetUserInternalDataResult = server.GetUserInternalData(GetUserInternalDataRequest);
     
     // 아이템 테이블 받아오기
     var itemTableRequest = {
@@ -70,6 +70,20 @@ function MakeItemData(item) {
     // 아이템 카달로그 받아오기
     var catalogDataResult = GetItemCatalogData(item.ItemId);
     var customObj = JSON.parse(catalogDataResult.CustomData);
+    // 테이블 가져오기
+    var EquipAvailableData = {};
+    if(GetUserInternalDataResult.Data.hasOwnProperty("EquipAvailable")) {
+        EquipAvailableData = JSON.parse( GetUserInternalDataResult.Data["EquipAvailable"].Value );
+    }else {
+        
+    }
+    
+    for(var data in EquipAvailableData.List) {
+        if(data.ItemClass == item.ItemClass) {
+            
+        }
+    }
+    
     // 스탯 설정
     var equipmentData;
     for(var index in itemTableData.Equipments) {
@@ -327,11 +341,11 @@ handlers.BattleResult = function (args, context) {
         var GetPlayerStatisticsResult = server.GetPlayerStatistics(GetPlayerStatisticsRequest);
         
         // 유저 티어 가져오기
-        var GetUserDataRequest = {
+        var GetUserInternalDataRequest = {
             "PlayFabId" : currentPlayerId,   
             "Keys" : [ "Tier", "Rebirth" ]
         }
-        var GetUserDataResult = server.GetUserData(GetUserDataRequest);
+        var GetUserInternalDataResult = server.GetUserInternalData(GetUserDataRequest);
         
         // 트로피 관련 테이블 가져오기
         
