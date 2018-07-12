@@ -63,7 +63,7 @@ function MakeItemData(item) {
     
     // 아이템 테이블 받아오기
     var itemTableRequest = {
-        "Keys" : [ "ItemStatTable" ]
+        "Keys" : [ "ItemStatTable", "TierTable" ]
     }
     var itemTableData = JSON.parse( server.GetTitleInternalData(itemTableRequest) );
     
