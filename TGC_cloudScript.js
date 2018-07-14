@@ -133,8 +133,15 @@ function MakeItemData(item) {
         if(customObj.grade == "rare") { equipmentData.skillLevel = 20; }
         if(customObj.grade == "legend") { equipmentData.skillLevel = 100; }
     }
-    // 
+    // 아이템 데이터 업데이트
+    var UpdateItemCustomDataRequest = {
+        "PlayFabId": currentPlayerId,
+        "ItemInstanceId": item.InstanceId,
+        "Data": equipmentData
+    }
+    server.UpdateUserInventoryItemCustomData(UpdateItemCustomDataRequest);
     
+    return JSON.stringify(equipmentData); // 값 반환하기
 }
 
 function ProgressItemData(item) {
