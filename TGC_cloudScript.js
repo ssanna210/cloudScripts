@@ -88,7 +88,7 @@ function MakeItemData(item) {
     var customObj = JSON.parse(catalogDataResult.CustomData);
     // 테이블 가져오기
     var EquipListData = {};
-    for(var equipData in itemTableData.Data["TierTable"].EquipList)
+    for(var equipData in itemTableData.Data["TierTable"].EquipList) {
         if(equipData.Tier <= tier) {
             EquipListData = equipData;
         }
