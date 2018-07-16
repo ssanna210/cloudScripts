@@ -416,25 +416,25 @@ handlers.BattleResult = function (args, context) {
         var userData = {};
         
         if(GetUserInternalDataResult.Data.hasOwnProperty("Tier")) {
-            userData.tier = GetUserInternalDataResult.Data["Tier"].Value;
+            userData.tier = parseInt( GetUserInternalDataResult.Data["Tier"].Value );
         }else {
             userData.tier = 1;
         }
     
         if(GetUserInternalDataResult.Data.hasOwnProperty("Rebirth")) {
-            userData.rebirth = GetUserInternalDataResult.Data["Rebirth"].Value;
+            userData.rebirth = parseInt( GetUserInternalDataResult.Data["Rebirth"].Value );
         }else {
             userData.rebirth = 0;
         }
         
         if(GetUserInternalDataResult.Data.hasOwnProperty("WinCount")) {
-            userData.winCount = GetUserInternalDataResult.Data["WinCount"].Value;
+            userData.winCount = parseInt( GetUserInternalDataResult.Data["WinCount"].Value );
         }else {
             userData.winCount = 0;
         }
         
         if(GetUserInternalDataResult.Data.hasOwnProperty("WinningStreak")) {
-            userData.winningStreak = GetUserInternalDataResult.Data["WinningStreak"].Value;
+            userData.winningStreak = parseInt( GetUserInternalDataResult.Data["WinningStreak"].Value );
         }else {
             userData.winningStreak = 0;
         }
