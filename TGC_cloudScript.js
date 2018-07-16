@@ -439,7 +439,7 @@ handlers.BattleResult = function (args, context) {
             userData.WinningStreak = 0;
         }
         
-        var tier = userData.Tier + (userData.rebirth * 100); // 환생까지 계산된 실제 티어값
+        var tier = userData.Tier + (userData.Rebirth * 100); // 환생까지 계산된 실제 티어값
     
         // 트로피 관련 테이블 가져오기
         var tierTableRequest = {
