@@ -450,7 +450,7 @@ handlers.BattleResult = function (args, context) {
         // 트로피 계산
         var tierInfo = {};
         for(var info in tierTableData.Data["TierTable"].TierInfos) {
-            if( parseInt( info.Tier ) == tier) {
+            if( info.Tier == tier) {
                 tierInfo = info;
             }
         }
@@ -487,7 +487,7 @@ handlers.BattleResult = function (args, context) {
         
         result.trophy = trophyStatistic.Value;
         result.userData = userData;
-        result.tierInfo = tierTableData.Data["TierTable"]; // 테스트용
+        result.tierInfo = tierTableData.Data["TierTable"].TierInfos; // 테스트용
         
         return result;
         
