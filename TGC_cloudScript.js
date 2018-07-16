@@ -402,7 +402,7 @@ handlers.BattleResult = function (args, context) {
             "PlayFabId" : currentPlayerId,   
             "Keys" : [ "Tier", "Rebirth", "WinCount", "WinningStreak" ]
         }
-        var GetUserInternalDataResult = server.GetUserInternalData(GetUserDataRequest);
+        var GetUserInternalDataResult = server.GetUserInternalData(GetUserInternalDataRequest);
         
         var userData = {};
         
