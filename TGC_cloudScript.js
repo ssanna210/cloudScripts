@@ -449,9 +449,9 @@ handlers.BattleResult = function (args, context) {
         
         // 트로피 계산
         var tierInfo = {};
-        for(var index in tierTableData.Data["TierTable"].TierInfos) {
-            if(tierTableData.Data["TierTable"].TierInfos[index].Tier == tier) {
-                tierInfo = tierTableData.Data["TierTable"].TierInfos[index];    
+        for(var info in tierTableData.Data["TierTable"].TierInfos) {
+            if(info.Tier == tier) {
+                tierInfo = info;
             }
         }
         if(args.isVictory) {
