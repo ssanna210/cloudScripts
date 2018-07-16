@@ -487,7 +487,7 @@ handlers.BattleResult = function (args, context) {
         
         result.trophy = trophyStatistic.Value;
         result.userData = userData;
-        result.tierInfo = tierTableData.Data["TierTable"].TierInfos[0]; // 테스트용
+        result.tierInfo = tierTableData.Data["TierTable"].TierInfos; // 테스트용
         
         return result;
         
