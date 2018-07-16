@@ -449,9 +449,9 @@ handlers.BattleResult = function (args, context) {
         
         // 트로피 계산
         var tierInfo = {};
-        for(var info in tierTableData.Data["TierTable"].TierInfos) {
-            if( info.Tier == tier) {
-                tierInfo = info;
+        for(var index in tierTableData.Data.TierTable.TierInfos) {
+            if( tierTableData.Data.TierTable.TierInfos[index].Tier == tier) {
+                tierInfo = tierTableData.Data.TierTable.TierInfos[index];
             }
         }
         if(args.isVictory) {
@@ -487,7 +487,7 @@ handlers.BattleResult = function (args, context) {
         
         result.trophy = trophyStatistic.Value;
         result.userData = userData;
-        result.tierInfo = tierTableData.Data["TierTable"].TierInfos; // 테스트용
+        result.tierInfo = tierTableData.Data.TierTable.TierInfos; // 테스트용
         
         return result;
         
