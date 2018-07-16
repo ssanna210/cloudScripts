@@ -396,7 +396,8 @@ handlers.BattleResult = function (args, context) {
             "StatisticNames": [ "Trophy" ]
         };
         var GetPlayerStatisticsResult = server.GetPlayerStatistics(GetPlayerStatisticsRequest);
-        var trophyStatistic;
+
+        var trophyStatistic = {};
         if(GetPlayerStatisticsResult.Statistics.length > 0) {
             trophyStatistic = GetPlayerStatisticsResult.Statistics[0];
         }else {
