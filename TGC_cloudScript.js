@@ -396,6 +396,14 @@ handlers.BattleResult = function (args, context) {
             "StatisticNames": [ "Trophy" ]
         };
         var GetPlayerStatisticsResult = server.GetPlayerStatistics(GetPlayerStatisticsRequest);
+        var trophyStatistic;
+        if(GetPlayerStatisticsResult.Statistics.length > 0) {
+            trophyStatistic = GetPlayerStatisticsResult.Statistics[0];
+        }else {
+            trophyStatistic.StatisticName = "Trophy";
+            trophyStatistic.Value = 0;
+            GetPlayerStatisticsResult.Statistics.push(trophyStatistic);
+        }
         
         // 유저 티어 가져오기
         var GetUserInternalDataRequest = {
@@ -447,8 +455,8 @@ handlers.BattleResult = function (args, context) {
         }
         if(args.isVictory) {
             // 이긴 경우
-            if(GetPlayerStatisticsResult.Statistics[0].Value < tierInfo.TrophyLimit) {
-                GetPlayerStatisticsResult.Statistics[0].Value += 1;
+            if(trophyStatistic.Value < tierInfo.TrophyLimit) {
+                trophyStatistic.Value += 1;
             }
             // 이긴 횟수 체크
             userData.winCount += 1; // 승리 추가
@@ -466,7 +474,7 @@ handlers.BattleResult = function (args, context) {
         // 유저 통계 업데이트 : 트로피
         var UpdatePlayerStatisticsRequest = {
             "PlayFabId": currentPlayerId,
-            "Statistics": GetPlayerStatisticsResult.Statistics
+            "Statistics": [trophyStatistic]
         };
         var UpdatePlayerStatisticsResult = server.UpdatePlayerStatistics(UpdatePlayerStatisticsRequest);
         // 유저 정보 업데이트
@@ -476,7 +484,7 @@ handlers.BattleResult = function (args, context) {
         }
         server.UpdateUserInternalData(UpdateUserInternalDataRequest);
         
-        result.trophy = GetPlayerStatisticsResult.Statistics[0].Value;
+        result.trophy = trophyStatistic.Value;
         result.userData = userData;
         
         return result;
