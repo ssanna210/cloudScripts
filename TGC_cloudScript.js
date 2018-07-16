@@ -416,30 +416,30 @@ handlers.BattleResult = function (args, context) {
         var userData = {};
         
         if(GetUserInternalDataResult.Data.hasOwnProperty("Tier")) {
-            userData.tier = parseInt( GetUserInternalDataResult.Data["Tier"].Value );
+            userData.Tier = parseInt( GetUserInternalDataResult.Data["Tier"].Value );
         }else {
-            userData.tier = 1;
+            userData.Tier = 1;
         }
     
         if(GetUserInternalDataResult.Data.hasOwnProperty("Rebirth")) {
-            userData.rebirth = parseInt( GetUserInternalDataResult.Data["Rebirth"].Value );
+            userData.Rebirth = parseInt( GetUserInternalDataResult.Data["Rebirth"].Value );
         }else {
-            userData.rebirth = 0;
+            userData.Rebirth = 0;
         }
         
         if(GetUserInternalDataResult.Data.hasOwnProperty("WinCount")) {
-            userData.winCount = parseInt( GetUserInternalDataResult.Data["WinCount"].Value );
+            userData.WinCount = parseInt( GetUserInternalDataResult.Data["WinCount"].Value );
         }else {
-            userData.winCount = 0;
+            userData.WinCount = 0;
         }
         
         if(GetUserInternalDataResult.Data.hasOwnProperty("WinningStreak")) {
-            userData.winningStreak = parseInt( GetUserInternalDataResult.Data["WinningStreak"].Value );
+            userData.WinningStreak = parseInt( GetUserInternalDataResult.Data["WinningStreak"].Value );
         }else {
-            userData.winningStreak = 0;
+            userData.WinningStreak = 0;
         }
-    
-        userData.tier = userData.tier + (userData.rebirth * 100);
+        
+        var tier = userData.Tier + (userData.rebirth * 100); // 환생까지 계산된 실제 티어값
     
         // 트로피 관련 테이블 가져오기
         var tierTableRequest = {
@@ -450,7 +450,7 @@ handlers.BattleResult = function (args, context) {
         // 트로피 계산
         var tierInfo = {};
         for(var index in tierTableData.Data["TierTable"].TierInfos) {
-            if(tierTableData.Data["TierTable"].TierInfos[index].Tier == userData.tier) {
+            if(tierTableData.Data["TierTable"].TierInfos[index].Tier == tier) {
                 tierInfo = tierTableData.Data["TierTable"].TierInfos[index];    
             }
         }
@@ -460,16 +460,16 @@ handlers.BattleResult = function (args, context) {
                 trophyStatistic.Value += 1;
             }
             // 이긴 횟수 체크
-            userData.winCount += 1; // 승리 추가
-            userData.winningStreak += 1; // 연승 추가
-            if(userData.winCount >= PER_WIN_CHEST) {
+            userData.WinCount += 1; // 승리 추가
+            userData.WinningStreak += 1; // 연승 추가
+            if(userData.WinCount >= PER_WIN_CHEST) {
                 result.chestValue = grantChest();
-                userData.winCount = 0;
+                userData.WinCount = 0;
             }
             
         }else {
             // 패배할 경우
-            userData.winningStreak = 0; // 연승 초기화
+            userData.WinningStreak = 0; // 연승 초기화
         }
         
         // 유저 통계 업데이트 : 트로피
