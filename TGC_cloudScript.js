@@ -81,14 +81,15 @@ function MakeItemData(item) {
     var itemTableRequest = {
         "Keys" : [ "ItemStatTable", "TierTable", "SkillTable" ]
     }
-    var itemTableData = server.GetTitleInternalData(itemTableRequest);
+    var GetTitleInternalDataResult = server.GetTitleInternalData(itemTableRequest);
+    var itemTableData = JSON.parse( GetTitleInternalDataResult.Data );
     
     // 아이템 카달로그 받아오기
     var catalogDataResult = GetItemCatalogData(item.ItemId);
     var customObj = JSON.parse(catalogDataResult.CustomData);
     // 테이블 가져오기
     var EquipListData = {};
-    for(var equipData in itemTableData.Data["TierTable"].EquipList) {
+    for(var equipData in itemTableData["TierTable"].EquipList) {
         if(equipData.Tier <= tier) {
             EquipListData = equipData;
         }
@@ -99,16 +100,16 @@ function MakeItemData(item) {
     var itemId = equipList[randomValue];
     // 스탯 설정
     var equipmentData = {};
-    for(var index in itemTableData.Data["ItemStatTable"].Equipments) {
-        if(itemTableData.Data["ItemStatTable"].Equipments[index].ItemID == itemId) {
-           equipmentData = itemTableData.Data["ItemStatTable"].Equipments[index];    
+    for(var index in itemTableData["ItemStatTable"].Equipments) {
+        if(itemTableData["ItemStatTable"].Equipments[index].ItemID == itemId) {
+           equipmentData = itemTableData["ItemStatTable"].Equipments[index];    
         } 
     }
     //Lev, Atk, Hp
     var tierInfo = {};
-    for(var index in itemTableData.Data["TierTable"].TierInfos) {
-        if(itemTableData.Data["TierTable"].TierInfos[index].Tier == tier) {
-            tierInfo = itemTableData.Data["TierTable"].TierInfos[index];    
+    for(var index in itemTableData["TierTable"].TierInfos) {
+        if(itemTableData["TierTable"].TierInfos[index].Tier == tier) {
+            tierInfo = itemTableData["TierTable"].TierInfos[index];    
         }
     }
     equipmentData.Level = 1;
@@ -122,13 +123,13 @@ function MakeItemData(item) {
     // 스킬 설정
     if(customObj.grade == "rare" || customObj.grade == "legend") {
         var skillIdList = [];
-        for(var index in itemTableData.Data["SkillTable"].TierInfos) {
-            if(itemTableData.Data["SkillTable"].SkillInfos[index].ItemClass == item.ItemClass) {
-                skillIdList.push( itemTableData.Data["SkillTable"].SkillInfos[index].Skill );
+        for(var index in itemTableData["SkillTable"].TierInfos) {
+            if(itemTableData["SkillTable"].SkillInfos[index].ItemClass == item.ItemClass) {
+                skillIdList.push( itemTableData["SkillTable"].SkillInfos[index].Skill );
             }
         }
         equipmentData.skill = JSON.stringify(
-            itemTableData.Data["SkillTable"].SkillInfos[ skillIdList[parseInt( Math.random() * skillIdList.length )] ]
+            itemTableData["SkillTable"].SkillInfos[ skillIdList[parseInt( Math.random() * skillIdList.length )] ]
             );
         if(customObj.grade == "rare") { equipmentData.skillLevel = 20; }
         if(customObj.grade == "legend") { equipmentData.skillLevel = 100; }
@@ -487,7 +488,6 @@ handlers.BattleResult = function (args, context) {
         
         result.trophy = trophyStatistic.Value;
         result.userData = userData;
-        result.tierInfo = tierInfo.Data; // 테스트용
         
         return result;
         
