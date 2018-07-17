@@ -445,13 +445,13 @@ handlers.BattleResult = function (args, context) {
         var tierTableRequest = {
             "Keys" : [ "TierTable" ]
         }
-        var tierTableData = server.GetTitleInternalData(tierTableRequest);
-        
+        var GetTitleInternalDataResult = server.GetTitleInternalData(tierTableRequest);
+        var tierTable = JSON.parse( GetTitleInternalDataResult.Data["TierTable"] );
         // 트로피 계산
         var tierInfo = {};
-        for(var index in tierTableData.Data.TierTable.TierInfos) {
-            if( tierTableData.Data.TierTable.TierInfos[index].Tier == tier) {
-                tierInfo = tierTableData.Data.TierTable.TierInfos[index];
+        for(var index in tierTable.TierInfos) {
+            if( tierTable.TierInfos[index].Tier == tier) {
+                tierInfo = tierTable.TierInfos[index];
             }
         }
         if(args.isVictory) {
@@ -487,7 +487,7 @@ handlers.BattleResult = function (args, context) {
         
         result.trophy = trophyStatistic.Value;
         result.userData = userData;
-        result.tierInfo = tierTableData.Data.TierTable.TierInfos; // 테스트용
+        result.tierInfo = tierInfo.Data; // 테스트용
         
         return result;
         
