@@ -54,6 +54,8 @@ handlers.unlockChest = function (args, context) {
 };
 
 function MakeItemData(item) {
+    try {
+    
     // 유저 티어 가져오기
     var GetUserInternalDataRequest = {
         "PlayFabId" : currentPlayerId,   
@@ -89,6 +91,9 @@ function MakeItemData(item) {
     
     // 아이템 카달로그 받아오기
     var catalogDataResult = GetItemCatalogData(item.ItemId);
+        if(catalogDataResult == null){
+            throw "해당 아이템 카달로그 찾지 못함";
+        }
     var customObj = JSON.parse(catalogDataResult.CustomData);
     // 테이블 가져오기
     var EquipListData = {};
@@ -146,6 +151,12 @@ function MakeItemData(item) {
     server.UpdateUserInventoryItemCustomData(UpdateItemCustomDataRequest);
     
     return JSON.stringify(equipmentData); // 값 반환하기
+        
+    } catch(e) {
+        var retObj = {};
+        retObj["errorDetails"] = "Error: " + e;
+        return retObj;
+    }
 }
 
 function ProgressItemData(item) {
