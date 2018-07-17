@@ -147,9 +147,14 @@ function MakeItemData(items) {
                         skillIdList.push( skillTable.SkillInfos[index].Skill );
                     }
                 }
-                equipmentData[cnt].skill = JSON.stringify(
-                    skillTable.SkillInfos[ skillIdList[parseInt( Math.random() * skillIdList.length )] ]
-                    );
+                
+                var randomSkillId = skillIdList[parseInt( Math.random() * skillIdList.length )];
+                for(var index in skillTable.TierInfos) {
+                    if(skillTable.SkillInfos[index].Skill == randomSkillId) {
+                        equipmentData[cnt].skill = JSON.stringify( skillTable.SkillInfos[index] );
+                    }
+                }
+                
                 if(customObj.grade == "rare") { equipmentData[cnt].skillLevel = 20; }
                 if(customObj.grade == "legend") { equipmentData[cnt].skillLevel = 100; }
             }
