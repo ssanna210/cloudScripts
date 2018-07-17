@@ -344,12 +344,7 @@ handlers.openGem = function (args, context) {
         var result = server.UnlockContainerInstance(request);  
         
         //아이템 데이터 부여
-        var itemValues = [];
-        
-        for(var item in result.GrantedItems)
-        {
-            itemValues.push(MakeItemData(item));
-        }
+        var itemValues = MakeItemData(result.GrantedItems);
         
         return itemValues;
         
