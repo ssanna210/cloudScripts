@@ -104,7 +104,7 @@ function MakeItemData(items) {
         var GetCatalogItemsResult = server.GetCatalogItems(GetCatalogItemsRequest);
         
         var cnt = 0; // 배열 인덱스
-        var equipmentData = {}; // 아이템 정보 담을 오브젝트
+        var equipmentData = []; // 아이템 정보 담을 오브젝트
         
         for(var item in items) {
             
