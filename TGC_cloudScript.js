@@ -103,15 +103,14 @@ function MakeItemData(items) {
         };
         var GetCatalogItemsResult = server.GetCatalogItems(GetCatalogItemsRequest);
         
-        var cnt = 0; // 배열 인덱스
         var equipmentData = []; // 아이템 정보 담을 오브젝트
         
-        for(var item in items) {
+        for(var key in items) {
             
             var catalogDataResult = {};
             for(var index in GetCatalogItemsResult.Catalog)
             {
-                if(GetCatalogItemsResult.Catalog[index].ItemId === item.ItemId)
+                if(GetCatalogItemsResult.Catalog[index].ItemId === items[key].ItemId)
                 {
                     catalogDataResult = GetCatalogItemsResult.Catalog[index];
                 }
@@ -121,33 +120,33 @@ function MakeItemData(items) {
             }
             if(catalogDataResult.CustomData === undefined){
                 //throw "catalogDataResult.CustomData is undefined";
-                throw JSON.stringify(item);
+                throw JSON.stringify(items[key]);
             }
             var customObj = JSON.parse(catalogDataResult.CustomData);
             
             // 장비 리스트에서 랜덤뽑기
-            var equipList = EquipListData[item.ItemClass].split(",");
+            var equipList = EquipListData[items[key].ItemClass].split(",");
             var randomValue = parseInt(Math.random() * equipList.length);
             var itemId = equipList[randomValue];
             // 스탯 설정
             for(var index in itemTable.Equipments) {
                 if(itemTable.Equipments[index].ItemID == itemId) {
-                    equipmentData[cnt] = itemTable.Equipments[index];    
+                    equipmentData[key] = itemTable.Equipments[index];    
                 } 
             }
             //Lev, Atk, Hp
-            equipmentData[cnt].Level = 1;
-            if(equipmentData[cnt].hasOwnProperty("AtkX")) {
-                equipmentData[cnt].Atk = parseInt( tierInfo.StatAmount * equipmentData[cnt].AtkX );
+            equipmentData[key].Level = 1;
+            if(equipmentData[key].hasOwnProperty("AtkX")) {
+                equipmentData[key].Atk = parseInt( tierInfo.StatAmount * equipmentData[key].AtkX );
             }
-            if(equipmentData[cnt].hasOwnProperty("HpX")) {
-                equipmentData[cnt].Hp = parseInt( tierInfo.StatAmount * equipmentData[cnt].HpX );    
+            if(equipmentData[key].hasOwnProperty("HpX")) {
+                equipmentData[key].Hp = parseInt( tierInfo.StatAmount * equipmentData[key].HpX );    
             }
             // 스킬 설정
             if(customObj.grade == "rare" || customObj.grade == "legend") {
                 var skillIdList = [];
                 for(var index in skillTable.TierInfos) {
-                    if(skillTable.SkillInfos[index].ItemClass == item.ItemClass) {
+                    if(skillTable.SkillInfos[index].ItemClass == items[key].ItemClass) {
                         skillIdList.push( skillTable.SkillInfos[index].Skill );
                     }
                 }
@@ -155,22 +154,21 @@ function MakeItemData(items) {
                 var randomSkillId = skillIdList[parseInt( Math.random() * skillIdList.length )];
                 for(var index in skillTable.TierInfos) {
                     if(skillTable.SkillInfos[index].Skill == randomSkillId) {
-                        equipmentData[cnt].skill = JSON.stringify( skillTable.SkillInfos[index] );
+                        equipmentData[key].skill = JSON.stringify( skillTable.SkillInfos[index] );
                     }
                 }
                 
-                if(customObj.grade == "rare") { equipmentData[cnt].skillLevel = 20; }
-                if(customObj.grade == "legend") { equipmentData[cnt].skillLevel = 100; }
+                if(customObj.grade == "rare") { equipmentData[key].skillLevel = 20; }
+                if(customObj.grade == "legend") { equipmentData[key].skillLevel = 100; }
             }
             // 아이템 데이터 업데이트
             var UpdateItemCustomDataRequest = {
                 "PlayFabId": currentPlayerId,
-                "ItemInstanceId": item.InstanceId,
-                "Data": equipmentData[cnt]
+                "ItemInstanceId": items[key].InstanceId,
+                "Data": equipmentData[key]
             }
             server.UpdateUserInventoryItemCustomData(UpdateItemCustomDataRequest);
             
-            cnt++;
         }
         
         return equipmentData; // 값 반환하기
