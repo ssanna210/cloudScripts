@@ -135,12 +135,15 @@ function MakeItemData(items) {
                 } 
             }
             //Lev, Atk, Hp
-            equipmentData[key].Level = 1.toString();
+            equipmentData[key].Level = 1;
+            equipmentData[key].Level = equipmentData[key].Level.toString();
             if(equipmentData[key].hasOwnProperty("AtkX")) {
-                equipmentData[key].Atk = (parseInt( tierInfo.StatAmount * equipmentData[key].AtkX )).toString();
+                equipmentData[key].Atk = parseInt( tierInfo.StatAmount * equipmentData[key].AtkX );
+                equipmentData[key].Atk = equipmentData[key].Atk.toString();
             }
             if(equipmentData[key].hasOwnProperty("HpX")) {
-                equipmentData[key].Hp = (parseInt( tierInfo.StatAmount * equipmentData[key].HpX )).toString();
+                equipmentData[key].Hp = parseInt( tierInfo.StatAmount * equipmentData[key].HpX );
+                equipmentData[key].Hp = equipmentData[key].Hp.toString();
             }
             // 스킬 설정
             if(customObj.grade == "rare" || customObj.grade == "legend") {
@@ -158,8 +161,8 @@ function MakeItemData(items) {
                     }
                 }
                 
-                if(customObj.grade == "rare") { equipmentData[key].skillLevel = 20.toString(); }
-                if(customObj.grade == "legend") { equipmentData[key].skillLevel = 100.toString(); }
+                if(customObj.grade == "rare") { equipmentData[key].skillLevel = "20"; }
+                if(customObj.grade == "legend") { equipmentData[key].skillLevel = "100"; }
             }
             // 아이템 데이터 업데이트
             var UpdateItemCustomDataRequest = {
