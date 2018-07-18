@@ -111,7 +111,7 @@ function MakeItemData(items) {
             var catalogDataResult = {};
             for(var index in GetCatalogItemsResult.Catalog)
             {
-                if(GetCatalogItemsResult.Catalog[index].ItemId == item.ItemId)
+                if(GetCatalogItemsResult.Catalog[index].ItemId === item.ItemId)
                 {
                     catalogDataResult = GetCatalogItemsResult.Catalog[index];
                 }
