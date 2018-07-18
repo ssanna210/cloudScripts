@@ -121,7 +121,7 @@ function MakeItemData(items) {
             }
             if(catalogDataResult.CustomData === undefined){
                 //throw "catalogDataResult.CustomData is undefined";
-                throw catalogDataResult;
+                throw JSON.stringify(catalogDataResult);
             }
             var customObj = JSON.parse(catalogDataResult.CustomData);
             
