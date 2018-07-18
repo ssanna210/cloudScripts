@@ -128,9 +128,13 @@ function MakeItemData(items) {
             var equipList = EquipListData[items[key].ItemClass].split(",");
             var randomValue = parseInt(Math.random() * equipList.length);
             var itemId = equipList[randomValue];
+            //
             var tableData = {};
             var stat = {};
             var skill = {};
+            equipmentData[key].TableData = "NONE";
+            equipmentData[key].Stat = "NONE";
+            equipmentData[key].Skill = "NONE";
             // 스탯 설정
             for(var index in itemTable.Equipments) {
                 if(itemTable.Equipments[index].ItemID == itemId) {
