@@ -167,7 +167,7 @@ function MakeItemData(items) {
             // 아이템 데이터 업데이트
             var UpdateItemCustomDataRequest = {
                 "PlayFabId": currentPlayerId,
-                "ItemInstanceId": items[key].InstanceId,
+                "ItemInstanceId": items[key].ItemInstanceId,
                 "Data": equipmentData[key]
             }
             server.UpdateUserInventoryItemCustomData(UpdateItemCustomDataRequest);
