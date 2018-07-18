@@ -119,6 +119,9 @@ function MakeItemData(items) {
             if(catalogDataResult == null){
                 throw "해당 아이템 카달로그 찾지 못함";
             }
+            if(catalogDataResult.CustomData === undefined){
+                throw "catalogDataResult.CustomData is undefined";
+            }
             var customObj = JSON.parse(catalogDataResult.CustomData);
             
             // 장비 리스트에서 랜덤뽑기
@@ -179,7 +182,7 @@ function MakeItemData(items) {
 }
 
 function ProgressItemData(item) {
-           
+    
 }
 
 handlers.openStartChest = function (args, context) {
