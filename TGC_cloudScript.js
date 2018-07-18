@@ -120,7 +120,8 @@ function MakeItemData(items) {
                 throw "해당 아이템 카달로그 찾지 못함";
             }
             if(catalogDataResult.CustomData === undefined){
-                throw "catalogDataResult.CustomData is undefined";
+                //throw "catalogDataResult.CustomData is undefined";
+                throw catalogDataResult;
             }
             var customObj = JSON.parse(catalogDataResult.CustomData);
             
