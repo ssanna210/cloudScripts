@@ -85,9 +85,9 @@ function MakeItemData(items) {
         
         // 테이블 가져오기
         var EquipListData = {};
-        for(var equipData in tierTable.EquipList) {
-            if(equipData.Tier <= tier) {
-                EquipListData = equipData;
+        for(var index in tierTable.EquipList) {
+            if(tierTable.EquipList[index].Tier <= tier) {
+                EquipListData = tierTable.EquipList[index];
             }
         }
         var tierInfo = {};
