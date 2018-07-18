@@ -165,7 +165,7 @@ function MakeItemData(items) {
             var UpdateItemCustomDataRequest = {
                 "PlayFabId": currentPlayerId,
                 "ItemInstanceId": items[key].InstanceId,
-                "Data": JSON.stringify( equipmentData[key] );
+                "Data": JSON.stringify( equipmentData[key] )
             }
             server.UpdateUserInventoryItemCustomData(UpdateItemCustomDataRequest);
             
