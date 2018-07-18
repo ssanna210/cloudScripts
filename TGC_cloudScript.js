@@ -119,8 +119,8 @@ function MakeItemData(items) {
                 throw "해당 아이템 카달로그 찾지 못함";
             }
             if(catalogDataResult.CustomData === undefined){
-                //throw "catalogDataResult.CustomData is undefined";
-                throw JSON.stringify(items[key]);
+                throw "catalogDataResult.CustomData is undefined";
+                //throw JSON.stringify(items[key]);
             }
             var customObj = JSON.parse(catalogDataResult.CustomData);
             
@@ -128,21 +128,22 @@ function MakeItemData(items) {
             var equipList = EquipListData[items[key].ItemClass].split(",");
             var randomValue = parseInt(Math.random() * equipList.length);
             var itemId = equipList[randomValue];
+            var tableData = {};
             // 스탯 설정
             for(var index in itemTable.Equipments) {
                 if(itemTable.Equipments[index].ItemID == itemId) {
-                    equipmentData[key].TableData = itemTable.Equipments[index];    
+                    tableData = itemTable.Equipments[index];    
                 }
             }
             //Lev, Atk, Hp
             equipmentData[key].Stat.Level = 1;
             equipmentData[key].Stat.Level = equipmentData[key].Level.toString();
-            if(equipmentData[key].TableData.hasOwnProperty("AtkX")) {
-                equipmentData[key].Stat.Atk = parseInt( tierInfo.StatAmount * equipmentData[key].TableData.AtkX );
+            if(tableData.hasOwnProperty("AtkX")) {
+                equipmentData[key].Stat.Atk = parseInt( tierInfo.StatAmount * tableData.AtkX );
                 equipmentData[key].Stat.Atk = equipmentData[key].Stat.Atk.toString();
             }
-            if(equipmentData[key].TableData.hasOwnProperty("HpX")) {
-                equipmentData[key].Stat.Hp = parseInt( tierInfo.StatAmount * equipmentData[key].TableData.HpX );
+            if(tableData.hasOwnProperty("HpX")) {
+                equipmentData[key].Stat.Hp = parseInt( tierInfo.StatAmount * tableData.HpX );
                 equipmentData[key].Stat.Hp = equipmentData[key].Stat.Hp.toString();
             }
             // 스킬 설정
@@ -165,7 +166,7 @@ function MakeItemData(items) {
                 if(customObj.grade == "legend") { equipmentData[key].Skill.SkillLevel = "100"; }
             }
             // 데이터들 stringify 하기
-            equipmentData[key].TableData = JSON.stringify( equipmentData[key].TableData );
+            equipmentData[key].TableData = JSON.stringify( tableData );
             equipmentData[key].Stat = JSON.stringify( equipmentData[key].Stat );
             equipmentData[key].Skill = JSON.stringify( equipmentData[key].Skill );
             // 아이템 데이터 업데이트
