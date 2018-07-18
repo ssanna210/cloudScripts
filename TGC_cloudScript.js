@@ -131,19 +131,19 @@ function MakeItemData(items) {
             // 스탯 설정
             for(var index in itemTable.Equipments) {
                 if(itemTable.Equipments[index].ItemID == itemId) {
-                    equipmentData[key] = itemTable.Equipments[index];    
-                } 
+                    equipmentData[key].TableData = itemTable.Equipments[index];    
+                }
             }
             //Lev, Atk, Hp
-            equipmentData[key].Level = 1;
-            equipmentData[key].Level = equipmentData[key].Level.toString();
-            if(equipmentData[key].hasOwnProperty("AtkX")) {
-                equipmentData[key].Atk = parseInt( tierInfo.StatAmount * equipmentData[key].AtkX );
-                equipmentData[key].Atk = equipmentData[key].Atk.toString();
+            equipmentData[key].Stat.Level = 1;
+            equipmentData[key].Stat.Level = equipmentData[key].Level.toString();
+            if(equipmentData[key].TableData.hasOwnProperty("AtkX")) {
+                equipmentData[key].Stat.Atk = parseInt( tierInfo.StatAmount * equipmentData[key].TableData.AtkX );
+                equipmentData[key].Stat.Atk = equipmentData[key].Stat.Atk.toString();
             }
-            if(equipmentData[key].hasOwnProperty("HpX")) {
-                equipmentData[key].Hp = parseInt( tierInfo.StatAmount * equipmentData[key].HpX );
-                equipmentData[key].Hp = equipmentData[key].Hp.toString();
+            if(equipmentData[key].TableData.hasOwnProperty("HpX")) {
+                equipmentData[key].Stat.Hp = parseInt( tierInfo.StatAmount * equipmentData[key].TableData.HpX );
+                equipmentData[key].Stat.Hp = equipmentData[key].Stat.Hp.toString();
             }
             // 스킬 설정
             if(customObj.grade == "rare" || customObj.grade == "legend") {
@@ -157,13 +157,17 @@ function MakeItemData(items) {
                 var randomSkillId = skillIdList[parseInt( Math.random() * skillIdList.length )];
                 for(var index in skillTable.TierInfos) {
                     if(skillTable.SkillInfos[index].Skill == randomSkillId) {
-                        equipmentData[key].skill = JSON.stringify( skillTable.SkillInfos[index] );
+                        equipmentData[key].Skill = skillTable.SkillInfos[index];
                     }
                 }
                 
-                if(customObj.grade == "rare") { equipmentData[key].skillLevel = "20"; }
-                if(customObj.grade == "legend") { equipmentData[key].skillLevel = "100"; }
+                if(customObj.grade == "rare") { equipmentData[key].Skill.SkillLevel = "20"; }
+                if(customObj.grade == "legend") { equipmentData[key].Skill.SkillLevel = "100"; }
             }
+            // 데이터들 stringify 하기
+            equipmentData[key].TableData = JSON.stringify( equipmentData[key].TableData );
+            equipmentData[key].Stat = JSON.stringify( equipmentData[key].Stat );
+            equipmentData[key].Skill = JSON.stringify( equipmentData[key].Skill );
             // 아이템 데이터 업데이트
             var UpdateItemCustomDataRequest = {
                 "PlayFabId": currentPlayerId,
