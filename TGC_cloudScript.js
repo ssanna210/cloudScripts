@@ -132,6 +132,7 @@ function MakeItemData(items) {
             var tableData = {};
             var stat = {};
             var skill = {};
+            equipmentData[key] = {};
             equipmentData[key].TableData = "NONE";
             equipmentData[key].Stat = "NONE";
             equipmentData[key].Skill = "NONE";
