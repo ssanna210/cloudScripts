@@ -169,13 +169,13 @@ function MakeItemData(items) {
             // 스킬 설정
             if(customObj.grade == "rare" || customObj.grade == "legend") {
                 var skillIdList = [];
-                for(var index in skillTable.TierInfos) {
+                for(var index in skillTable.SkillInfos) {
                     if(skillTable.SkillInfos[index].ItemClass == tableData.ItemClass) {
                         skillIdList.push( skillTable.SkillInfos[index].Skill );
                     }
                 }
                 var randomSkillId = skillIdList[parseInt( Math.random() * skillIdList.length )];
-                for(var index in skillTable.TierInfos) {
+                for(var index in skillTable.SkillInfos) {
                     if(skillTable.SkillInfos[index].Skill == randomSkillId) {
                         skill = skillTable.SkillInfos[index];
                     }
