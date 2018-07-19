@@ -143,15 +143,29 @@ function MakeItemData(items) {
                 }
             }
             //Lev, Atk, Hp
-            stat.Level = 1;
-            stat.Level = stat.toString();
+            stat.Lev = 1;
+            stat.Lev = stat.toString();
             if(tableData.hasOwnProperty("AtkX")) {
                 stat.Atk = parseInt( tierInfo.StatAmount * tableData.AtkX );
                 stat.Atk = stat.Atk.toString();
+                delete tableData.AtkX; // 정리하기
             }
             if(tableData.hasOwnProperty("HpX")) {
                 stat.Hp = parseInt( tierInfo.StatAmount * tableData.HpX );
                 stat.Hp = stat.Hp.toString();
+                delete tableData.HpX; // 정리하기
+            }
+            if(tableData.hasOwnProperty("Sta")) {
+                stat.Sta = tableData.Sta;
+                delete tableData.Sta; // 정리하기
+            }
+            if(tableData.hasOwnProperty("StaReX")) {
+                stat.StaReX = tableData.StaReX;
+                delete tableData.StaReX; // 정리하기
+            }
+            if(tableData.hasOwnProperty("Wg")) {
+                stat.Wg = tableData.Wg;
+                delete tableData.Wg; // 정리하기
             }
             // 스킬 설정
             if(customObj.grade == "rare" || customObj.grade == "legend") {
@@ -161,7 +175,6 @@ function MakeItemData(items) {
                         skillIdList.push( skillTable.SkillInfos[index].Skill );
                     }
                 }
-                
                 var randomSkillId = skillIdList[parseInt( Math.random() * skillIdList.length )];
                 for(var index in skillTable.TierInfos) {
                     if(skillTable.SkillInfos[index].Skill == randomSkillId) {
@@ -169,9 +182,12 @@ function MakeItemData(items) {
                     }
                 }
                 
-                if(customObj.grade == "rare") { skill.SkillLevel = "20"; }
-                if(customObj.grade == "legend") { skill.SkillLevel = "100"; }
+                if(customObj.grade == "rare") { skill.Lev = "20"; }
+                if(customObj.grade == "legend") { skill.Lev = skill.Limit; }
             }
+            // 아이템 커스텀데이터 정리하기
+            delete skill.ItemClass;
+            delete skill.Skill;
             // 데이터들 stringify 하기
             equipmentData[key].TableData = JSON.stringify( tableData );
             equipmentData[key].Stat = JSON.stringify( stat );
