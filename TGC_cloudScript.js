@@ -170,7 +170,7 @@ function MakeItemData(items) {
             if(customObj.grade == "rare" || customObj.grade == "legend") {
                 var skillIdList = [];
                 for(var index in skillTable.TierInfos) {
-                    if(skillTable.SkillInfos[index].ItemClass == items[key].ItemClass) {
+                    if(skillTable.SkillInfos[index].ItemClass == tableData.ItemClass) {
                         skillIdList.push( skillTable.SkillInfos[index].Skill );
                     }
                 }
