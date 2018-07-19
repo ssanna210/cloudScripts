@@ -143,8 +143,7 @@ function MakeItemData(items) {
                 }
             }
             //Lev, Atk, Hp
-            stat.Lev = 1;
-            stat.Lev = stat.toString();
+            stat.Lev = "1";
             if(tableData.hasOwnProperty("AtkX")) {
                 stat.Atk = parseInt( tierInfo.StatAmount * tableData.AtkX );
                 stat.Atk = stat.Atk.toString();
@@ -184,10 +183,12 @@ function MakeItemData(items) {
                 
                 if(customObj.grade == "rare") { skill.Lev = "20"; }
                 if(customObj.grade == "legend") { skill.Lev = skill.Limit; }
+                
+                // 아이템 커스텀데이터 정리하기
+                delete skill.ItemClass;
+                delete skill.Skill;
             }
-            // 아이템 커스텀데이터 정리하기
-            delete skill.ItemClass;
-            delete skill.Skill;
+            
             // 데이터들 stringify 하기
             equipmentData[key].TableData = JSON.stringify( tableData );
             equipmentData[key].Stat = JSON.stringify( stat );
