@@ -1,4 +1,3 @@
-var PER_WIN_CHEST = 3; // 전투 보상 상자 얻기위한 승리 수 
 var DT_CHEST_BATTLE = "dropTable_battleChest"; // 전투 보상 상자의 드롭테이블
 var IC_CHEST_BATTLE = "BattleChest"; // 전투 보상 상자의 ItemClass
 var KEY_PLAYER_CHESTS_BATTLE = "playerBattleChests"; // 전투 보상 상자배열의 키값 
@@ -472,7 +471,7 @@ handlers.BattleResult = function (args, context) {
         // 유저 티어 가져오기
         var GetUserInternalDataRequest = {
             "PlayFabId" : currentPlayerId,   
-            "Keys" : [ "Tier", "Rebirth", "WinCount", "WinningStreak" ]
+            "Keys" : [ "Tier", "Rebirth", "WinCount", "WinningStreak", "PerWinChest" ]
         }
         var GetUserInternalDataResult = server.GetUserInternalData(GetUserInternalDataRequest);
         
@@ -536,7 +535,7 @@ handlers.BattleResult = function (args, context) {
             }
             // 이긴 횟수 체크
             userData.WinCount += 1; // 승리 추가
-            if(userData.WinCount >= PER_WIN_CHEST) {
+            if(userData.WinCount >= GetUserInternalDataResult.Data.PerWinChest) {
                 result.chestValue = grantChest();
                 userData.WinCount = 0;
             }
@@ -566,6 +565,7 @@ handlers.BattleResult = function (args, context) {
         result.trophy = trophyStatistic.Value;
         result.userData = userData;
         result.trophyAmount = trophyAmount;
+        result.perWinChest = GetUserInternalDataResult.Data.PerWinChest;
         
         return result;
         
