@@ -517,10 +517,22 @@ handlers.BattleResult = function (args, context) {
                 tierInfo = tierTable.TierInfos[index];
             }
         }
+        var trophyAmount = 0; // 보상 트로피 양
         if(args.isVictory) {
             // 이긴 경우
             if(trophyStatistic.Value < tierInfo.TrophyLimit) {
-                trophyStatistic.Value += 1;
+                
+                if(userData.WinningStreak > tierTable.StreakLimit) {
+                    trophyAmount = tierTable.Unit + tierTable.StreakLimit;
+                }else {
+                    trophyAmount = tierTable.Unit + userData.WinningStreak;
+                }
+                
+                trophyStatistic.Value += trophyAmount;
+                
+                if(trophyStatistic.Value > tierInfo.TrophyLimit) {
+                    trophyStatistic.Value = tierInfo.TrophyLimit;
+                }
             }
             // 이긴 횟수 체크
             userData.WinCount += 1; // 승리 추가
@@ -550,6 +562,7 @@ handlers.BattleResult = function (args, context) {
         
         result.trophy = trophyStatistic.Value;
         result.userData = userData;
+        result.trophyAmount = trophyAmount;
         
         return result;
         
