@@ -536,10 +536,13 @@ handlers.BattleResult = function (args, context) {
             }
             // 이긴 횟수 체크
             userData.WinCount += 1; // 승리 추가
-            userData.WinningStreak += 1; // 연승 추가
             if(userData.WinCount >= PER_WIN_CHEST) {
                 result.chestValue = grantChest();
                 userData.WinCount = 0;
+            }
+            userData.WinningStreak += 1; // 연승 추가
+            if(userData.WinningStreak >= 1) {
+                userData.WinningStreak -= 1;    // 연승 계산식
             }
             
         }else {
