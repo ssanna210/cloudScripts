@@ -500,11 +500,11 @@ handlers.BattleResult = function (args, context) {
         }else {
             userData.WinningStreak = 0;
         }
-        
+        // 1 : true, 0 : false
         if(GetUserInternalDataResult.Data.hasOwnProperty("BeforeWin")) {
-            userData.BeforeWin = GetUserInternalDataResult.Data["BeforeWin"].Value;
+            userData.BeforeWin = parseInt( GetUserInternalDataResult.Data["BeforeWin"].Value );
         }else {
-            userData.BeforeWin = false;
+            userData.BeforeWin = 0;
         }
         
         var tier = userData.Tier + (userData.Rebirth * 100); // 환생까지 계산된 실제 티어값
@@ -525,7 +525,7 @@ handlers.BattleResult = function (args, context) {
         var trophyAmount = 0; // 보상 트로피 양
         if(args.isVictory) {
             // 연승 계산
-            if(userData.BeforeWin == true) {
+            if(userData.BeforeWin == 1) {
                 userData.WinningStreak += 1; // 연승 추가
             }
             
@@ -551,11 +551,11 @@ handlers.BattleResult = function (args, context) {
                 userData.WinCount = 0;
             }
             
-            userData.BeforeWin = true; // 다음 연산을 위하여
+            userData.BeforeWin = 1; // 다음 연산을 위하여
             
         }else {
             // 패배할 경우
-            userData.BeforeWin = false;
+            userData.BeforeWin = 0; // 0: false
             userData.WinningStreak = 0; // 연승 초기화
         }
         
