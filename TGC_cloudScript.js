@@ -471,7 +471,7 @@ handlers.BattleResult = function (args, context) {
         // 유저 티어 가져오기
         var GetUserInternalDataRequest = {
             "PlayFabId" : currentPlayerId,   
-            "Keys" : [ "Tier", "Rebirth", "WinCount", "WinningStreak" ]
+            "Keys" : [ "Tier", "Rebirth", "WinCount", "WinningStreak", "BeforeWin" ]
         }
         var GetUserInternalDataResult = server.GetUserInternalData(GetUserInternalDataRequest);
         
@@ -501,6 +501,12 @@ handlers.BattleResult = function (args, context) {
             userData.WinningStreak = 0;
         }
         
+        if(GetUserInternalDataResult.Data.hasOwnProperty("BeforeWin")) {
+            userData.BeforeWin = parseInt( GetUserInternalDataResult.Data["BeforeWin"].Value );
+        }else {
+            userData.BeforeWin = false;
+        }
+        
         var tier = userData.Tier + (userData.Rebirth * 100); // 환생까지 계산된 실제 티어값
     
         // 트로피 관련 테이블 가져오기
@@ -519,7 +525,7 @@ handlers.BattleResult = function (args, context) {
         var trophyAmount = 0; // 보상 트로피 양
         if(args.isVictory) {
             // 연승 계산
-            if(userData.hasOwnProperty("BeforeWin") && userData.BeforeWin) {
+            if(userData.BeforeWin) {
                 userData.BeforeWin = true;
                 userData.WinningStreak += 1; // 연승 추가
             }
