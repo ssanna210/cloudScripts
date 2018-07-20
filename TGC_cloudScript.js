@@ -518,6 +518,11 @@ handlers.BattleResult = function (args, context) {
         }
         var trophyAmount = 0; // 보상 트로피 양
         if(args.isVictory) {
+            // 연승 계산
+            if(userData.hasOwnProperty("BeforeWin") && userData.BeforeWin) {
+                userData.BeforeWin = true;
+                userData.WinningStreak += 1; // 연승 추가
+            }
             // 이긴 경우
             if(trophyStatistic.Value < tierInfo.TrophyLimit) {
                 
@@ -539,13 +544,10 @@ handlers.BattleResult = function (args, context) {
                 result.chestValue = grantChest();
                 userData.WinCount = 0;
             }
-            userData.WinningStreak += 1; // 연승 추가
-            if(userData.WinningStreak >= 1) {
-                userData.WinningStreak -= 1;    // 연승 계산식
-            }
             
         }else {
             // 패배할 경우
+            userData.BeforeWin = false;
             userData.WinningStreak = 0; // 연승 초기화
         }
         
