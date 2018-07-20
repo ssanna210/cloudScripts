@@ -522,16 +522,16 @@ handlers.BattleResult = function (args, context) {
             // 이긴 경우
             if(trophyStatistic.Value < tierInfo.TrophyLimit) {
                 
-                if(userData.WinningStreak > tierTable.StreakLimit) {
-                    trophyAmount = tierTable.Unit + tierTable.StreakLimit;
+                if(userData.WinningStreak > parseInt(tierTable.StreakLimit)) {
+                    trophyAmount = parseInt(tierTable.Unit) + parseInt(tierTable.StreakLimit);
                 }else {
-                    trophyAmount = tierTable.Unit + userData.WinningStreak;
+                    trophyAmount = parseInt(tierTable.Unit) + userData.WinningStreak;
                 }
                 
                 trophyStatistic.Value += trophyAmount;
                 
-                if(trophyStatistic.Value > tierInfo.TrophyLimit) {
-                    trophyStatistic.Value = tierInfo.TrophyLimit;
+                if(trophyStatistic.Value > parseInt(tierInfo.TrophyLimit)) {
+                    trophyStatistic.Value = parseInt(tierInfo.TrophyLimit);
                 }
             }
             // 이긴 횟수 체크
