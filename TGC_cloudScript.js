@@ -525,10 +525,10 @@ handlers.BattleResult = function (args, context) {
         var trophyAmount = 0; // 보상 트로피 양
         if(args.isVictory) {
             // 연승 계산
-            if(userData.BeforeWin) {
-                userData.BeforeWin = true;
+            if(userData.BeforeWin == true) {
                 userData.WinningStreak += 1; // 연승 추가
             }
+            
             // 이긴 경우
             if(trophyStatistic.Value < tierInfo.TrophyLimit) {
                 
@@ -550,6 +550,8 @@ handlers.BattleResult = function (args, context) {
                 result.chestValue = grantChest();
                 userData.WinCount = 0;
             }
+            
+            userData.BeforeWin = true; // 다음 연산을 위하여
             
         }else {
             // 패배할 경우
