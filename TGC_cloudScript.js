@@ -502,7 +502,7 @@ handlers.BattleResult = function (args, context) {
         }
         
         if(GetUserInternalDataResult.Data.hasOwnProperty("BeforeWin")) {
-            userData.BeforeWin = parseInt( GetUserInternalDataResult.Data["BeforeWin"].Value );
+            userData.BeforeWin = GetUserInternalDataResult.Data["BeforeWin"].Value;
         }else {
             userData.BeforeWin = false;
         }
