@@ -471,7 +471,7 @@ handlers.BattleResult = function (args, context) {
         // 유저 티어 가져오기
         var GetUserInternalDataRequest = {
             "PlayFabId" : currentPlayerId,   
-            "Keys" : [ "Tier", "Rebirth", "WinCount", "WinningStreak", "PerWinChest" ]
+            "Keys" : [ "Tier", "Rebirth", "WinCount", "WinningStreak" ]
         }
         var GetUserInternalDataResult = server.GetUserInternalData(GetUserInternalDataRequest);
         
@@ -505,7 +505,7 @@ handlers.BattleResult = function (args, context) {
     
         // 트로피 관련 테이블 가져오기
         var tierTableRequest = {
-            "Keys" : [ "TierTable" ]
+            "Keys" : [ "TierTable", "PerWinChest"  ]
         }
         var GetTitleInternalDataResult = server.GetTitleInternalData(tierTableRequest);
         var tierTable = JSON.parse( GetTitleInternalDataResult.Data["TierTable"] );
@@ -540,7 +540,7 @@ handlers.BattleResult = function (args, context) {
             }
             // 이긴 횟수 체크
             userData.WinCount += 1; // 승리 추가
-            if(userData.WinCount >= GetUserInternalDataResult.Data.PerWinChest) {
+            if(userData.WinCount >=  GetTitleInternalDataResult.Data["PerWinChest"]) {
                 result.chestValue = grantChest();
                 userData.WinCount = 0;
             }
@@ -567,7 +567,7 @@ handlers.BattleResult = function (args, context) {
         result.trophy = trophyStatistic.Value;
         result.userData = userData;
         result.trophyAmount = trophyAmount;
-        result.perWinChest = GetUserInternalDataResult.Data.PerWinChest;
+        result.perWinChest = GetTitleInternalDataResult.Data["PerWinChest"];
         
         return result;
         
