@@ -548,6 +548,8 @@ handlers.BattleResult = function (args, context) {
             userData.WinCount += 1; // 승리 추가
             if(userData.WinCount >=  GetTitleInternalDataResult.Data["PerWinChest"]) {
                 result.chestValue = grantChest();
+                delete result.chestValue;       // 그냥 생략
+                
                 userData.WinCount = 0;
             }
             
