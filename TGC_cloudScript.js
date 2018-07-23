@@ -237,6 +237,7 @@ handlers.openStartChest = function (args, context) {
         // 유저 티어 가져오기
         var GetUserInternalDataResult = GetInternalDataUser( [ "Tier"] );
         var randomTier = GetRandomTier( GetUserInternalDataResult.Data["Tier"] );
+        randomTier = randomTier.toString();
         // 보상 상자 시간 설정
         var customObj = JSON.parse(catalogDataResult.CustomData);
         
@@ -253,7 +254,7 @@ handlers.openStartChest = function (args, context) {
                 "openTime" : unLockDate,
                 "startTime" : currentTime,
                 "state" : "OPENING",
-                "tier" : randomTier.toString();
+                "tier" : randomTier
             }
         }
 
