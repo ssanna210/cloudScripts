@@ -653,7 +653,7 @@ function CopyObj(obj) {
   if (typeof obj === 'object' && obj !== null) {
     for (var attr in obj) {
       if (obj.hasOwnProperty(attr)) {
-        copy[attr] = copyObj(obj[attr]);
+        copy[attr] = CopyObj(obj[attr]);
       }
     }
   } else {
