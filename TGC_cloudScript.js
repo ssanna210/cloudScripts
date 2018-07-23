@@ -142,7 +142,7 @@ function MakeItemData(items) {
             // 스탯 설정
             for(var index in itemTable.Equipments) {
                 if(itemTable.Equipments[index].ItemID == itemId) {
-                    tableData = itemTable.Equipments[index];    
+                    tableData = CopyObj( itemTable.Equipments[index] );
                 }
             }
             //Lev, Atk, Hp
@@ -180,7 +180,7 @@ function MakeItemData(items) {
                 var randomSkillId = skillIdList[parseInt( Math.random() * skillIdList.length )];
                 for(var index in skillTable.SkillInfos) {
                     if(skillTable.SkillInfos[index].Skill == randomSkillId) {
-                        skill = skillTable.SkillInfos[index];
+                        skill = CopyObj( skillTable.SkillInfos[index] );
                     }
                 }
                 
@@ -644,4 +644,18 @@ function GetRandomTier (tier) {
     if(result < 1) { result = 1; }
 
     return result;
+}
+
+function CopyObj(obj) {
+  var copy = {};
+  if (typeof obj === 'object' && obj !== null) {
+    for (var attr in obj) {
+      if (obj.hasOwnProperty(attr)) {
+        copy[attr] = copyObj(obj[attr]);
+      }
+    }
+  } else {
+    copy = obj;
+  }
+  return copy;
 }
