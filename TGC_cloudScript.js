@@ -100,8 +100,9 @@ function MakeItemData(items) {
             // 해당 아이템 티어 테이블 받아오기
             var tierInfo = {};
             var randomTier = 1; // 해당 아이템 티어
-            if(items[key].CustomData.hasOwnProperty("tier")) { randomTier = items[key].CustomData["tier"]; }
-            else { randomTier = GetRandomTier ( tier ); }   // randomTier 값 없으면 새로 생성
+            if(items[key].CustomData !== undefined && items[key].CustomData.hasOwnProperty("tier")) { 
+                randomTier = items[key].CustomData["tier"]; 
+            }else { randomTier = GetRandomTier ( tier ); }   // randomTier 값 없으면 새로 생성
             
             for(var index in tierTable.TierInfos) {
                 if(tierTable.TierInfos[index].Tier == randomTier) {
