@@ -236,7 +236,7 @@ handlers.openStartChest = function (args, context) {
         }
         // 유저 티어 가져오기
         var GetUserInternalDataResult = GetInternalDataUser( [ "Tier"] );
-        var randomTier = GetRandomTier( GetUserInternalDataResult.Data["Tier"] );
+        var randomTier = GetRandomTier( parseInt( GetUserInternalDataResult.Data["Tier"].Value ) );
         randomTier = randomTier.toString();
         // 보상 상자 시간 설정
         var customObj = JSON.parse(catalogDataResult.CustomData);
