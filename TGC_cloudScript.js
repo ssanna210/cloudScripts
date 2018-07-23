@@ -5,7 +5,7 @@ var MAXIMUM_CHEST_BATTLE = 4; // 전투 보상 상자 최대 수량
 var MinutePerGem = 12; // 젬당 분 계수
 var VIRTUAL_CURRENCY_CODE = "GE";
 var REDUCETIME_AD = 30;
-
+var RANDOM_TIER_AMOUNT = 3;
 // 전투 보상 상자 여는 함수
 handlers.unlockChest = function (args, context) {
     try {
@@ -50,13 +50,10 @@ handlers.unlockChest = function (args, context) {
 function MakeItemData(items) {
     try {
         // 유저 티어 가져오기
-        var GetUserInternalDataRequest = {
-            "PlayFabId" : currentPlayerId,   
-            "Keys" : [ "Tier", "Rebirth"]
-        }
-        var GetUserInternalDataResult = server.GetUserInternalData(GetUserInternalDataRequest);
+        var GetUserInternalDataResult = GetInternalDataUser( ["Tier", "Rebirth"] );
         var tier; // 유저 티어
         var rebirth; // 유저 환생
+        var totalTier; // 총 티어
     
         if(GetUserInternalDataResult.Data.hasOwnProperty("Tier")) {
             tier = GetUserInternalDataResult.Data["Tier"].Value;
@@ -70,7 +67,7 @@ function MakeItemData(items) {
             rebirth = 0;
         }
     
-        tier = tier + (rebirth * 100);
+        totalTier = tier + (rebirth * 100);
     
         // 아이템 테이블 받아오기
         var itemTableRequest = {
@@ -85,16 +82,11 @@ function MakeItemData(items) {
         // 테이블 가져오기
         var EquipListData = {};
         for(var index in tierTable.EquipList) {
-            if(tierTable.EquipList[index].Tier <= tier) {
+            if(tierTable.EquipList[index].Tier <= totalTier) {
                 EquipListData = tierTable.EquipList[index];
             }
         }
-        var tierInfo = {};
-        for(var index in tierTable.TierInfos) {
-            if(tierTable.TierInfos[index].Tier == tier) {
-                tierInfo = tierTable.TierInfos[index];    
-            }
-        }
+        
     
         // 아이템 카달로그 받아오기
         var GetCatalogItemsRequest = {
@@ -105,6 +97,17 @@ function MakeItemData(items) {
         var equipmentData = []; // 아이템 정보 담을 오브젝트
         
         for(var key in items) {
+            // 해당 아이템 티어 테이블 받아오기
+            var tierInfo = {};
+            var randomTier = 1; // 해당 아이템 티어
+            if(items[key].CustomData.hasOwnProperty("tier")) { randomTier = items[key].CustomData["tier"]; }
+            else { randomTier = GetRandomTier ( tier ); }   // randomTier 값 없으면 새로 생성
+            
+            for(var index in tierTable.TierInfos) {
+                if(tierTable.TierInfos[index].Tier == randomTier) {
+                    tierInfo = tierTable.TierInfos[index];    
+                }
+            }
             
             var catalogDataResult = {};
             for(var index in GetCatalogItemsResult.Catalog)
@@ -135,6 +138,7 @@ function MakeItemData(items) {
             equipmentData[key].TableData = "NONE";
             equipmentData[key].Stat = "NONE";
             equipmentData[key].Skill = "NONE";
+            equipmentData[key].Tier = randomTier.toString();    //아이템 티어
             // 스탯 설정
             for(var index in itemTable.Equipments) {
                 if(itemTable.Equipments[index].ItemID == itemId) {
@@ -187,7 +191,8 @@ function MakeItemData(items) {
                 delete skill.ItemClass;
                 delete skill.Skill;
             }
-            
+            // 커스텀 데이터 정리하기
+            delete tableData.ItemClass; // 아이템 클래스는 ItemInstance 에도 있다
             // 데이터들 stringify 하기
             equipmentData[key].TableData = JSON.stringify( tableData );
             equipmentData[key].Stat = JSON.stringify( stat );
@@ -229,7 +234,9 @@ handlers.openStartChest = function (args, context) {
         if(catalogDataResult == null) {
             throw "해당 아이템 카달로그 찾지 못함";
         }
-        
+        // 유저 티어 가져오기
+        var GetUserInternalDataResult = GetInternalDataUser( [ "Tier"] );
+        var randomTier = GetRandomTier( GetUserInternalDataResult.Data["Tier"] );
         // 보상 상자 시간 설정
         var customObj = JSON.parse(catalogDataResult.CustomData);
         
@@ -245,7 +252,8 @@ handlers.openStartChest = function (args, context) {
             "Data": {
                 "openTime" : unLockDate,
                 "startTime" : currentTime,
-                "state" : "OPENING"
+                "state" : "OPENING",
+                "tier" : randomTier;
             }
         }
 
@@ -621,4 +629,19 @@ function GetItemCatalogData(id) {
         }
     }
     return itemResult;
+}
+
+function GetInternalDataUser(keys) {
+    var GetUserInternalDataRequest = {
+        "PlayFabId" : currentPlayerId,   
+        "Keys" : keys
+    }
+    return server.GetUserInternalData(GetUserInternalDataRequest);   
+}
+
+function GetRandomTier (tier) {
+    var result = tier - parseInt(Math.random() * RANDOM_TIER_AMOUNT);   
+    if(result < 1) { result = 1; }
+
+    return result;
 }
