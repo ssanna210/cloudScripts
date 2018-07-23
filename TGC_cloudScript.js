@@ -253,7 +253,7 @@ handlers.openStartChest = function (args, context) {
                 "openTime" : unLockDate,
                 "startTime" : currentTime,
                 "state" : "OPENING",
-                "tier" : randomTier;
+                "tier" : randomTier.toString();
             }
         }
 
