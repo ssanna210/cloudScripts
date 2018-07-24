@@ -188,9 +188,14 @@ function MakeItemData(items) {
                 if(customObj.grade == "rare") { skill.Lev = "20"; }
                 if(customObj.grade == "legend") { skill.Lev = skill.Limit; }
                 
+                // 타겟 장비ID 리스트에서 랜덤뽑기
+                var equipIdList = EquipListData[skill.TargetClass].split(",");
+                skill.TagetId = equipIdList[ parseInt(Math.random() * equipIdList.length) ];
+                
                 // 아이템 커스텀데이터 정리하기
                 delete skill.ItemClass;
                 delete skill.Skill;
+                delete skill.TargetClass;
             }
             // 커스텀 데이터 정리하기
             delete tableData.ItemClass; // 아이템 클래스는 ItemInstance 에도 있다
