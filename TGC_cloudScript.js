@@ -190,7 +190,7 @@ function MakeItemData(items) {
                 
                 // 타겟 장비ID 리스트에서 랜덤뽑기
                 var equipIdList = EquipListData[skill.TargetClass].split(",");
-                skill.TagetId = equipIdList[ parseInt(Math.random() * equipIdList.length) ];
+                skill.TargetId = equipIdList[ parseInt(Math.random() * equipIdList.length) ];
                 
                 // 아이템 커스텀데이터 정리하기
                 delete skill.ItemClass;
