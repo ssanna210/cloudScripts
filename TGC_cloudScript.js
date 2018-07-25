@@ -67,7 +67,7 @@ function MakeItemData(items) {
             rebirth = 0;
         }
     
-        totalTier = tier + (rebirth * 100);
+        totalTier = parseInt(tier) + (parseInt(rebirth) * 100);
     
         // 아이템 테이블 받아오기
         var itemTableRequest = {
