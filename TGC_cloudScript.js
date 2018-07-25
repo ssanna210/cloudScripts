@@ -51,23 +51,23 @@ function MakeItemData(items) {
     try {
         // 유저 티어 가져오기
         var GetUserInternalDataResult = GetInternalDataUser( ["Tier", "Rebirth"] );
-        var tier; // 유저 티어
-        var rebirth; // 유저 환생
-        var totalTier; // 총 티어
+        var tier = 0; // 유저 티어
+        var rebirth = 0; // 유저 환생
+        var totalTier = 0; // 총 티어
     
         if(GetUserInternalDataResult.Data.hasOwnProperty("Tier")) {
-            tier = GetUserInternalDataResult.Data["Tier"].Value;
+            tier = parseInt( GetUserInternalDataResult.Data["Tier"].Value );
         }else {
             tier = 1;
         }
     
         if(GetUserInternalDataResult.Data.hasOwnProperty("Rebirth")) {
-            rebirth = GetUserInternalDataResult.Data["Rebirth"].Value;
+            rebirth = parseInt( GetUserInternalDataResult.Data["Rebirth"].Value );
         }else {
             rebirth = 0;
         }
     
-        totalTier = parseInt(tier) + (parseInt(rebirth) * 100);
+        totalTier = tier + (rebirth * 100);
     
         // 아이템 테이블 받아오기
         var itemTableRequest = {
@@ -157,8 +157,8 @@ function MakeItemData(items) {
             }
             if(tableData.hasOwnProperty("HpX")) {
                 stat.Hp = parseInt( tierInfo.StatAmount * tableData.HpX );
-                stat.Hp = stat.Hp.toString();
                 stat.Hp += parseInt( Math.random() * tier );    // 티어값만큼 랜덤 스탯 추가
+                stat.Hp = stat.Hp.toString();
                 delete tableData.HpX; // 정리하기
             }
             if(tableData.hasOwnProperty("Sta")) {
