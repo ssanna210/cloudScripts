@@ -150,12 +150,14 @@ function MakeItemData(items) {
             stat.Lev = "1";
             if(tableData.hasOwnProperty("AtkX")) {
                 stat.Atk = parseInt( tierInfo.StatAmount * tableData.AtkX );
+                stat.Atk += parseInt( Math.random() * tier );   // 티어값만큼 랜덤 스탯 추가
                 stat.Atk = stat.Atk.toString();
                 delete tableData.AtkX; // 정리하기
             }
             if(tableData.hasOwnProperty("HpX")) {
                 stat.Hp = parseInt( tierInfo.StatAmount * tableData.HpX );
                 stat.Hp = stat.Hp.toString();
+                stat.Hp += parseInt( Math.random() * tier );    // 티어값만큼 랜덤 스탯 추가
                 delete tableData.HpX; // 정리하기
             }
             if(tableData.hasOwnProperty("Sta")) {
@@ -196,6 +198,11 @@ function MakeItemData(items) {
                 delete skill.ItemClass;
                 delete skill.Skill;
                 delete skill.TargetClass;
+            }
+            // 캐릭터 외형 설정하기
+            if(tableData.ItemClass == "character") {
+                tableData.hc = parseInt(Math.random() * 6); // 헤어 컬러
+                tableData.sc = parseInt(Math.random() * 3); // 스킨 컬러
             }
             // 커스텀 데이터 정리하기
             delete tableData.ItemClass; // 아이템 클래스는 ItemInstance 에도 있다
