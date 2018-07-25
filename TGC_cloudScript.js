@@ -148,7 +148,7 @@ function MakeItemData(items) {
                 }
             }
             //Lev, Atk, Hp
-            stat.Lev = "1";
+            stat.Lev = 1;
             if(tableData.hasOwnProperty("AtkX")) {
                 stat.Atk = parseInt( tierInfo.StatAmount * tableData.AtkX );
                 stat.Atk += parseInt( Math.random() * tier );   // 티어값만큼 랜덤 스탯 추가
@@ -188,7 +188,7 @@ function MakeItemData(items) {
                     }
                 }
                 
-                if(customObj.grade == "rare") { skill.Lev = "20"; }
+                if(customObj.grade == "rare") { skill.Lev = 20; }
                 if(customObj.grade == "legend") { skill.Lev = skill.Limit; }
                 
                 // 타겟 장비ID 리스트에서 랜덤뽑기
