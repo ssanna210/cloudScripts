@@ -152,13 +152,13 @@ function MakeItemData(items) {
             if(tableData.hasOwnProperty("AtkX")) {
                 stat.Atk = parseInt( tierInfo.StatAmount * tableData.AtkX );
                 stat.Atk += parseInt( Math.random() * tier );   // 티어값만큼 랜덤 스탯 추가
-                stat.Atk = stat.Atk.toString();
+                //stat.Atk = stat.Atk.toString();
                 delete tableData.AtkX; // 정리하기
             }
             if(tableData.hasOwnProperty("HpX")) {
                 stat.Hp = parseInt( tierInfo.StatAmount * tableData.HpX );
                 stat.Hp += parseInt( Math.random() * tier );    // 티어값만큼 랜덤 스탯 추가
-                stat.Hp = stat.Hp.toString();
+                //stat.Hp = stat.Hp.toString();
                 delete tableData.HpX; // 정리하기
             }
             if(tableData.hasOwnProperty("Sta")) {
