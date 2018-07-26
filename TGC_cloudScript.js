@@ -204,6 +204,9 @@ function MakeItemData(items) {
             if(tableData.ItemClass == "character") {
                 tableData.hc = parseInt(Math.random() * 6); // 헤어 컬러
                 tableData.sc = parseInt(Math.random() * 3); // 스킨 컬러
+                var hairIdList = tableData["HairRange"].split(",");
+                tableData.ht = hairIdList[ parseInt(Math.random() * hairIdList.length) ];   // 헤어 타입
+                delete tableData.HairRange;
             }
             // 커스텀 데이터 정리하기
             delete tableData.ItemClass; // 아이템 클래스는 ItemInstance 에도 있다
