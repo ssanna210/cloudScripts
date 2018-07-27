@@ -73,11 +73,11 @@ function MakeItemData(items) {
         var itemTableRequest = {
             "Keys" : [ "ItemStatTable", "TierTable", "SkillTable" ]
         }
-        var GetTitleInternalDataResult = server.GetTitleInternalData(itemTableRequest);
+        var GetTitleDataResult = server.GetTitleData(itemTableRequest);
 
-        var itemTable = JSON.parse( GetTitleInternalDataResult.Data["ItemStatTable"] );
-        var tierTable = JSON.parse( GetTitleInternalDataResult.Data["TierTable"] );
-        var skillTable = JSON.parse( GetTitleInternalDataResult.Data["SkillTable"] );
+        var itemTable = JSON.parse( GetTitleDataResult.Data["ItemStatTable"] );
+        var tierTable = JSON.parse( GetTitleDataResult.Data["TierTable"] );
+        var skillTable = JSON.parse( GetTitleDataResult.Data["SkillTable"] );
         
         // 테이블 가져오기
         var EquipListData = {};
@@ -539,8 +539,8 @@ handlers.BattleResult = function (args, context) {
         var tierTableRequest = {
             "Keys" : [ "TierTable", "PerWinChest"  ]
         }
-        var GetTitleInternalDataResult = server.GetTitleInternalData(tierTableRequest);
-        var tierTable = JSON.parse( GetTitleInternalDataResult.Data["TierTable"] );
+        var GetTitleDataResult = server.GetTitleData(tierTableRequest);
+        var tierTable = JSON.parse( GetTitleDataResult.Data["TierTable"] );
         // 트로피 계산
         var tierInfo = {};
         for(var index in tierTable.TierInfos) {
@@ -572,7 +572,7 @@ handlers.BattleResult = function (args, context) {
             }
             // 이긴 횟수 체크
             userData.WinCount += 1; // 승리 추가
-            if(userData.WinCount >=  GetTitleInternalDataResult.Data["PerWinChest"]) {
+            if(userData.WinCount >=  GetTitleDataResult.Data["PerWinChest"]) {
                 result.chestValue = grantChest();
                 delete result.chestValue;       // 그냥 생략
                 
@@ -603,7 +603,7 @@ handlers.BattleResult = function (args, context) {
         result.trophy = trophyStatistic.Value;
         result.userData = userData;
         result.trophyAmount = trophyAmount;
-        result.perWinChest = GetTitleInternalDataResult.Data["PerWinChest"];
+        result.perWinChest = GetTitleDataResult.Data["PerWinChest"];
         
         return result;
         
