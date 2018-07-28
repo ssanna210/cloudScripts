@@ -188,7 +188,7 @@ function MakeItemData(items) {
                     }
                 }
                 
-                if(customObj.grade == "rare") { skill.Lev = 20; }
+                if(customObj.grade == "rare") { skill.Lev = 20 + (parseInt(Math.random() * 10) - 8); }
                 if(customObj.grade == "legend") { skill.Lev = skill.Limit; }
                 
                 // 타겟 장비ID 리스트에서 랜덤뽑기
