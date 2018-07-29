@@ -207,6 +207,9 @@ function MakeItemData(items) {
                 var hairIdList = tableData["HairRange"].split(",");
                 tableData.ht = hairIdList[ parseInt(Math.random() * hairIdList.length) ];   // 헤어 타입
                 delete tableData.HairRange;
+                // acc 슬롯 개수 정하기
+                if( parseInt(Math.random() * 100) < 2 ) { tableData.accCnt = 2 }
+                else { tableData.accCnt = 1 }
             }
             // 커스텀 데이터 정리하기
             delete tableData.ItemClass; // 아이템 클래스는 ItemInstance 에도 있다
