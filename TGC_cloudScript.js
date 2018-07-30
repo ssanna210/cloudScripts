@@ -209,8 +209,8 @@ function MakeItemData(items) {
                 tableData.ht = hairIdList[ parseInt(Math.random() * hairIdList.length) ];   // 헤어 타입
                 delete tableData.HairRange;
                 // acc 슬롯 개수 정하기 ex) 2: 무기슬롯, 3: 아머슬롯, 4: 악세서리 슬롯 => "2,3,4" or "2,3,4,4"
-                if( parseInt(Math.random() * 100) < 2 ) { tableData.slot = "2,3,4"; }
-                else { tableData.slot = "2,3,4,4"; }
+                if( parseInt(Math.random() * 100) < 2 ) { tableData.slot = "2,3,4,4"; }
+                else { tableData.slot = "2,3,4"; }
             }
             // 커스텀 데이터 정리하기
             delete tableData.ItemClass; // 아이템 클래스는 ItemInstance 에도 있다
