@@ -730,3 +730,41 @@ function CalculItemWorth ( customData, worthTable ) {
     return result;
     
 }
+
+handlers.ExpUp = function (args) {
+    // targetItem : 경험치업 할 대상 아이템, rawItem : 제물 아이템
+     if (!args || !args.targetItemInstanceId || !args.rawItemInstanceId)
+        throw "Invalid input parameters, expected TargetItemInstanceId and RawItemInstanceId";
+    ExpUp_internal(args.targetItemInstanceId, args.rawItemInstanceId);  
+}
+
+function ExpUp_internal ( targeInstId, rawInstId ) {
+     // 아이템 테이블 받아오기
+    var tableRequest = {
+        "Keys" : [ "LevelTable", "WorthTable" ]
+    }
+    var GetTitleDataResult = server.GetTitleData(tableRequest);
+    var worthTable = JSON.parse( GetTitleDataResult.Data.WorthTable );        // 가치 테이블
+    var levelTable = JSON.parse( GetTitleDataResult.Data.LevelTable );        // 가치 테이블
+    // 아이템 검수
+    var inventory = server.GetUserInventory({ PlayFabId: currentPlayerId });
+    var targetItemInstance = null;
+    var rawItemInstance = null;
+    for (var i = 0; i < inventory.Inventory.length; i++) {
+        if (inventory.Inventory[i].ItemInstanceId === targeInstId)
+            targetItemInstance = inventory.Inventory[i];
+        else if (inventory.Inventory[i].ItemInstanceId === rawInstId)
+            rawItemInstance = inventory.Inventory[i];
+    }
+    if (!targetItemInstance || !rawItemInstance)
+        throw "Item instance not found"; // Protection against client providing incorrect data
+    if(targetItemInstance.CustomData === undefined || rawItemInstance.CustomData === undefined){
+        throw "itemInstance.CustomData is undefined";
+    }
+    
+    // 아이템 가치 계산
+    var targetItemWorth = CalculItemWorth(targetItemInstance.CustomData, worthTable);
+    var rawItemWorth = CalculItemWorth(rawItemInstance.CustomData, worthTable);
+    var exp = Math.floor(rawItemWorth * worthTable.ExpX);
+    
+}
