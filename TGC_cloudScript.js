@@ -681,3 +681,52 @@ function CopyObj(obj) {
   }
   return copy;
 }
+
+function SellItem_internal(soldItemInstanceId, requestedVcType) {
+    // 아이템 테이블 받아오기
+    var tableRequest = {
+        "Keys" : [ "WorthTable" ]
+    }
+    var GetTitleDataResult = server.GetTitleData(tableRequest);
+    var worthTable = GetTitleDataResult.Data.WorthTable;        // 가치 테이블
+    if(!worthTable) throw "WorthTable not found";
+    
+    // get item
+    var itemInstance = GetItemData(soldItemInstanceId);
+    if (!itemInstance)
+        throw "Item instance not found"; // Protection against client providing incorrect data
+    if(itemInstance.CustomData === undefined){
+        throw "itemInstance.CustomData is undefined";
+    }
+    // 아이템 가치 계산
+    var itemWorth = CalculItemWorth(itemInstance.CustomData, worthTable);
+    
+    // Once we get here all safety checks are passed - Perform the sell
+    var sellPrice = Math.floor(itemWorth * worthTable.SellGoldX);
+    server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: sellPrice, VirtualCurrency: requestedVcType });
+    server.RevokeInventoryItem({ PlayFabId: currentPlayerId, ItemInstanceId: soldItemInstanceId });
+}
+
+handlers.SellItem = function (args) {
+    if (!args || !args.soldItemInstanceId || !args.requestedVcType)
+        throw "Invalid input parameters, expected soldItemInstanceId and requestedVcType";
+    SellItem_internal(args.soldItemInstanceId, args.requestedVcType);
+};
+
+function CalculItemWorth ( customData, worthTable ) {
+    
+    // stat : Atk, Hp, Sta
+    var tier = parseInt( customData.Tier );
+    var grade = (tier - 1) / 5;
+    var stat = JSON.parse( customData.Stat );
+    var lev = stat.Lev;
+    var atk = 0; var hp = 0; var sta = 0;
+    if(stat.hasOwnProperty("Atk")) atk = stat.Atk;
+    if(stat.hasOwnProperty("Hp")) atk = stat.Hp;
+    if(stat.hasOwnProperty("Sta")) atk = stat.Sta;
+    
+    var result = (worthTable.Grade * grade) + (worthTable.Tier * tier) + (worthTable.Lev * lev) + ( worthTable.Stat * (atk + hp + sta) );
+    
+    return result;
+    
+}
