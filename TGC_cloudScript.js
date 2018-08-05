@@ -708,9 +708,9 @@ function SellItem_internal(soldItemInstanceId, requestedVcType) {
 }
 
 handlers.SellItem = function (args) {
-    if (!args || !args.soldItemInstanceId || !args.requestedVcType)
+    if (!args || !args.soldItemInstanceId)
         throw "Invalid input parameters, expected soldItemInstanceId and requestedVcType";
-    SellItem_internal(args.soldItemInstanceId, args.requestedVcType);
+    SellItem_internal(args.soldItemInstanceId, "GO");
 };
 
 function CalculItemWorth ( customData, worthTable ) {
