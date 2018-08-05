@@ -688,7 +688,7 @@ function SellItem_internal(soldItemInstanceId, requestedVcType) {
         "Keys" : [ "WorthTable" ]
     }
     var GetTitleDataResult = server.GetTitleData(tableRequest);
-    var worthTable = GetTitleDataResult.Data.WorthTable;        // 가치 테이블
+    var worthTable = JSON.parse( GetTitleDataResult.Data.WorthTable );        // 가치 테이블
     if(!worthTable) throw "WorthTable not found";
     
     // get item
