@@ -772,7 +772,7 @@ function ExpUp_internal ( targeInstId, rawInstId ) {
     var rawItemWorth = CalculItemWorth(rawItemInstance.CustomData, worthTable);
     var exp = Math.floor(rawItemWorth * worthTable.ExpX);
     var levUpCost = Math.floor( rawItemWorth * worthTable.LevUpCostX );
-    if(levUpCost > inventory.VirtualCurrencyDict["GO"]) throw "Gold가 모자릅니다.";
+    if(levUpCost > inventory.VirtualCurrency["GO"]) throw "Gold가 모자릅니다.";
     
     // Exp Up
     targetItemStat.Exp += exp;
