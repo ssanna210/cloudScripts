@@ -149,6 +149,7 @@ function MakeItemData(items) {
             }
             //Lev, Atk, Hp
             stat.Lev = 1;
+            stat.Exp = 0;
             if(tableData.hasOwnProperty("AtkX")) {
                 stat.Atk = parseInt( tierInfo.StatAmount * tableData.AtkX );
                 stat.Atk += parseInt( Math.random() * tier );   // 티어값만큼 랜덤 스탯 추가
@@ -761,10 +762,47 @@ function ExpUp_internal ( targeInstId, rawInstId ) {
     if(targetItemInstance.CustomData === undefined || rawItemInstance.CustomData === undefined){
         throw "itemInstance.CustomData is undefined";
     }
+    var targetItemStat = {};
+    var levLimit = CalculLevLimit( parseInt( targetItemInstance.CustomData.Tier ), levelTable );
+    targetItemStat = JSON.parse( targetItemInstance.CustomData.Stat );
+    if(targetItemStat.Lev >= levLimit) { targetItemStat.Lev = levLimit;  throw "아이템 레벨 MAX"; }
     
     // 아이템 가치 계산
     var targetItemWorth = CalculItemWorth(targetItemInstance.CustomData, worthTable);
     var rawItemWorth = CalculItemWorth(rawItemInstance.CustomData, worthTable);
     var exp = Math.floor(rawItemWorth * worthTable.ExpX);
+    var levUpCost = Math.floor( rawItemWorth * worthTable.LevUpCostX );
+    if(levUpCost > inventory.VirtualCurrencyDict["GO"]) throw "Gold가 모자릅니다.";
     
+    // Exp Up
+    targetItemStat.Exp += exp;
+    if(targetItemStat.Exp >= targetItemWorth) { 
+        targetItemStat.Exp = targetItemStat.Exp - targetItemWorth;
+        targetItemStat.Lev += 1;
+        if(targetItemStat.hasOwnProperty("Atk")) targetItemStat.Atk += Math.floor( targetItemStat.Atk * levelTable.XperLevel );
+        if(targetItemStat.hasOwnProperty("Hp")) targetItemStat.Hp += Math.floor( targetItemStat.Hp * levelTable.XperLevel );
+        if(targetItemStat.hasOwnProperty("Sta")) targetItemStat.Sta += Math.floor( targetItemStat.Sta * levelTable.XperLevel );
+        
+        if(targetItemStat.Lev >= levLimit) { targetItemStat.Lev = levLimit; }
+    }
+    targetItemInstance.CustomData.Stat = JSON.stringify( targetItemStat );
+    // 아이템 데이터 업데이트
+    var UpdateItemCustomDataRequest = {
+        "PlayFabId": currentPlayerId,
+        "ItemInstanceId": targeInstId,
+        "Data": targetItemInstance.CustomData
+    }
+    server.UpdateUserInventoryItemCustomData(UpdateItemCustomDataRequest);
+
+    // 코스트 처리
+    server.SubtractUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: levUpCost, VirtualCurrency: "GO" });
+    server.RevokeInventoryItem({ PlayFabId: currentPlayerId, ItemInstanceId: rawInstId });
+}
+
+function CalculLevLimit ( tier, levelTable ) {
+    var starCnt = 0;
+    starCnt = (tier % 5);
+    if (starCnt == 0) starCnt = 5;
+    var result = levelTable.LimitList[starCnt-1];
+    return result;
 }
