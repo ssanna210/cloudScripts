@@ -711,7 +711,7 @@ function SellItem_internal(soldItemInstanceId, requestedVcType) {
 handlers.SellItem = function (args) {
     if (!args || !args.soldItemInstanceId)
         throw "Invalid input parameters, expected soldItemInstanceId and requestedVcType";
-    SellItem_internal(args.soldItemInstanceId, "GO");
+    return SellItem_internal(args.soldItemInstanceId, "GO");
 };
 
 function CalculItemWorth ( customData, worthTable ) {
@@ -736,7 +736,7 @@ handlers.ExpUp = function (args) {
     // targetItem : 경험치업 할 대상 아이템, rawItem : 제물 아이템
      if (!args || !args.targetItemInstanceId || !args.rawItemInstanceId)
         throw "Invalid input parameters, expected TargetItemInstanceId and RawItemInstanceId";
-    ExpUp_internal(args.targetItemInstanceId, args.rawItemInstanceId);  
+    return ExpUp_internal(args.targetItemInstanceId, args.rawItemInstanceId);  
 }
 
 function ExpUp_internal ( targeInstId, rawInstId ) {
