@@ -706,6 +706,8 @@ function SellItem_internal(soldItemInstanceId, requestedVcType) {
     var sellPrice = Math.floor(itemWorth * worthTable.SellGoldX);
     server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: sellPrice, VirtualCurrency: requestedVcType });
     server.RevokeInventoryItem({ PlayFabId: currentPlayerId, ItemInstanceId: soldItemInstanceId });
+    
+    return sellPrice;
 }
 
 handlers.SellItem = function (args) {
@@ -797,6 +799,8 @@ function ExpUp_internal ( targeInstId, rawInstId ) {
     // 코스트 처리
     server.SubtractUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: levUpCost, VirtualCurrency: "GO" });
     server.RevokeInventoryItem({ PlayFabId: currentPlayerId, ItemInstanceId: rawInstId });
+    
+    return exp;
 }
 
 function CalculLevLimit ( tier, levelTable ) {
