@@ -810,3 +810,11 @@ function CalculLevLimit ( tier, levelTable ) {
     var result = levelTable.LimitList[starCnt-1];
     return result;
 }
+
+handlers.UpdatePartyTabData = function (args) {
+    // targetItem : 경험치업 할 대상 아이템, rawItem : 제물 아이템
+    if (!args || !args.tab1 || !args.tab2 || !args.tab3)
+        throw "Invalid input parameters";
+    
+    server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : args } );
+}
