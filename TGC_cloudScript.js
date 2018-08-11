@@ -818,3 +818,45 @@ handlers.UpdatePartyTabData = function (args) {
     
     server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : args } );
 }
+
+// 유저가 처음 접속했는지 체크하는 함수
+handlers.FirstCheck () {
+    var result = {};
+    var internalData = server.GetUserInternalData( { PlayFabId: currentPlayerId, Keys: ["isFirstGift", "isTutoComplete"] } );
+    if(internalData.Data.hasOwnProperty("isFirstGift") && isTrue( internalData.Data["isFirstGift"].Value )) {
+        result.isFirstGift = internalData.Data["isFirstGift"].Value;
+    }else {
+        // 처음 접속이면 아이템 증정
+        var pull = server.GrantItemsToUser({ 
+            PlayFabId: currentPlayerId, 
+            ItemIds: ["bundle_firstGift"]
+        });
+        MakeItemData(pull.ItemGrantResults);
+        server.UpdateUserInternalData( { PlayFabId: currentPlayerId, Data: {"isFirstGift": "true"} } );
+        result.isFirstGift = true;
+    }
+    if(internalData.Data.hasOwnProperty("isTutoComplete") && isTrue( internalData.Data["isTutoComplete"].Value )) {
+        result.isTutoComplete = internalData.Data["isTutoComplete"].Value;
+    }else {
+        result.isTutoComplete = false;
+    }
+    
+    return result;
+}
+// string -> bool 변환 함수
+function isTrue(value){
+    if (typeof(value) === 'string'){
+        value = value.trim().toLowerCase();
+    }
+    switch(value){
+        case true:
+        case "true":
+        case 1:
+        case "1":
+        case "on":
+        case "yes":
+            return true;
+        default: 
+            return false;
+    }
+}
