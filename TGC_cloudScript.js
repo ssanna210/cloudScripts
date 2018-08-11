@@ -820,7 +820,7 @@ handlers.UpdatePartyTabData = function (args) {
 }
 
 // 유저가 처음 접속했는지 체크하는 함수
-handlers.FirstCheck () {
+handlers.FirstCheck = function (args) {
     var result = {};
     var internalData = server.GetUserInternalData( { PlayFabId: currentPlayerId, Keys: ["isFirstGift", "isTutoComplete"] } );
     if(internalData.Data.hasOwnProperty("isFirstGift") && isTrue( internalData.Data["isFirstGift"].Value )) {
