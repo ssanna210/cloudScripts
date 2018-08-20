@@ -134,10 +134,11 @@ function MakeItemData(items) {
             var itemId = equipList[randomValue];
             //
             var tableData = {};
+            var info = {};
             var stat = {};
             var skill = {};
             equipmentData[key] = {};
-            //equipmentData[key].TableData = "NONE";
+            equipmentData[key].Info = "NONE";
             equipmentData[key].Stat = "NONE";
             equipmentData[key].Skill = "NONE";
             equipmentData[key].Tier = randomTier.toString();    //아이템 티어
@@ -148,7 +149,6 @@ function MakeItemData(items) {
                 }
             }
             //Lev, Atk, Hp
-            stat.ItemID = tableData.ItemID;
             stat.Lev = 1;
             stat.Exp = 0;
             if(tableData.hasOwnProperty("AtkX")) {
@@ -196,20 +196,23 @@ function MakeItemData(items) {
                 delete skill.Skill;
                 delete skill.TargetClass;
             }
+            // customData.info 설정
+            info.ItemID = tableData.ItemID;
+            
             // 캐릭터 설정
             if(tableData.ItemClass == "character") {
                 // 캐릭터 외형 설정하기
-                stat.hc = parseInt(Math.random() * 6); // 헤어 컬러
-                stat.sc = parseInt(Math.random() * 3); // 스킨 컬러
+                info.hc = parseInt(Math.random() * 6); // 헤어 컬러
+                info.sc = parseInt(Math.random() * 3); // 스킨 컬러
                 var hairIdList = tableData["HairRange"].split(",");
-                stat.ht = hairIdList[ parseInt(Math.random() * hairIdList.length) ];   // 헤어 타입
+                info.ht = hairIdList[ parseInt(Math.random() * hairIdList.length) ];   // 헤어 타입
                 // acc 슬롯 개수 정하기 ex) 2: 무기슬롯, 3: 아머슬롯, 4: 악세서리 슬롯 => "2,3,4" or "2,3,4,4"
-                if( parseInt(Math.random() * 100) < 2 ) { stat.slot = "2,3,4,4"; }
-                else { stat.slot = "2,3,4"; }
+                if( parseInt(Math.random() * 100) < 2 ) { info.slot = "2,3,4,4"; }
+                else { info.slot = "2,3,4"; }
             }
             
             // 데이터들 stringify 하기
-            //equipmentData[key].TableData = JSON.stringify( tableData );
+            equipmentData[key].Info = JSON.stringify( info );
             equipmentData[key].Stat = JSON.stringify( stat );
             equipmentData[key].Skill = JSON.stringify( skill );
             // 아이템 데이터 업데이트
