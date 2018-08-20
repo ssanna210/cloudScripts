@@ -148,32 +148,27 @@ function MakeItemData(items) {
                 }
             }
             //Lev, Atk, Hp
+            stat.ItemID = tableData.ItemID;
             stat.Lev = 1;
             stat.Exp = 0;
             if(tableData.hasOwnProperty("AtkX")) {
                 stat.Atk = parseInt( tierInfo.StatAmount * tableData.AtkX );
                 stat.Atk += parseInt( Math.random() * tier );   // 티어값만큼 랜덤 스탯 추가
-                //stat.Atk = stat.Atk.toString();
-                delete tableData.AtkX; // 정리하기
             }
             if(tableData.hasOwnProperty("HpX")) {
                 stat.Hp = parseInt( tierInfo.StatAmount * tableData.HpX );
                 stat.Hp += parseInt( Math.random() * tier );    // 티어값만큼 랜덤 스탯 추가
-                //stat.Hp = stat.Hp.toString();
-                delete tableData.HpX; // 정리하기
             }
             if(tableData.hasOwnProperty("Sta")) {
                 stat.Sta = tableData.Sta;
-                delete tableData.Sta; // 정리하기
             }
             if(tableData.hasOwnProperty("StaReX")) {
                 stat.StaReX = tableData.StaReX;
-                delete tableData.StaReX; // 정리하기
             }
             if(tableData.hasOwnProperty("Wg")) {
                 stat.Wg = tableData.Wg;
-                delete tableData.Wg; // 정리하기
             }
+            
             // 스킬 설정
             if(customObj.grade == "rare" || customObj.grade == "legend") {
                 var skillIdList = [];
@@ -204,19 +199,17 @@ function MakeItemData(items) {
             // 캐릭터 설정
             if(tableData.ItemClass == "character") {
                 // 캐릭터 외형 설정하기
-                tableData.hc = parseInt(Math.random() * 6); // 헤어 컬러
-                tableData.sc = parseInt(Math.random() * 3); // 스킨 컬러
+                stat.hc = parseInt(Math.random() * 6); // 헤어 컬러
+                stat.sc = parseInt(Math.random() * 3); // 스킨 컬러
                 var hairIdList = tableData["HairRange"].split(",");
-                tableData.ht = hairIdList[ parseInt(Math.random() * hairIdList.length) ];   // 헤어 타입
-                delete tableData.HairRange;
+                stat.ht = hairIdList[ parseInt(Math.random() * hairIdList.length) ];   // 헤어 타입
                 // acc 슬롯 개수 정하기 ex) 2: 무기슬롯, 3: 아머슬롯, 4: 악세서리 슬롯 => "2,3,4" or "2,3,4,4"
-                if( parseInt(Math.random() * 100) < 2 ) { tableData.slot = "2,3,4,4"; }
-                else { tableData.slot = "2,3,4"; }
+                if( parseInt(Math.random() * 100) < 2 ) { stat.slot = "2,3,4,4"; }
+                else { stat.slot = "2,3,4"; }
             }
-            // 커스텀 데이터 정리하기
-            delete tableData.ItemClass; // 아이템 클래스는 ItemInstance 에도 있다
+            
             // 데이터들 stringify 하기
-            equipmentData[key].TableData = JSON.stringify( tableData );
+            //equipmentData[key].TableData = JSON.stringify( tableData );
             equipmentData[key].Stat = JSON.stringify( stat );
             equipmentData[key].Skill = JSON.stringify( skill );
             // 아이템 데이터 업데이트
