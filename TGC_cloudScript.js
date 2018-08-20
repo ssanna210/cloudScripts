@@ -806,10 +806,33 @@ function CalculLevLimit ( tier, levelTable ) {
 
 handlers.UpdatePartyTabData = function (args) {
     // targetItem : 경험치업 할 대상 아이템, rawItem : 제물 아이템
-    if (!args || !args.tab1 || !args.tab2 || !args.tab3)
+    if (!args || !args.tab1 || !args.tab2 || !args.tab3 || !args.lastTab)
         throw "Invalid input parameters";
+    server.UpdateUserInternalData( {  PlayFabId: currentPlayerId, Data : args } );
     
-    server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : args } );
+    if(!args.hasOwnProperty(args.lastTab)) { throw "args에 lastTab의 value 값 키가 없음"; }
+    var equipInfo = JSON.parse( args[args.lastTab] );
+    var customDatas = [];
+    var inventoryResult = server.GetUserInventory( {"PlayFabId": currentPlayerId} );
+    var item = null;
+    for(var index in equipInfo) {
+        if(equipInfo[index] == null) {
+            customDatas.push(null);
+        }else {
+            item = null;
+            for(var i in inventoryResult.Inventory)
+            {
+                if(inventoryResult.Inventory[i].ItemInstanceId === args.InstanceId)
+                {
+                    item = inventoryResult.Inventory[i];
+                }
+            }
+            if(item == null) customDatas.push(null);
+            else customDatas.push(item);
+        }
+    }
+    var characterInfo = JSON.stringify(customDatas);
+    server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { "CharacterInfo" : characterInfo } } );
 }
 
 // 유저가 처음 접속했는지 체크하는 함수
