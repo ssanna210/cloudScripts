@@ -825,7 +825,7 @@ handlers.UpdatePartyTabData = function (args) {
             item = null;
             for(var i in inventoryResult.Inventory)
             {
-                if(inventoryResult.Inventory[i].ItemInstanceId === args.InstanceId)
+                if(inventoryResult.Inventory[i].ItemInstanceId === equipInfo[index])
                 {
                     item = inventoryResult.Inventory[i];
                 }
