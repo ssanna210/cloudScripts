@@ -828,7 +828,7 @@ handlers.UpdatePartyTabData = function (args) {
                 }
             }
             if(item == null) customDatas.push(null);
-            else customDatas.push(item);
+            else customDatas.push(item.CustomData);
         }
     }
     var characterInfo = JSON.stringify(customDatas);
