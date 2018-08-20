@@ -137,7 +137,7 @@ function MakeItemData(items) {
             var stat = {};
             var skill = {};
             equipmentData[key] = {};
-            equipmentData[key].TableData = "NONE";
+            //equipmentData[key].TableData = "NONE";
             equipmentData[key].Stat = "NONE";
             equipmentData[key].Skill = "NONE";
             equipmentData[key].Tier = randomTier.toString();    //아이템 티어
