@@ -836,7 +836,7 @@ handlers.UpdatePartyTabData = function (args) {
     }
     // 캐릭터 정보 : ReadOnly 데이터에 저장
     var characterInfo = JSON.stringify(customDatas);
-    server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { "CharacterInfo" : characterInfo } } );
+    server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { "CharacterInfo" : characterInfo }, Permission : "Public" } );
     
 }
 
