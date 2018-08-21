@@ -811,7 +811,7 @@ handlers.UpdatePartyTabData = function (args) {
     // targetItem : 경험치업 할 대상 아이템, rawItem : 제물 아이템
     if (!args || !args.tab1 || !args.tab2 || !args.tab3 || !args.lastTab)
         throw "Invalid input parameters";
-    server.UpdateUserInternalData( {  PlayFabId: currentPlayerId, Data : args } );
+    server.UpdateUserData( {  PlayFabId: currentPlayerId, Data : args } );  // 탭정보 : 유저 데이터에 저장
     
     if(!args.hasOwnProperty(args.lastTab)) { throw "args에 lastTab의 value 값 키가 없음"; }
     var equipInfo = JSON.parse( args[args.lastTab] );
@@ -834,8 +834,10 @@ handlers.UpdatePartyTabData = function (args) {
             else customDatas.push(item.CustomData);
         }
     }
+    // 캐릭터 정보 : ReadOnly 데이터에 저장
     var characterInfo = JSON.stringify(customDatas);
     server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { "CharacterInfo" : characterInfo } } );
+    
 }
 
 // 유저가 처음 접속했는지 체크하는 함수
