@@ -49,25 +49,27 @@ handlers.unlockChest = function (args, context) {
 
 function MakeItemData(items) {
     try {
-        // 유저 티어 가져오기
-        var GetUserInternalDataResult = GetInternalDataUser( ["Tier", "Rebirth"] );
-        var tier = 0; // 유저 티어
-        var rebirth = 0; // 유저 환생
-        var totalTier = 0; // 총 티어
-    
-        if(GetUserInternalDataResult.Data.hasOwnProperty("Tier")) {
-            tier = parseInt( GetUserInternalDataResult.Data["Tier"].Value );
-        }else {
-            tier = 1;
+        // 유저 통계 가져오기 : 총 티어
+        var GetPlayerStatisticsRequest = {
+            "PlayFabId": currentPlayerId,
+            "StatisticNames": [ "TotalTier" ]
+        };
+        var StatisticsResult = server.GetPlayerStatistics(GetPlayerStatisticsRequest);
+
+        var tierStatistic = {};
+        tierStatistic.StatisticName = "TotalTier";
+        tierStatistic.Value = 1;
+        
+        if(StatisticsResult.Statistics.length > 0) {
+            for(var index in StatisticsResult.Statistics) {
+                if(StatisticsResult.Statistics[index].StatisticName == "TotalTier") 
+                    tierStatistic = StatisticsResult.Statistics[index];
+            }
         }
-    
-        if(GetUserInternalDataResult.Data.hasOwnProperty("Rebirth")) {
-            rebirth = parseInt( GetUserInternalDataResult.Data["Rebirth"].Value );
-        }else {
-            rebirth = 0;
-        }
-    
-        totalTier = tier + (rebirth * 100);
+        
+        var totalTier = tierStatistic.Value; // 총 티어
+        var tier = totalTier % 100; // 유저 티어
+        var rebirth = parseInt( totalTier / 100 ); // 유저 환생
     
         // 아이템 테이블 받아오기
         var itemTableRequest = {
@@ -234,10 +236,6 @@ function MakeItemData(items) {
     }
 }
 
-function ProgressItemData(item) {
-    
-}
-
 handlers.openStartChest = function (args, context) {
     try {
         // 상자 정보 가져오기
@@ -252,9 +250,28 @@ handlers.openStartChest = function (args, context) {
         if(catalogDataResult == null) {
             throw "해당 아이템 카달로그 찾지 못함";
         }
-        // 유저 티어 가져오기
-        var GetUserInternalDataResult = GetInternalDataUser( [ "Tier"] );
-        var randomTier = GetRandomTier( parseInt( GetUserInternalDataResult.Data["Tier"].Value ) );
+        // 유저 통계 가져오기 : 총 티어
+        var GetPlayerStatisticsRequest = {
+            "PlayFabId": currentPlayerId,
+            "StatisticNames": [ "TotalTier" ]
+        };
+        var StatisticsResult = server.GetPlayerStatistics(GetPlayerStatisticsRequest);
+
+        var tierStatistic = {};
+        tierStatistic.StatisticName = "TotalTier";
+        tierStatistic.Value = 1;
+        
+        if(StatisticsResult.Statistics.length > 0) {
+            for(var index in StatisticsResult.Statistics) {
+                if(StatisticsResult.Statistics[index].StatisticName == "TotalTier") 
+                    tierStatistic = StatisticsResult.Statistics[index];
+            }
+        }
+        
+        var totalTier = tierStatistic.Value; // 총 티어
+        var tier = totalTier % 100; // 유저 티어
+
+        var randomTier = GetRandomTier( tier ) );
         randomTier = randomTier.toString();
         // 보상 상자 시간 설정
         var customObj = JSON.parse(catalogDataResult.CustomData);
@@ -479,42 +496,35 @@ function ProcessGrantChest()
 handlers.BattleResult = function (args, context) {
     try {
         var result = {};
-        // 유저 통계 가져오기 : 트로피
+        // 유저 통계 가져오기 : 트로피, 총 티어
         var GetPlayerStatisticsRequest = {
             "PlayFabId": currentPlayerId,
-            "StatisticNames": [ "Trophy" ]
+            "StatisticNames": [ "Trophy", "TotalTier" ]
         };
-        var GetPlayerStatisticsResult = server.GetPlayerStatistics(GetPlayerStatisticsRequest);
+        var StatisticsResult = server.GetPlayerStatistics(GetPlayerStatisticsRequest);
 
         var trophyStatistic = {};
-        if(GetPlayerStatisticsResult.Statistics.length > 0) {
-            trophyStatistic = GetPlayerStatisticsResult.Statistics[0];
-        }else {
-            trophyStatistic.StatisticName = "Trophy";
-            trophyStatistic.Value = 0;
-            GetPlayerStatisticsResult.Statistics.push(trophyStatistic);
+        var tierStatistic = {};
+        trophyStatistic.StatisticName = "Trophy"; trophyStatistic.Value = 0;
+        tierStatistic.StatisticName = "TotalTier"; tierStatistic.Value = 1;
+        
+        if(StatisticsResult.Statistics.length > 0) {
+            for(var index in StatisticsResult.Statistics) {
+                if(StatisticsResult.Statistics[index].StatisticName == "Trophy") 
+                    trophyStatistic = StatisticsResult.Statistics[index];
+                if(StatisticsResult.Statistics[index].StatisticName == "TotalTier") 
+                    tierStatistic = StatisticsResult.Statistics[index];
+            }
         }
         
         // 유저 티어 가져오기
         var GetUserInternalDataRequest = {
             "PlayFabId" : currentPlayerId,   
-            "Keys" : [ "Tier", "Rebirth", "WinCount", "WinningStreak", "BeforeWin" ]
+            "Keys" : [ "WinCount", "WinningStreak", "BeforeWin" ]
         }
         var GetUserInternalDataResult = server.GetUserInternalData(GetUserInternalDataRequest);
         
         var userData = {};
-        
-        if(GetUserInternalDataResult.Data.hasOwnProperty("Tier")) {
-            userData.Tier = parseInt( GetUserInternalDataResult.Data["Tier"].Value );
-        }else {
-            userData.Tier = 1;
-        }
-    
-        if(GetUserInternalDataResult.Data.hasOwnProperty("Rebirth")) {
-            userData.Rebirth = parseInt( GetUserInternalDataResult.Data["Rebirth"].Value );
-        }else {
-            userData.Rebirth = 0;
-        }
         
         if(GetUserInternalDataResult.Data.hasOwnProperty("WinCount")) {
             userData.WinCount = parseInt( GetUserInternalDataResult.Data["WinCount"].Value );
@@ -533,8 +543,6 @@ handlers.BattleResult = function (args, context) {
         }else {
             userData.BeforeWin = 0;
         }
-        
-        var tier = userData.Tier + (userData.Rebirth * 100); // 환생까지 계산된 실제 티어값
     
         // 트로피 관련 테이블 가져오기
         var tierTableRequest = {
@@ -545,7 +553,7 @@ handlers.BattleResult = function (args, context) {
         // 트로피 계산
         var tierInfo = {};
         for(var index in tierTable.TierInfos) {
-            if( tierTable.TierInfos[index].Tier == tier) {
+            if( tierTable.TierInfos[index].Tier == tierStatistic.Value) {
                 tierInfo = tierTable.TierInfos[index];
             }
         }
@@ -591,7 +599,7 @@ handlers.BattleResult = function (args, context) {
         // 유저 통계 업데이트 : 트로피
         var UpdatePlayerStatisticsRequest = {
             "PlayFabId": currentPlayerId,
-            "Statistics": [trophyStatistic]
+            "Statistics": [trophyStatistic,tierStatistic]
         };
         var UpdatePlayerStatisticsResult = server.UpdatePlayerStatistics(UpdatePlayerStatisticsRequest);
         // 유저 정보 업데이트
@@ -601,6 +609,7 @@ handlers.BattleResult = function (args, context) {
         }
         server.UpdateUserInternalData(UpdateUserInternalDataRequest);
         
+        result.totalTier = tierStatistic.Value;
         result.trophy = trophyStatistic.Value;
         result.userData = userData;
         result.trophyAmount = trophyAmount;
