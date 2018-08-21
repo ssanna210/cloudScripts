@@ -68,7 +68,7 @@ function MakeItemData(items) {
         }
         
         var totalTier = tierStatistic.Value; // 총 티어
-        var tier = totalTier % 100; // 유저 티어
+        var tier = parseInt(totalTier % 100); // 유저 티어
         var rebirth = parseInt( totalTier / 100 ); // 유저 환생
     
         // 아이템 테이블 받아오기
@@ -269,7 +269,7 @@ handlers.openStartChest = function (args, context) {
         }
         
         var totalTier = tierStatistic.Value; // 총 티어
-        var tier = totalTier % 100; // 유저 티어
+        var tier = parseInt( totalTier % 100 ); // 유저 티어
 
         var randomTier = GetRandomTier( tier ) );
         randomTier = randomTier.toString();
