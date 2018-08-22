@@ -271,7 +271,7 @@ handlers.openStartChest = function (args, context) {
         var totalTier = tierStatistic.Value; // 총 티어
         var tier = parseInt( totalTier % 100 ); // 유저 티어
 
-        var randomTier = GetRandomTier( tier ) );
+        var randomTier = GetRandomTier( tier );
         randomTier = randomTier.toString();
         // 보상 상자 시간 설정
         var customObj = JSON.parse(catalogDataResult.CustomData);
