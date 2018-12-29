@@ -493,6 +493,7 @@ function ProcessGrantChest()
 }
 
 // 전투 결과 보상 함수
+// args.mode, 0: normal mode 1: promotion mode
 handlers.BattleResult = function (args, context) {
     try {
         var result = {};
