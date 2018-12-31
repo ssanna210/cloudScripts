@@ -559,42 +559,59 @@ handlers.BattleResult = function (args, context) {
             }
         }
         var trophyAmount = 0; // 보상 트로피 양
-        if(args.isVictory) {
-            // 연승 계산
-            if(userData.BeforeWin == 1) {
-                userData.WinningStreak += 1; // 연승 추가
-            }
-            
+        // 일반 모드
+        if(args.mode == 0) {
             // 이긴 경우
+            if(args.isVictory) {
+                // 연승 계산
+                if(userData.BeforeWin == 1) {
+                    userData.WinningStreak += 1; // 연승 추가
+                }
+                if(trophyStatistic.Value < tierInfo.TrophyLimit) {
+                
+                    if(userData.WinningStreak > parseInt(tierTable.StreakLimit)) {
+                        trophyAmount = parseInt(tierTable.Unit) + parseInt(tierTable.StreakLimit);
+                    }else {
+                        trophyAmount = parseInt(tierTable.Unit) + userData.WinningStreak;
+                    }
+                
+                    trophyStatistic.Value += trophyAmount;
+                
+                    if(trophyStatistic.Value > parseInt(tierInfo.TrophyLimit)) {
+                        trophyStatistic.Value = parseInt(tierInfo.TrophyLimit);
+                    }
+                }
+                // 이긴 횟수 체크
+                userData.WinCount += 1; // 승리 추가
+                if(userData.WinCount >=  GetTitleDataResult.Data["PerWinChest"]) {
+                    result.chestValue = grantChest();
+                    delete result.chestValue;       // 그냥 생략
+                
+                    userData.WinCount = 0;
+                }
+                userData.BeforeWin = 1; // 다음 연산을 위하여
+
+            }else {
+                // 패배할 경우
+                userData.BeforeWin = 0; // 0: false
+                userData.WinningStreak = 0; // 연승 초기화
+            }   
+        }
+        // 승급전
+        if(args.mode == 1) {
+            // 승급전 체크
             if(trophyStatistic.Value < tierInfo.TrophyLimit) {
-                
-                if(userData.WinningStreak > parseInt(tierTable.StreakLimit)) {
-                    trophyAmount = parseInt(tierTable.Unit) + parseInt(tierTable.StreakLimit);
-                }else {
-                    trophyAmount = parseInt(tierTable.Unit) + userData.WinningStreak;
-                }
-                
-                trophyStatistic.Value += trophyAmount;
-                
-                if(trophyStatistic.Value > parseInt(tierInfo.TrophyLimit)) {
-                    trophyStatistic.Value = parseInt(tierInfo.TrophyLimit);
-                }
-            }
-            // 이긴 횟수 체크
-            userData.WinCount += 1; // 승리 추가
-            if(userData.WinCount >=  GetTitleDataResult.Data["PerWinChest"]) {
-                result.chestValue = grantChest();
-                delete result.chestValue;       // 그냥 생략
-                
-                userData.WinCount = 0;
+                throw "승급전에 필요한 트로피가 모자랍니다";
             }
             
-            userData.BeforeWin = 1; // 다음 연산을 위하여
-            
-        }else {
-            // 패배할 경우
-            userData.BeforeWin = 0; // 0: false
-            userData.WinningStreak = 0; // 연승 초기화
+            if(args.isVictory) {
+                // 승급 성공
+                
+                tierStatistic.Value
+            }else {
+                // 승급 실패
+                
+            }
         }
         
         // 유저 통계 업데이트 : 트로피
