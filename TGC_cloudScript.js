@@ -608,13 +608,14 @@ handlers.BattleResult = function (args, context) {
             if(trophyStatistic.Value < parseInt(tierInfo.TrophyLimit)) {
                 throw "승급전에 필요한 트로피가 모자랍니다.";
             }
-            if(tier >= parseInt(tierInfo.TierLimit)) { // temp
+            if(tier >= parseInt(tierInfo.TierLimit)) {
                 throw "티어가 이미 최대치입니다.";
             }
             
             if(args.isVictory) {
                 // 승급 성공, 티어 업
                 tier++;
+                trophyStatistic.Value = 0;
                 isPromotion = true;
                 
             }else {
@@ -655,14 +656,74 @@ handlers.BattleResult = function (args, context) {
 
 }
 
-function PromoteTier() {
+// 환생 함수
+handlers.Rebirth = function (args, context) {
     try {
+        var result = {};
+        result.isRebirth = false;
+        // 유저 통계 가져오기 : 트로피, 총 티어
+        var GetPlayerStatisticsRequest = {
+            "PlayFabId": currentPlayerId,
+            "StatisticNames": [ "Trophy", "TotalTier" ]
+        };
+        var StatisticsResult = server.GetPlayerStatistics(GetPlayerStatisticsRequest);
+
+        var trophyStatistic = {};
+        var tierStatistic = {};
+        trophyStatistic.StatisticName = "Trophy"; trophyStatistic.Value = 0;
+        tierStatistic.StatisticName = "TotalTier"; tierStatistic.Value = 1;
+        
+        if(StatisticsResult.Statistics.length > 0) {
+            for(var index in StatisticsResult.Statistics) {
+                if(StatisticsResult.Statistics[index].StatisticName == "Trophy") 
+                    trophyStatistic = StatisticsResult.Statistics[index];
+                if(StatisticsResult.Statistics[index].StatisticName == "TotalTier") 
+                    tierStatistic = StatisticsResult.Statistics[index];
+            }
+        }
+        
+        var totalTier = tierStatistic.Value; // 총 티어
+        var tier = parseInt(totalTier % 100); // 유저 티어
+        var rebirth = parseInt( totalTier / 100 ); // 유저 환생
+        
+        // 트로피 관련 테이블 가져오기
+        var tierTableRequest = {
+            "Keys" : [ "TierTable" ]
+        }
+        var GetTitleDataResult = server.GetTitleData(tierTableRequest);
+        var tierTable = JSON.parse( GetTitleDataResult.Data["TierTable"] );
+        
+        if(tier < parseInt(tierInfo.TierLimit)) {
+            throw "티어가 모자릅니다.";
+        }
+        if(rebirth >= parseInt(tierInfo.RebirthLimit)) {
+            throw "환생이 이미 최대치입니다.";   
+        }
+        
+        rebirth ++;
+        tier = 1;
+        tierStatistic.Value = rebirth * 100 + tier;
+        trophyStatistic.Value = 0;
+        // 환생 보상 : 소량 보석, 스킬포인트, 아이템 언락
+        // !!!여기까지 했다 
+        //
+        result.isRebirth = true;
+        
+        // 유저 통계 업데이트 : 트로피
+        var UpdatePlayerStatisticsRequest = {
+            "PlayFabId": currentPlayerId,
+            "Statistics": [trophyStatistic,tierStatistic]
+        };
+        var UpdatePlayerStatisticsResult = server.UpdatePlayerStatistics(UpdatePlayerStatisticsRequest);
+        
+        return result;
         
     } catch(e) {
         var retObj = {};
         retObj["errorDetails"] = "Error: " + e;
         return retObj;
     }
+
 }
 
 function GetItemData(id) {
