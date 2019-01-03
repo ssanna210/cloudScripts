@@ -518,7 +518,11 @@ handlers.BattleResult = function (args, context) {
             }
         }
         
-        // 유저 티어 가져오기
+        var totalTier = tierStatistic.Value; // 총 티어
+        var tier = parseInt(totalTier % 100); // 유저 티어
+        var rebirth = parseInt( totalTier / 100 ); // 유저 환생
+        
+        // 유저 정보 가져오기, 승수, 연승수, 전에 이겼는지
         var GetUserInternalDataRequest = {
             "PlayFabId" : currentPlayerId,   
             "Keys" : [ "WinCount", "WinningStreak", "BeforeWin" ]
@@ -567,7 +571,7 @@ handlers.BattleResult = function (args, context) {
                 if(userData.BeforeWin == 1) {
                     userData.WinningStreak += 1; // 연승 추가
                 }
-                if(trophyStatistic.Value < tierInfo.TrophyLimit) {
+                if(trophyStatistic.Value < parseInt(tierInfo.TrophyLimit)) {
                 
                     if(userData.WinningStreak > parseInt(tierTable.StreakLimit)) {
                         trophyAmount = parseInt(tierTable.Unit) + parseInt(tierTable.StreakLimit);
@@ -598,19 +602,26 @@ handlers.BattleResult = function (args, context) {
             }   
         }
         // 승급전
+        var isPromotion = false;
         if(args.mode == 1) {
             // 승급전 체크
-            if(trophyStatistic.Value < tierInfo.TrophyLimit) {
-                throw "승급전에 필요한 트로피가 모자랍니다";
+            if(trophyStatistic.Value < parseInt(tierInfo.TrophyLimit)) {
+                throw "승급전에 필요한 트로피가 모자랍니다.";
+            }
+            if(tier >= parseInt(tierInfo.TierLimit)) { // temp
+                throw "티어가 이미 최대치입니다.";
             }
             
             if(args.isVictory) {
-                // 승급 성공
+                // 승급 성공, 티어 업
+                tier++;
+                isPromotion = true;
                 
-                tierStatistic.Value
             }else {
-                // 승급 실패
-                
+                // 승급 실패, 점수 깎이기
+                trophyAmount = (parseInt(tierInfo.TrophyLimit) * 0.5) * -1;
+                trophyStatistic.Value += trophyAmount;
+                if(trophyStatistic.Value < 0) trophyStatistic.Value = 0;
             }
         }
         
@@ -632,6 +643,7 @@ handlers.BattleResult = function (args, context) {
         result.userData = userData;
         result.trophyAmount = trophyAmount;
         result.perWinChest = GetTitleDataResult.Data["PerWinChest"];
+        result.isPromotion = isPromotion;
         
         return result;
         
@@ -641,6 +653,16 @@ handlers.BattleResult = function (args, context) {
         return retObj;
     }
 
+}
+
+function PromoteTier() {
+    try {
+        
+    } catch(e) {
+        var retObj = {};
+        retObj["errorDetails"] = "Error: " + e;
+        return retObj;
+    }
 }
 
 function GetItemData(id) {
