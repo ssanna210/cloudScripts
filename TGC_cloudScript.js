@@ -701,10 +701,15 @@ handlers.Rebirth = function (args, context) {
         }
         
         rebirth ++;
+        // 초기화 : 티어, 트로피, 골드
         tier = 1;
         tierStatistic.Value = rebirth * 100 + tier;
         trophyStatistic.Value = 0;
+        ResetVirtualCurrency("GO");
+        // 유지되는것 : 보석, 언락, 통계
+        
         // 환생 보상 : 소량 보석, 스킬포인트, 아이템 언락
+        server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: 50, VirtualCurrency: "GE" });
         // !!!여기까지 했다 
         //
         result.isRebirth = true;
@@ -724,6 +729,26 @@ handlers.Rebirth = function (args, context) {
         return retObj;
     }
 
+}
+
+function ResetVirtualCurrency( requestedVcType ) {
+    try {
+        
+        var inventory = server.GetUserInventory({"PlayFabId": currentPlayerId});
+        var vcAmount = 0;
+        if(inventory.VirtualCurrency.hasOwnProperty(requestedVcType) {
+            vcAmount = inventory.VirtualCurrency[requestedVcType];    
+        }else {
+            throw "관련 재화가 항목에 없습니다.";   
+        }
+        
+        return server.SubtractUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: vcAmount, VirtualCurrency: requestedVcType });
+        
+    }catch(e) {
+        var retObj = {};
+        retObj["errorDetails"] = "Error: " + e;
+        return retObj;
+    }
 }
 
 function GetItemData(id) {
