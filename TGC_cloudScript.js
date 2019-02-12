@@ -602,7 +602,13 @@ handlers.BattleResult = function (args, context) {
             }   
         }
         // 승급전
-        var isPromotion = false;
+        var promoData = {};
+        promoData.isPromotion = false;
+        promoData.beforeTier = tier;
+        promoData.afterTier = 0;
+        promoData.gold = 0;
+        promoData.gem = 0;
+        
         if(args.mode == 1) {
             // 승급전 체크
             if(trophyStatistic.Value < parseInt(tierInfo.TrophyLimit)) {
@@ -616,7 +622,13 @@ handlers.BattleResult = function (args, context) {
                 // 승급 성공, 티어 업
                 tier++;
                 trophyStatistic.Value = 0;
-                isPromotion = true;
+                promoData.isPromotion = true;
+                // 승급 보상
+                promoData.gold = parseInt( parseInt(tierInfo.TrophyLimit) * tierTable.GoldX );
+                promoData.gem = parseInt( parseInt(tierInfo.TrophyLimit) * tierTable.GemX );
+                // 소량 보석, 소량 골드, 스킬포인트, 아이템 언락
+                server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: promoData.gold, VirtualCurrency: "GO" });
+                server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: promoData.gem, VirtualCurrency: "GE" });
                 
             }else {
                 // 승급 실패, 점수 깎이기
@@ -644,7 +656,7 @@ handlers.BattleResult = function (args, context) {
         result.userData = userData;
         result.trophyAmount = trophyAmount;
         result.perWinChest = GetTitleDataResult.Data["PerWinChest"];
-        result.isPromotion = isPromotion;
+        result.promoData = promoData;
         
         return result;
         
