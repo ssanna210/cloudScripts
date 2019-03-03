@@ -651,6 +651,7 @@ handlers.BattleResult = function (args, context) {
         }
         server.UpdateUserInternalData(UpdateUserInternalDataRequest);
         
+        result.mode = args.mode;
         result.totalTier = tierStatistic.Value;
         result.trophy = trophyStatistic.Value;
         result.userData = userData;
