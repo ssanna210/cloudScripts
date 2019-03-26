@@ -621,7 +621,6 @@ handlers.BattleResult = function (args, context) {
             if(args.isVictory) {
                 // 승급 성공, 티어 업
                 tier++;
-                trophyStatistic.Value = 0;
                 promoData.isPromotion = true;
                 // 승급 보상
                 promoData.gold = parseInt( parseInt(tierInfo.TrophyLimit) * tierTable.GoldX );
@@ -717,7 +716,6 @@ handlers.Rebirth = function (args, context) {
         // 초기화 : 티어, 트로피, 골드
         tier = 1;
         tierStatistic.Value = rebirth * 100 + tier;
-        trophyStatistic.Value = 0;
         ResetVirtualCurrency("GO");
         // 유지되는것 : 보석, 언락, 통계
         
