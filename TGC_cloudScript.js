@@ -747,7 +747,7 @@ function ResetVirtualCurrency( requestedVcType ) {
         
         var inventory = server.GetUserInventory({"PlayFabId": currentPlayerId});
         var vcAmount = 0;
-        if(inventory.VirtualCurrency.hasOwnProperty(requestedVcType) {
+        if(inventory.VirtualCurrency.hasOwnProperty(requestedVcType)) {
             vcAmount = inventory.VirtualCurrency[requestedVcType];    
         }else {
             throw "관련 재화가 항목에 없습니다.";   
