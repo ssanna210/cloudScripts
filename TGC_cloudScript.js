@@ -631,7 +631,7 @@ handlers.BattleResult = function (args, context) {
                 
             }else {
                 // 승급 실패, 점수 깎이기
-                trophyAmount = (parseInt(tierInfo.TrophyLimit) * 0.5) * -1;
+                trophyAmount = -50;
                 trophyStatistic.Value += trophyAmount;
                 if(trophyStatistic.Value < 0) trophyStatistic.Value = 0;
             }
