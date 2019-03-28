@@ -621,6 +621,8 @@ handlers.BattleResult = function (args, context) {
             if(args.isVictory) {
                 // 승급 성공, 티어 업
                 tier++;
+                tierStatistic.Value = tier;
+                promoData.afterTier = tier;
                 promoData.isPromotion = true;
                 // 승급 보상
                 promoData.gold = parseInt( parseInt(tierInfo.TrophyLimit) * tierTable.GoldX );
