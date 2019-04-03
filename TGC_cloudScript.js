@@ -869,8 +869,8 @@ function CalculItemWorth ( customData, worthTable ) {
     var lev = stat.Lev;
     var atk = 0; var hp = 0; var sta = 0;
     if(stat.hasOwnProperty("Atk")) atk = stat.Atk;
-    if(stat.hasOwnProperty("Hp")) atk = stat.Hp;
-    if(stat.hasOwnProperty("Sta")) atk = stat.Sta;
+    if(stat.hasOwnProperty("Hp")) hp = stat.Hp;
+    if(stat.hasOwnProperty("Sta")) sta = stat.Sta;
     
     var result = (worthTable.Grade * grade) + (worthTable.Tier * tier) + (worthTable.Lev * lev) + ( worthTable.Stat * (atk + hp + sta) );
     
@@ -917,7 +917,7 @@ function ExpUp_internal ( targeInstId, rawInstId ) {
     var targetItemWorth = CalculItemWorth(targetItemInstance.CustomData, worthTable);
     var rawItemWorth = CalculItemWorth(rawItemInstance.CustomData, worthTable);
     var exp = Math.floor(rawItemWorth * worthTable.ExpX);
-    var levUpCost = Math.floor( rawItemWorth * worthTable.LevUpCostX );
+    var levUpCost = targetItemStat.Lev * Math.floor( rawItemWorth * worthTable.LevUpCostX );
     if(levUpCost > inventory.VirtualCurrency["GO"]) throw "Gold가 모자릅니다.";
     
     // Exp Up
