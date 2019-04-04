@@ -82,14 +82,14 @@ function MakeItemData(items) {
         var skillTable = JSON.parse( GetTitleDataResult.Data["SkillTable"] );
         
         // 테이블 가져오기
+        var EquipArray = [];
         var EquipListData = {};
         
         for(var i = 0; i < tierTable.EquipList.length; i++) {
             if(tierTable.EquipList[i].Tier <= totalTier) {
-                EquipListData = tierTable.EquipList[i];
+                EquipArray.push(tierTable.EquipList[i]);
             }
         }
-        
     
         // 아이템 카달로그 받아오기
         var GetCatalogItemsRequest = {
@@ -131,6 +131,16 @@ function MakeItemData(items) {
             var customObj = JSON.parse(catalogDataResult.CustomData);
             
             // 장비 리스트에서 랜덤뽑기
+            if(!EquipListData.hasOwnProperty(items[key].ItemClass)) {
+                var tempList = [];
+                for(int i=0; i< EquipArray.length; i++) {
+                    if(EquipArray[i].hasOwnProperty(items[key].ItemClass)) {
+                        tempList.push(EquipArray[i][items[key].ItemClass]);
+                    }
+                }
+                EquipListData[items[key].ItemClass] = tempList.join(',');
+            }
+            
             var equipList = EquipListData[items[key].ItemClass].split(",");
             var randomValue = parseInt(Math.random() * equipList.length);
             var itemId = equipList[randomValue];
