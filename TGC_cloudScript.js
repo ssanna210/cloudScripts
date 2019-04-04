@@ -133,7 +133,7 @@ function MakeItemData(items) {
             // 장비 리스트에서 랜덤뽑기
             if(!EquipListData.hasOwnProperty(items[key].ItemClass)) {
                 var tempList = [];
-                for(int i=0; i< EquipArray.length; i++) {
+                for(var i=0; i< EquipArray.length; i++) {
                     if(EquipArray[i].hasOwnProperty(items[key].ItemClass)) {
                         tempList.push(EquipArray[i][items[key].ItemClass]);
                     }
