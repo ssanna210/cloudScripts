@@ -90,7 +90,7 @@ function MakeItemData(items) {
                 EquipArray.push(tierTable.EquipList[i]);
             }
         }
-    
+        
         // 아이템 카달로그 받아오기
         var GetCatalogItemsRequest = {
             "PlayFabId": currentPlayerId
@@ -200,6 +200,15 @@ function MakeItemData(items) {
                 if(customObj.grade == "legend") { skill.Lev = skill.Limit; }
                 
                 // 타겟 장비ID 리스트에서 랜덤뽑기
+                if(!EquipListData.hasOwnProperty(skill.TargetClass)) {
+                    var tempList = [];
+                    for(var i=0; i< EquipArray.length; i++) {
+                        if(EquipArray[i].hasOwnProperty(skill.TargetClass)) {
+                            tempList.push(EquipArray[i][skill.TargetClass]);
+                        }
+                    }
+                    EquipListData[skill.TargetClass] = tempList.join(',');
+                }
                 var equipIdList = EquipListData[skill.TargetClass].split(",");
                 skill.TargetId = equipIdList[ parseInt(Math.random() * equipIdList.length) ];
                 
