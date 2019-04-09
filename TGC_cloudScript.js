@@ -1007,6 +1007,63 @@ handlers.UpdatePartyTabData = function (args) {
     
 }
 
+// 스킬 마스터리 업그레이드 args.ID : 마스터리 ID
+handlers.MasteryUpgrade = function (args) {
+    try {
+        var userData = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: ["Mastery"] } );
+        var inventory = server.GetUserInventory( { PlayFabId: currentPlayerId } );
+        var tableData = server.GetTitleData( { Keys: ["MasteryTable"] } );  // 마스터리 테이블
+        
+        var masteryObj = {};
+        if(userData.Data.hasOwnProperty("Mastery")) {
+            masteryObj = userData.Data["Mastery"].Value;
+        }else {
+            // 스킬 마스터리 처음일때
+            masteryObj = resetMasteryValue(tableData);
+        }
+        // 체크
+        if(!masteryObj.hasOwnProperty(String(args.ID))) { throw "해당 마스터리 ID가 없습니다"; }
+        if(!tableData.Data["MasteryTable"].Mastery.hasOwnProperty(String(args.ID))) { throw "해당 마스터리 ID가 없습니다"; }
+
+        var value = parseInt(masteryObj[String(args.ID)]);
+        
+        var masteryData = {};   // 테이블의 해당 마스터리 데이터
+        for(var index in tableData.Data["MasteryTable"].Mastery) {
+            if(tableData.Data["MasteryTable"].Mastery[index].ID == args.ID) {
+                masteryData = tableData.Data["MasteryTable"].Mastery[index];
+            }
+        }
+        // 레벨 Limit 체크
+        if(value >= masteryData.Limit) {
+            throw "마스터리 레벨 제한";
+        }
+        // 코스트 체크
+        var needSP = 0;
+        needSP = masteryData.Cost * (value + 1);
+        if( inventory.VirtualCurrency.SP < needSP ) {
+            throw "SP 부족";
+        }else {
+            // 스킬 업그레이드
+            value += 1;
+            masteryObj[String(args.ID)] = String(value);
+            // 코스트
+            var spCostRequest = {
+                "PlayFabId": currentPlayerId,
+                "VirtualCurrency": "SP",
+                "Amount": needSP   
+            };
+            var costResult = server.SubtractUserVirtualCurrency(spCostRequest); 
+        }
+        
+        return server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { "Mastery" : masteryObj }, Permission : "Public" } );
+        
+    } catch(e) {
+        var retObj = {};
+        retObj["errorDetails"] = "Error: " + e;
+        return retObj;
+    }
+};
+
 // 유저가 처음 접속했는지 체크하는 함수
 handlers.FirstCheck = function (args) {
     var result = {};
@@ -1031,6 +1088,16 @@ handlers.FirstCheck = function (args) {
     
     return result;
 }
+
+function resetMasteryValue(args){
+    // 스킬 마스터리 처음일때
+    var result = {};
+    for(var index in args.Data["MasteryTable"].Mastery) {
+        result[String(args.Data["MasteryTable"].Mastery[index].ID)] = String(0);
+    }
+    return result;
+}
+
 // string -> bool 변환 함수
 function isTrue(value){
     if (typeof(value) === 'string'){
