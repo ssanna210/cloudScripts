@@ -1022,8 +1022,8 @@ handlers.MasteryUpgrade = function (args) {
             masteryObj = resetMasteryValue(tableData);
         }
         // 체크
-        if(!masteryObj.hasOwnProperty(String(args.ID))) { throw "해당 마스터리 ID가 없습니다"; }
-        if(!tableData.Data["MasteryTable"].Mastery.hasOwnProperty(String(args.ID))) { throw "해당 마스터리 ID가 없습니다"; }
+        if(!masteryObj.hasOwnProperty(String(args.ID))) { throw "masteryObj에 해당 마스터리 ID가 없습니다"; }
+        if(!tableData.Data["MasteryTable"].Mastery.hasOwnProperty(String(args.ID))) { throw "table에 해당 마스터리 ID가 없습니다"; }
 
         var value = parseInt(masteryObj[String(args.ID)]);
         
