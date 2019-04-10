@@ -1087,7 +1087,7 @@ handlers.FirstCheck = function (args) {
         var tableData = JSON.parse( GetTitleDataResult.Data["MasteryTable"] );
         var masteryObj = resetMasteryValue(tableData);
         var value = JSON.stringify(masteryObj);
-        return server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { "Mastery" : value }, Permission : "Public" } );
+        server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { "Mastery" : value }, Permission : "Public" } );
     }
     if(internalData.Data.hasOwnProperty("isTutoComplete") && isTrue( internalData.Data["isTutoComplete"].Value )) {
         result.isTutoComplete = internalData.Data["isTutoComplete"].Value;
