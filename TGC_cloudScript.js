@@ -1056,7 +1056,7 @@ handlers.MasteryUpgrade = function (args) {
             var costResult = server.SubtractUserVirtualCurrency(spCostRequest); 
         }
         
-        var value = stringify(masteryObj);
+        var value = JSON.stringify(masteryObj);
         
         return server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { "Mastery" : value }, Permission : "Public" } );
         
