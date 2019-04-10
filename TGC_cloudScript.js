@@ -1022,8 +1022,7 @@ handlers.MasteryUpgrade = function (args) {
             masteryObj = resetMasteryValue(tableData);
         }
         // 체크
-        //if(!masteryObj.hasOwnProperty(String(args.ID))) { throw "masteryObj에 해당 마스터리 ID가 없습니다"; }
-        if(!masteryObj.hasOwnProperty(String(args.ID))) { throw stringify(masteryObj); }
+        if(!masteryObj.hasOwnProperty(String(args.ID))) { throw "masteryObj에 해당 마스터리 ID가 없습니다"; }
         if(!tableData.Data["MasteryTable"].Mastery.hasOwnProperty(String(args.ID))) { throw "table에 해당 마스터리 ID가 없습니다"; }
 
         var value = parseInt(masteryObj[String(args.ID)]);
@@ -1090,11 +1089,12 @@ handlers.FirstCheck = function (args) {
     return result;
 }
 
-function resetMasteryValue(args){
+function resetMasteryValue(table){
     // 스킬 마스터리 처음일때
+    var data = table.Data["MasteryTable"].Mastery;
     var result = {};
-    for(var index in args.Data["MasteryTable"].Mastery) {
-        result[String(args.Data["MasteryTable"].Mastery[index].ID)] = String(0);
+    for(var index in data) {
+        result[String(data[index].ID)] = String(0);
     }
     return result;
 }
