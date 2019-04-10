@@ -1082,6 +1082,12 @@ handlers.FirstCheck = function (args) {
         MakeItemData(pull.ItemGrantResults);
         server.UpdateUserInternalData( { PlayFabId: currentPlayerId, Data: {"isFirstGift": "true"} } );
         result.isFirstGift = true;
+        // 마스터리 init
+        var GetTitleDataResult = server.GetTitleData( { Keys: ["MasteryTable"] } );  // 마스터리 테이블
+        var tableData = JSON.parse( GetTitleDataResult.Data["MasteryTable"] );
+        var masteryObj = resetMasteryValue(tableData);
+        var value = JSON.stringify(masteryObj);
+        return server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { "Mastery" : value }, Permission : "Public" } );
     }
     if(internalData.Data.hasOwnProperty("isTutoComplete") && isTrue( internalData.Data["isTutoComplete"].Value )) {
         result.isTutoComplete = internalData.Data["isTutoComplete"].Value;
