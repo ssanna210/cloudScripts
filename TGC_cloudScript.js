@@ -1017,7 +1017,7 @@ handlers.MasteryUpgrade = function (args) {
         
         var masteryObj = {};
         if(userData.Data.hasOwnProperty("Mastery")) {
-            masteryObj = userData.Data["Mastery"].Value;
+            masteryObj = JSON.parse( userData.Data["Mastery"].Value );
         }else {
             // 스킬 마스터리 처음일때
             masteryObj = resetMasteryValue(tableData);
