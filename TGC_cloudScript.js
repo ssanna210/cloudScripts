@@ -1012,7 +1012,8 @@ handlers.MasteryUpgrade = function (args) {
     try {
         var userData = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: ["Mastery"] } );
         var inventory = server.GetUserInventory( { PlayFabId: currentPlayerId } );
-        var tableData = server.GetTitleData( { Keys: ["MasteryTable"] } );  // 마스터리 테이블
+        var GetTitleDataResult = server.GetTitleData( { Keys: ["MasteryTable"] } );  // 마스터리 테이블
+        var tableData = JSON.parse( GetTitleDataResult.Data["MasteryTable"] );
         
         var masteryObj = {};
         if(userData.Data.hasOwnProperty("Mastery")) {
@@ -1023,14 +1024,14 @@ handlers.MasteryUpgrade = function (args) {
         }
         // 체크
         if(!masteryObj.hasOwnProperty(String(args.ID))) { throw "masteryObj에 해당 마스터리 ID가 없습니다"; }
-        if(!tableData.Data["MasteryTable"].Mastery.hasOwnProperty(String(args.ID))) { throw "table에 해당 마스터리 ID가 없습니다"; }
+        if(!tableData.Mastery.hasOwnProperty(String(args.ID))) { throw "table에 해당 마스터리 ID가 없습니다"; }
 
         var value = parseInt(masteryObj[String(args.ID)]);
         
         var masteryData = {};   // 테이블의 해당 마스터리 데이터
-        for(var index in tableData.Data["MasteryTable"].Mastery) {
-            if(tableData.Data["MasteryTable"].Mastery[index].ID == args.ID) {
-                masteryData = tableData.Data["MasteryTable"].Mastery[index];
+        for(var index in tableData.Mastery) {
+            if(tableData.Mastery[index].ID == args.ID) {
+                masteryData = tableData.Mastery[index];
             }
         }
         // 레벨 Limit 체크
@@ -1091,10 +1092,9 @@ handlers.FirstCheck = function (args) {
 
 function resetMasteryValue(table){
     // 스킬 마스터리 처음일때
-    var data = table.Data["MasteryTable"].Mastery;
     var result = {};
-    for(var index in data) {
-        result[String(data[index].ID)] = String(0);
+    for(var index in table.Mastery) {
+        result[String(table.Mastery[index].ID)] = String(0);
     }
     return result;
 }
