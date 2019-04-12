@@ -570,10 +570,11 @@ handlers.BattleResult = function (args, context) {
     
         // 트로피 관련 테이블 가져오기
         var tierTableRequest = {
-            "Keys" : [ "TierTable", "PerWinChest"  ]
+            "Keys" : [ "TierTable", "General"  ]
         }
         var GetTitleDataResult = server.GetTitleData(tierTableRequest);
         var tierTable = JSON.parse( GetTitleDataResult.Data["TierTable"] );
+        var generalTable = JSON.parse( GetTitleDataResult.Data["General"] );
         // 트로피 계산
         var tierInfo = {};
         for(var index in tierTable.TierInfos) {
@@ -606,7 +607,7 @@ handlers.BattleResult = function (args, context) {
                 }
                 // 이긴 횟수 체크
                 userData.WinCount += 1; // 승리 추가
-                if(userData.WinCount >=  GetTitleDataResult.Data["PerWinChest"]) {
+                if(userData.WinCount >= generalTable.PerWinChest) {
                     result.chestValue = grantChest();
                     delete result.chestValue;       // 그냥 생략
                 
@@ -646,14 +647,16 @@ handlers.BattleResult = function (args, context) {
                 // 승급 보상
                 promoData.gold = parseInt( parseInt(tierInfo.TrophyLimit) * tierTable.GoldX );
                 promoData.gem = parseInt( parseInt(tierInfo.TrophyLimit) * tierTable.GemX );
+                promoData.sp = generalTable.PromoReward.SP;
                 // 소량 보석, 소량 골드, 스킬포인트, 아이템 언락
                 server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: promoData.gold, VirtualCurrency: "GO" });
                 server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: promoData.gem, VirtualCurrency: "GE" });
+                server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: promoData.sp, VirtualCurrency: "SP" });
                 
             }else {
                 // 승급 실패, 점수 깎이기
-                trophyAmount = -50;
-                trophyStatistic.Value += trophyAmount;
+                trophyAmount = generalTable.Promopenalty;
+                trophyStatistic.Value -= trophyAmount;
                 if(trophyStatistic.Value < 0) trophyStatistic.Value = 0;
             }
         }
@@ -676,7 +679,7 @@ handlers.BattleResult = function (args, context) {
         result.trophy = trophyStatistic.Value;
         result.userData = userData;
         result.trophyAmount = trophyAmount;
-        result.perWinChest = GetTitleDataResult.Data["PerWinChest"];
+        result.perWinChest = generalTable.PerWinChest;
         result.promoData = promoData;
         
         return result;
@@ -721,10 +724,11 @@ handlers.Rebirth = function (args, context) {
         
         // 트로피 관련 테이블 가져오기
         var tierTableRequest = {
-            "Keys" : [ "TierTable" ]
+            "Keys" : [ "TierTable", "General" ]
         }
         var GetTitleDataResult = server.GetTitleData(tierTableRequest);
         var tierTable = JSON.parse( GetTitleDataResult.Data["TierTable"] );
+        var generalTable = JSON.parse( GetTitleDataResult.Data["General"] );
         
         if(tier < parseInt(tierInfo.TierLimit)) {
             throw "티어가 모자릅니다.";
@@ -734,14 +738,15 @@ handlers.Rebirth = function (args, context) {
         }
         
         rebirth ++;
-        // 초기화 : 티어, 트로피, 골드
+        // 초기화 : 티어, 골드
         tier = 1;
         tierStatistic.Value = rebirth * 100 + tier;
         ResetVirtualCurrency("GO");
         // 유지되는것 : 보석, 언락, 통계
         
         // 환생 보상 : 소량 보석, 스킬포인트, 아이템 언락
-        server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: 50, VirtualCurrency: "GE" });
+        server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: generalTable.RebirthReward.Gem, VirtualCurrency: "GE" });
+        server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: generalTable.RebirthReward.SP, VirtualCurrency: "SP" });
         // !!!여기까지 했다 
         //
         result.isRebirth = true;
