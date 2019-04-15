@@ -744,9 +744,10 @@ handlers.Rebirth = function (args, context) {
         ResetVirtualCurrency("GO");
         // 유지되는것 : 보석, 언락, 통계
         
-        // 환생 보상 : 소량 보석, 스킬포인트, 아이템 언락
+        // 환생 보상 : 소량 보석, 스킬포인트, 트로피 RebirthTrophy, 아이템 언락
         server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: generalTable.RebirthReward.Gem, VirtualCurrency: "GE" });
         server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: generalTable.RebirthReward.SP, VirtualCurrency: "SP" });
+        trophyStatistic.Value += tierTable.RebirthTrophy;
         // !!!여기까지 했다 
         //
         result.isRebirth = true;
