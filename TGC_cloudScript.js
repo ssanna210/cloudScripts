@@ -730,10 +730,10 @@ handlers.Rebirth = function (args, context) {
         var tierTable = JSON.parse( GetTitleDataResult.Data["TierTable"] );
         var generalTable = JSON.parse( GetTitleDataResult.Data["General"] );
         
-        if(tier < parseInt(tierInfo.TierLimit)) {
+        if(tier < parseInt(tierTable.TierLimit)) {
             throw "티어가 모자릅니다.";
         }
-        if(rebirth >= parseInt(tierInfo.RebirthLimit)) {
+        if(rebirth >= parseInt(tierTable.RebirthLimit)) {
             throw "환생이 이미 최대치입니다.";   
         }
         
