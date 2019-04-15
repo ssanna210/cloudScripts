@@ -741,7 +741,7 @@ handlers.Rebirth = function (args, context) {
         // 초기화 : 티어, 골드
         tier = 1;
         tierStatistic.Value = rebirth * 100 + tier;
-        if(
+        
         ResetVirtualCurrency("GO");
         // 유지되는것 : 보석, 언락, 통계
         
