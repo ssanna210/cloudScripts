@@ -741,6 +741,7 @@ handlers.Rebirth = function (args, context) {
         // 초기화 : 티어, 골드
         tier = 1;
         tierStatistic.Value = rebirth * 100 + tier;
+        if(
         ResetVirtualCurrency("GO");
         // 유지되는것 : 보석, 언락, 통계
         
@@ -780,7 +781,10 @@ function ResetVirtualCurrency( requestedVcType ) {
             throw "관련 재화가 항목에 없습니다.";   
         }
         
-        return server.SubtractUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: vcAmount, VirtualCurrency: requestedVcType });
+        if(vcAmount > 0)
+            server.SubtractUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: vcAmount, VirtualCurrency: requestedVcType });
+        
+        return vcAmount;
         
     }catch(e) {
         var retObj = {};
