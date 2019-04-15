@@ -784,7 +784,7 @@ function ResetVirtualCurrency( requestedVcType ) {
         if(vcAmount > 0)
             server.SubtractUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: vcAmount, VirtualCurrency: requestedVcType });
         
-        return vcAmount;
+        return 0;
         
     }catch(e) {
         var retObj = {};
