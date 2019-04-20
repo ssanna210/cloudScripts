@@ -876,7 +876,7 @@ function SellItem_internal(soldItemInstanceId, requestedVcType) {
     var itemWorth = CalculItemWorth(itemInstance.CustomData, worthTable);
     
     // Once we get here all safety checks are passed - Perform the sell
-    var sellPrice = Math.round(itemWorth * worthTable.SellGoldX);
+    var sellPrice = Math.ceil(itemWorth * worthTable.SellGoldX);
     server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: sellPrice, VirtualCurrency: requestedVcType });
     server.RevokeInventoryItem({ PlayFabId: currentPlayerId, ItemInstanceId: soldItemInstanceId });
     
@@ -899,7 +899,7 @@ function CalculItemWorth ( customData, worthTable ) {
     var atk = 0; var hp = 0; var sta = 0;
     if(stat.hasOwnProperty("Atk")) atk = stat.Atk;
     if(stat.hasOwnProperty("Hp")) hp = stat.Hp;
-    if(stat.hasOwnProperty("Sta")) sta = stat.Sta;
+    if(stat.hasOwnProperty("Sta")) sta = Math.ceil(stat.Sta);
     
     var result = (worthTable.Grade * grade) + (worthTable.Tier * tier) + (worthTable.Lev * lev) + ( worthTable.Stat * (atk + hp + sta) );
     
@@ -945,8 +945,8 @@ function ExpUp_internal ( targeInstId, rawInstId ) {
     // 아이템 가치 계산
     var targetItemWorth = CalculItemWorth(targetItemInstance.CustomData, worthTable);
     var rawItemWorth = CalculItemWorth(rawItemInstance.CustomData, worthTable);
-    var exp = Math.round(rawItemWorth * worthTable.ExpX);
-    var levUpCost = targetItemStat.Lev * Math.round( rawItemWorth * worthTable.LevUpCostX );
+    var exp = Math.ceil(rawItemWorth * worthTable.ExpX);
+    var levUpCost = targetItemStat.Lev * Math.ceil( rawItemWorth * worthTable.LevUpCostX );
     if(levUpCost > inventory.VirtualCurrency["GO"]) throw "Gold가 모자릅니다.";
     
     // Exp Up
@@ -954,9 +954,9 @@ function ExpUp_internal ( targeInstId, rawInstId ) {
     if(targetItemStat.Exp >= targetItemWorth) { 
         targetItemStat.Exp = targetItemStat.Exp - targetItemWorth;
         targetItemStat.Lev += 1;
-        if(targetItemStat.hasOwnProperty("Atk")) targetItemStat.Atk += Math.round( targetItemStat.Atk * levelTable.XperLevel );
-        if(targetItemStat.hasOwnProperty("Hp")) targetItemStat.Hp += Math.round( targetItemStat.Hp * levelTable.XperLevel );
-        if(targetItemStat.hasOwnProperty("Sta")) targetItemStat.Sta += Math.round( targetItemStat.Sta * levelTable.XperLevel );
+        if(targetItemStat.hasOwnProperty("Atk")) targetItemStat.Atk += Math.ceil( targetItemStat.Atk * levelTable.XperLevel );
+        if(targetItemStat.hasOwnProperty("Hp")) targetItemStat.Hp += Math.ceil( targetItemStat.Hp * levelTable.XperLevel );
+        if(targetItemStat.hasOwnProperty("Sta")) targetItemStat.Sta += Math.ceil( targetItemStat.Sta * levelTable.XperLevel );
         
         if(targetItemStat.Lev >= levLimit) { targetItemStat.Lev = levLimit; }
     }
