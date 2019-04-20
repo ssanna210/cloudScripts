@@ -876,7 +876,7 @@ function SellItem_internal(soldItemInstanceId, requestedVcType) {
     var itemWorth = CalculItemWorth(itemInstance.CustomData, worthTable);
     
     // Once we get here all safety checks are passed - Perform the sell
-    var sellPrice = Math.floor(itemWorth * worthTable.SellGoldX);
+    var sellPrice = Math.round(itemWorth * worthTable.SellGoldX);
     server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: sellPrice, VirtualCurrency: requestedVcType });
     server.RevokeInventoryItem({ PlayFabId: currentPlayerId, ItemInstanceId: soldItemInstanceId });
     
@@ -945,8 +945,8 @@ function ExpUp_internal ( targeInstId, rawInstId ) {
     // 아이템 가치 계산
     var targetItemWorth = CalculItemWorth(targetItemInstance.CustomData, worthTable);
     var rawItemWorth = CalculItemWorth(rawItemInstance.CustomData, worthTable);
-    var exp = Math.floor(rawItemWorth * worthTable.ExpX);
-    var levUpCost = targetItemStat.Lev * Math.floor( rawItemWorth * worthTable.LevUpCostX );
+    var exp = Math.round(rawItemWorth * worthTable.ExpX);
+    var levUpCost = targetItemStat.Lev * Math.round( rawItemWorth * worthTable.LevUpCostX );
     if(levUpCost > inventory.VirtualCurrency["GO"]) throw "Gold가 모자릅니다.";
     
     // Exp Up
@@ -954,9 +954,9 @@ function ExpUp_internal ( targeInstId, rawInstId ) {
     if(targetItemStat.Exp >= targetItemWorth) { 
         targetItemStat.Exp = targetItemStat.Exp - targetItemWorth;
         targetItemStat.Lev += 1;
-        if(targetItemStat.hasOwnProperty("Atk")) targetItemStat.Atk += Math.floor( targetItemStat.Atk * levelTable.XperLevel );
-        if(targetItemStat.hasOwnProperty("Hp")) targetItemStat.Hp += Math.floor( targetItemStat.Hp * levelTable.XperLevel );
-        if(targetItemStat.hasOwnProperty("Sta")) targetItemStat.Sta += Math.floor( targetItemStat.Sta * levelTable.XperLevel );
+        if(targetItemStat.hasOwnProperty("Atk")) targetItemStat.Atk += Math.round( targetItemStat.Atk * levelTable.XperLevel );
+        if(targetItemStat.hasOwnProperty("Hp")) targetItemStat.Hp += Math.round( targetItemStat.Hp * levelTable.XperLevel );
+        if(targetItemStat.hasOwnProperty("Sta")) targetItemStat.Sta += Math.round( targetItemStat.Sta * levelTable.XperLevel );
         
         if(targetItemStat.Lev >= levLimit) { targetItemStat.Lev = levLimit; }
     }
