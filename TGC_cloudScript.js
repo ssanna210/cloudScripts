@@ -646,7 +646,7 @@ handlers.BattleResult = function (args, context) {
                 promoData.isPromotion = true;
                 // 승급 보상
                 promoData.gold = parseInt( parseInt(tierInfo.TrophyLimit) * tierTable.GoldX );
-                promoData.gem = parseInt( parseInt(tierInfo.TrophyLimit) * tierTable.GemX );
+                promoData.gem = generalTable.PromoReward.Gem;
                 promoData.sp = generalTable.PromoReward.SP;
                 // 소량 보석, 소량 골드, 스킬포인트, 아이템 언락
                 server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: promoData.gold, VirtualCurrency: "GO" });
