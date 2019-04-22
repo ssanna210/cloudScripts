@@ -938,15 +938,17 @@ function ExpUp_internal ( targeInstId, rawInstId ) {
         throw "itemInstance.CustomData is undefined";
     }
     var targetItemStat = {};
+    var rawItemStat = {};
     var levLimit = CalculLevLimit( parseInt( targetItemInstance.CustomData.Tier ), levelTable );
     targetItemStat = JSON.parse( targetItemInstance.CustomData.Stat );
+    rawItemStat = JSON.parse( rawItemInstance.CustomData.Stat );
     if(targetItemStat.Lev >= levLimit) { targetItemStat.Lev = levLimit;  throw "아이템 레벨 MAX"; }
     
     // 아이템 가치 계산
     var targetItemWorth = CalculItemWorth(targetItemInstance.CustomData, worthTable);
     var rawItemWorth = CalculItemWorth(rawItemInstance.CustomData, worthTable);
-    var exp = Math.ceil(rawItemWorth * worthTable.ExpX);
-    var levUpCost = targetItemStat.Lev * Math.ceil( rawItemWorth * worthTable.LevUpCostX );
+    var exp = Math.ceil(rawItemWorth * worthTable.ExpX * rawItemStat.Lev);
+    var levUpCost = rawItemStat.Lev * Math.ceil( rawItemWorth * worthTable.LevUpCostX );
     if(levUpCost > inventory.VirtualCurrency["GO"]) throw "Gold가 모자릅니다.";
     
     // Exp Up
