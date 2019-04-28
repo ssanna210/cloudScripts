@@ -619,7 +619,7 @@ handlers.BattleResult = function (args, context) {
                 promoData.afterTier = totalTier;
                 promoData.isPromotion = true;
                 // 승급 보상
-                promoData.gold = parseInt( parseInt(tierInfo.TrophyLimit) * tierTable.GoldX );
+                promoData.gold = parseInt( parseInt(tierInfo.StatAmount) * tierTable.GoldX );
                 promoData.gem = generalTable.PromoReward.Gem;
                 promoData.sp = generalTable.PromoReward.SP;
                 // 소량 보석, 소량 골드, 스킬포인트, 아이템 언락
