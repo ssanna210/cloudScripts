@@ -1112,8 +1112,9 @@ handlers.ItemUpgradeStart = function (args) {
         slot.openTime = unLockDate;
         slot.itemIds = args.itemIds;
         var value = stringify(slot);
+        var dataName = slotData.ID;
         
-        return server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { slotData.ID : value }, Permission : "Public" } );;
+        return server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { dataName : value }, Permission : "Public" } );;
         
     } catch(e) {
         var retObj = {};
