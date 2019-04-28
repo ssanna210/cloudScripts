@@ -614,8 +614,9 @@ handlers.BattleResult = function (args, context) {
             if(args.isVictory) {
                 // 승급 성공, 티어 업
                 tier++;
-                tierStatistic.Value = tier;
-                promoData.afterTier = tier;
+                totalTier = rebirth * 100 + tier;
+                tierStatistic.Value = totalTier;
+                promoData.afterTier = totalTier;
                 promoData.isPromotion = true;
                 // 승급 보상
                 promoData.gold = parseInt( parseInt(tierInfo.TrophyLimit) * tierTable.GoldX );
@@ -722,7 +723,6 @@ handlers.Rebirth = function (args, context) {
         server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: generalTable.RebirthReward.Gem, VirtualCurrency: "GE" });
         server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: generalTable.RebirthReward.SP, VirtualCurrency: "SP" });
         trophyStatistic.Value += tierTable.RebirthTrophy;
-        // !!!여기까지 했다 
         //
         result.isRebirth = true;
         
@@ -1109,7 +1109,7 @@ handlers.ItemUpgradeStart = function (args) {
         
         unLockDate.setTime(currentTime.getTime() + (waitTime * 1000 * 60));
         
-        slot.unLockDate = unLockDate;
+        slot.openTime = unLockDate;
         slot.itemIds = args.itemIds;
         var value = stringify(slot);
         
@@ -1122,13 +1122,32 @@ handlers.ItemUpgradeStart = function (args) {
     }
 }
 
-// args.slot : slotName
+// args.slotID
 handlers.ItemUpgradeFinish = function (args) {
     try {
-        var item = GetItemData(args.InstanceId);
-        if(item == null) { throw "해당 아이템을 찾지못함"; }
+        // get user slot data
+        var userData = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: [args.slotID] } );
+        if(!userData.hasOwnProperty(args.slotID)) { throw "slot not found"; }
+        var slot = {};
+        slot = JSON.parse( userData.Data[args.slotID].Value );
+        // time check
+        if(slot.hasOwnProperty("openTime")) {
+            var unLockDate = new Date( slot.openTime );
+            var currentTime = new Date();
+            
+            if(currentTime.getTime() < unLockDate.getTime()) {
+                throw "upgrade 시간이 안됨";
+            }
+        }else {
+            throw "slot에 openTime 키가 없음";
+        }
+        // get item check
+        var items = [];
+        items = GetItemData(slot.itemIds);
+        if(items.length == 0) { throw "해당 아이템을 찾지못함"; }
         
         var result = {};
+        result.isUp = false;
         
         // 유저 통계 가져오기 : 총 티어
         var GetPlayerStatisticsRequest = {
@@ -1162,31 +1181,34 @@ handlers.ItemUpgradeFinish = function (args) {
         var tierTable = JSON.parse( GetTitleDataResult.Data["TierTable"] );
         var skillTable = JSON.parse( GetTitleDataResult.Data["SkillTable"] );
         var generalTable = JSON.parse( GetTitleDataResult.Data["General"] );
-        var upgradeRateArray = [];
-        upgradeRateArray = generalTable.ItemUpgradeRate;
         // 아이템 확률계산
         var randomTry = Math.Floor(Math.random() * 100) + 1;
-        // 아이템 업그레이드
+        if(randomTry > slot.Rate) { return result; } // upgrade failed
+        
+        // upgrade success
         var tableData = {};
-        // 스탯 설정
-        for(var index in itemTable.Equipments) {
-            if(itemTable.Equipments[index].ItemID == item.ItemId) {
-                tableData = CopyObj( itemTable.Equipments[index] );
+        
+        for(var index in items) {
+           // 스탯 설정
+            for(var j in itemTable.Equipments) {
+                if(itemTable.Equipments[j].ItemID == item.ItemId) {
+                    tableData = CopyObj( itemTable.Equipments[j] );
+                }
             }
-        }
         
-        // 테이블 가져오기
-        var EquipArray = [];
-        var EquipListData = {};
+            // 테이블 가져오기
+            var EquipArray = [];
+            var EquipListData = {};
         
-        for(var i = 0; i < tierTable.EquipList.length; i++) {
-            if(tierTable.EquipList[i].Tier <= totalTier) {
-                EquipArray.push(tierTable.EquipList[i]);
+            for(var i = 0; i < tierTable.EquipList.length; i++) {
+                if(tierTable.EquipList[i].Tier <= totalTier) {
+                    EquipArray.push(tierTable.EquipList[i]);
+                }
             }
-        }
         
-        var skill = {};
-        skill = GetRandomSkill( tableData.ItemClass, skillTable.SkillInfos, EquipListData, EquipArray );
+            var skill = {};
+            skill = GetRandomSkill( tableData.ItemClass, skillTable.SkillInfos, EquipListData, EquipArray );
+        }
         
         return result;
         
