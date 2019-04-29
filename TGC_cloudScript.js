@@ -1,6 +1,5 @@
 var DT_CHEST_BATTLE = "dropTable_battleChest"; // 전투 보상 상자의 드롭테이블
 var IC_CHEST_BATTLE = "BattleChest"; // 전투 보상 상자의 ItemClass
-var KEY_PLAYER_CHESTS_BATTLE = "playerBattleChests"; // 전투 보상 상자배열의 키값 
 var MAXIMUM_CHEST_BATTLE = 4; // 전투 보상 상자 최대 수량
 var MinutePerGem = 12; // 젬당 분 계수
 var VIRTUAL_CURRENCY_CODE = "GE";
@@ -188,10 +187,6 @@ function MakeItemData(items) {
                 if(customObj.grade == "rare") { skill.Lev = 20 + (parseInt(Math.random() * 10) - 8); }
                 if(customObj.grade == "legend") { skill.Lev = skill.Limit; }
                 
-                // 아이템 커스텀데이터 정리하기
-                delete skill.ItemClass;
-                delete skill.Skill;
-                delete skill.TargetClass;
             }
             // customData.info 설정
             info.ItemID = tableData.ItemID;
@@ -839,9 +834,10 @@ function SellItem_internal(soldItemInstanceId, requestedVcType) {
     var GetTitleDataResult = server.GetTitleData(tableRequest);
     var worthTable = JSON.parse( GetTitleDataResult.Data.WorthTable );        // 가치 테이블
     if(!worthTable) throw "WorthTable not found";
-    
+    var ids = [];
+    ids.push(soldItemInstanceId);
     // get item
-    var GetItemDataResult = GetItemData([soldItemInstanceId]);
+    var GetItemDataResult = GetItemData(ids);
     if(GetItemDataResult.length == 0) { throw "해당 아이템 찾지 못함"; }
     var itemInstance = GetItemDataResult[0];
     if (!itemInstance)
@@ -1087,13 +1083,13 @@ handlers.FirstCheck = function (args) {
     return result;
 }
 
-// args.slotID, args.itemIds
+// args.slotID, args.itemIds, state: ING, FAIL
 handlers.ItemUpgradeStart = function (args) {
     try {
         // get item data
         var items = [];
         items = GetItemData(args.itemIds);
-        if(items.length == args.itemIds.length) { throw "해당 아이템을 찾지못함"; }
+        if(items.length != args.itemIds.length) { throw "해당 아이템을 찾지못함"; }
         // get title data
         var slot = {};
         var slotData = {};
@@ -1111,7 +1107,9 @@ handlers.ItemUpgradeStart = function (args) {
         
         slot.openTime = unLockDate;
         slot.itemIds = args.itemIds;
-        var value = stringify(slot);
+        slot.state = "ING";
+        
+        var value = JSON.stringify(slot);
         var dataName = slotData.ID;
         
         return server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { dataName : value }, Permission : "Public" } );;
@@ -1172,7 +1170,7 @@ handlers.ItemUpgradeFinish = function (args) {
         var tier = parseInt(totalTier % 100); // 유저 티어
         var rebirth = parseInt( totalTier / 100 ); // 유저 환생
     
-        // 아이템 테이블 받아오기
+        // get item table
         var itemTableRequest = {
             "Keys" : [ "ItemStatTable", "TierTable", "SkillTable", "General" ]
         }
@@ -1182,38 +1180,113 @@ handlers.ItemUpgradeFinish = function (args) {
         var tierTable = JSON.parse( GetTitleDataResult.Data["TierTable"] );
         var skillTable = JSON.parse( GetTitleDataResult.Data["SkillTable"] );
         var generalTable = JSON.parse( GetTitleDataResult.Data["General"] );
+        // get slot table data
+        var slotData = {};
+        for(var index in generalTable.ItemUpgradeSlot) {
+            if(generalTable.ItemUpgradeSlot[index].ID == args.slotID) { slotData = generalTable.ItemUpgradeSlot[index]; }
+        }
         // 아이템 확률계산
         var randomTry = Math.Floor(Math.random() * 100) + 1;
-        if(randomTry > slot.Rate) { return result; } // upgrade failed
+        
+        if(randomTry > slotData.Rate) { 
+            // upgrade failed
+            result.items = items;
+            slot.state = "FAIL";
+            var value = JSON.stringify(slot);
+            
+            server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { dataName : value }, Permission : "Public" } );;
+            
+            return result; 
+        } 
         
         // upgrade success
-        var tableData = {};
-        
         for(var index in items) {
-           // 스탯 설정
-            for(var j in itemTable.Equipments) {
-                if(itemTable.Equipments[j].ItemID == item.ItemId) {
-                    tableData = CopyObj( itemTable.Equipments[j] );
-                }
-            }
-        
-            // 테이블 가져오기
-            var EquipArray = [];
-            var EquipListData = {};
-        
-            for(var i = 0; i < tierTable.EquipList.length; i++) {
-                if(tierTable.EquipList[i].Tier <= totalTier) {
-                    EquipArray.push(tierTable.EquipList[i]);
-                }
-            }
-        
+            // 스탯 설정
             var skill = {};
-            skill = GetRandomSkill( tableData.ItemClass, skillTable.SkillInfos, EquipListData, EquipArray );
+            skill = JSON.parse(items[index].CustomData.Skill);
+            
+            if(skill.hasOwnProperty("Lev")) {
+                skill.Lev += slotData.Amount;
+                // limit check
+                if(skill.Lev >= skill.Limit) { 
+                    skill.Lev = skill.Limit;
+                }
+            }else {
+                
+                var tableData = {};
+                for(var j in itemTable.Equipments) {
+                    if(itemTable.Equipments[j].ItemID == items[index].ItemId) {
+                        tableData = CopyObj( itemTable.Equipments[j] );
+                    }
+                }
+        
+                // 테이블 가져오기
+                var EquipArray = [];
+                var EquipListData = {};
+        
+                for(var i = 0; i < tierTable.EquipList.length; i++) {
+                    if(tierTable.EquipList[i].Tier <= totalTier) {
+                        EquipArray.push(tierTable.EquipList[i]);
+                    }
+                }
+                
+                skill = GetRandomSkill( tableData.ItemClass, skillTable.SkillInfos, EquipListData, EquipArray );
+                
+            }
+            
+            items[index].CustomData.Skill = JSON.stringify(skill);
+            
+            var UpdateItemCustomDataRequest = {
+                "PlayFabId": currentPlayerId,
+                "ItemInstanceId": items[index].ItemInstanceId,
+                "Data": items[index].CustomData
+            }
+            server.UpdateUserInventoryItemCustomData(UpdateItemCustomDataRequest);
+            
         }
+        
+        result.items = items;
         
         return result;
         
     } catch(e) {
+        var retObj = {};
+        retObj["errorDetails"] = "Error: " + e;
+        return retObj;
+    }
+}
+
+// args.isRestore, args.slotID
+handlers.FailedItemRestore = function (args) {
+    try {
+        var userData = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: [args.slotID] } );
+        if(!userData.hasOwnProperty(args.slotID)) { throw "slot not found"; }
+        var slot = {};
+        slot = JSON.parse( userData.Data[args.slotID].Value );
+        //get items
+        var items = [];
+        items = GetItemData(args.itemIds);
+        if(items.length != slot.itemIds.length) { throw "해당 아이템을 찾지못함"; }
+        
+        var itemIds = [];
+        for(var index in slot.itemIds) {
+            itemIds.push( { ItemInstanceId : slot.itemIds[index], PlayFabId : currentPlayerId  } );
+        }
+        
+        if(args.isRestore) {
+            var inventory = server.GetUserInventory({PlayFabId : currentPlayerId});
+            // gem check !!! here! 
+            //var needGem = 
+        }
+        
+        if(!args.isRestore) {
+            
+            server.RevokeInventoryItems({ "Items" : itemIds });
+        }
+        
+        
+        
+    }catch(e) {
         var retObj = {};
         retObj["errorDetails"] = "Error: " + e;
         return retObj;
@@ -1250,6 +1323,11 @@ function GetRandomSkill( itemClass, SkillInfos, EquipListData, EquipArray ) {
     }
     var equipIdList = EquipListData[skill.TargetClass].split(",");
     skill.TargetId = equipIdList[ parseInt(Math.random() * equipIdList.length) ];
+    
+    // 아이템 커스텀데이터 정리하기
+    delete skill.ItemClass;
+    delete skill.Skill;
+    delete skill.TargetClass;
     
     return skill;
     
