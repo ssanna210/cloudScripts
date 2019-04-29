@@ -1,16 +1,16 @@
-var DT_CHEST_BATTLE = "dropTable_battleChest"; // 전투 보상 상자의 드롭테이블
-var IC_CHEST_BATTLE = "BattleChest"; // 전투 보상 상자의 ItemClass
-var MAXIMUM_CHEST_BATTLE = 4; // 전투 보상 상자 최대 수량
-var MinutePerGem = 12; // 젬당 분 계수
+var DT_CHEST_BATTLE = "dropTable_battleChest"; // drop table of battle reward
+var IC_CHEST_BATTLE = "BattleChest"; // ItemClass of battle chest
+var MAXIMUM_CHEST_BATTLE = 4; // battle chest Limit
+var MinutePerGem = 12;
 var VIRTUAL_CURRENCY_CODE = "GE";
 var REDUCETIME_AD = 30;
 var RANDOM_TIER_AMOUNT = 3;
-// 전투 보상 상자 여는 함수
+
 handlers.unlockChest = function (args, context) {
     try {
-        // 상자 정보 가져오기
+        // get chest info
         var GetItemDataResult = GetItemData([args.InstanceId]);
-        if(GetItemDataResult.length == 0) { throw "해당 아이템 찾지 못함"; }
+        if(GetItemDataResult.length == 0) { throw "Item instance not found"; }
         var chestDataResult = GetItemDataResult[0];
         
         if(chestDataResult.CustomData.hasOwnProperty("openTime")) {
@@ -24,15 +24,10 @@ handlers.unlockChest = function (args, context) {
             throw "상자에 openTime 키가 없음";
         }
         
-        //상자 열기
-        var request = {
-            PlayFabId: currentPlayerId,
-            ContainerItemInstanceId: args.InstanceId
-        };
+        // open chest
+        var result = server.UnlockContainerInstance({ PlayFabId: currentPlayerId, ContainerItemInstanceId: args.InstanceId });  
         
-        var result = server.UnlockContainerInstance(request);  
-        
-        //아이템 데이터 부여
+        // make item data
         var itemValues = MakeItemData(result.GrantedItems);
         
         return itemValues;
@@ -47,12 +42,8 @@ handlers.unlockChest = function (args, context) {
 
 function MakeItemData(items) {
     try {
-        // 유저 통계 가져오기 : 총 티어
-        var GetPlayerStatisticsRequest = {
-            "PlayFabId": currentPlayerId,
-            "StatisticNames": [ "TotalTier" ]
-        };
-        var StatisticsResult = server.GetPlayerStatistics(GetPlayerStatisticsRequest);
+        // get user statistics : TotalTier
+        var StatisticsResult = server.GetPlayerStatistics({ "PlayFabId": currentPlayerId, "StatisticNames": [ "TotalTier" ] });
 
         var tierStatistic = {};
         tierStatistic.StatisticName = "TotalTier";
@@ -69,17 +60,13 @@ function MakeItemData(items) {
         var tier = parseInt(totalTier % 100); // 유저 티어
         var rebirth = parseInt( totalTier / 100 ); // 유저 환생
     
-        // 아이템 테이블 받아오기
-        var itemTableRequest = {
-            "Keys" : [ "ItemStatTable", "TierTable", "SkillTable" ]
-        }
-        var GetTitleDataResult = server.GetTitleData(itemTableRequest);
+        // get item table
+        var GetTitleDataResult = server.GetTitleData( { "Keys" : [ "ItemStatTable", "TierTable", "SkillTable" ] } );
 
         var itemTable = JSON.parse( GetTitleDataResult.Data["ItemStatTable"] );
         var tierTable = JSON.parse( GetTitleDataResult.Data["TierTable"] );
         var skillTable = JSON.parse( GetTitleDataResult.Data["SkillTable"] );
         
-        // 테이블 가져오기
         var EquipArray = [];
         var EquipListData = {};
         
@@ -89,11 +76,8 @@ function MakeItemData(items) {
             }
         }
         
-        // 아이템 카달로그 받아오기
-        var GetCatalogItemsRequest = {
-            "PlayFabId": currentPlayerId
-        };
-        var GetCatalogItemsResult = server.GetCatalogItems(GetCatalogItemsRequest);
+        // get item catalog
+        var GetCatalogItemsResult = server.GetCatalogItems({ "PlayFabId": currentPlayerId });
         
         var equipmentData = []; // 아이템 정보 담을 오브젝트
         
@@ -207,13 +191,8 @@ function MakeItemData(items) {
             equipmentData[key].Info = JSON.stringify( info );
             equipmentData[key].Stat = JSON.stringify( stat );
             equipmentData[key].Skill = JSON.stringify( skill );
-            // 아이템 데이터 업데이트
-            var UpdateItemCustomDataRequest = {
-                "PlayFabId": currentPlayerId,
-                "ItemInstanceId": items[key].ItemInstanceId,
-                "Data": equipmentData[key]
-            }
-            server.UpdateUserInventoryItemCustomData(UpdateItemCustomDataRequest);
+            // update item data
+            server.UpdateUserInventoryItemCustomData( { "PlayFabId": currentPlayerId, "ItemInstanceId": items[key].ItemInstanceId, "Data": equipmentData[key] } );
             
         }
         
@@ -228,9 +207,9 @@ function MakeItemData(items) {
 
 handlers.openStartChest = function (args, context) {
     try {
-        // 상자 정보 가져오기
+        // get chest info
         var GetItemDataResult = GetItemData([args.InstanceId]);
-        if(GetItemDataResult.length == 0) { throw "해당 아이템 찾지 못함"; }
+        if(GetItemDataResult.length == 0) { throw "Item instance not found"; }
         var chestDataResult = GetItemDataResult[0];
         
         // 상자 카달로그 정보 가져오기
@@ -339,11 +318,8 @@ handlers.videoChest = function (args, context) {
 
 handlers.openGem = function (args, context) {
     try {
-        // 유저 인벤토리 가져오기
-        var GetUserInventoryRequest = {
-            "PlayFabId": currentPlayerId
-        };
-        var GetUserInventoryResult = server.GetUserInventory(GetUserInventoryRequest);
+        // get user inventory
+        var GetUserInventoryResult = server.GetUserInventory( { "PlayFabId": currentPlayerId } );
         
         // 상자 정보 가져오기
         var chestDataResult;
@@ -405,12 +381,7 @@ handlers.openGem = function (args, context) {
         
         
         //상자 열기
-        var request = {
-            PlayFabId: currentPlayerId,
-            ContainerItemInstanceId: args.InstanceId
-        };
-        
-        var result = server.UnlockContainerInstance(request);  
+        var result = server.UnlockContainerInstance({ PlayFabId: currentPlayerId, ContainerItemInstanceId: args.InstanceId });  
         
         //아이템 데이터 부여
         var itemValues = MakeItemData(result.GrantedItems);
@@ -431,10 +402,7 @@ handlers.openGem = function (args, context) {
 function grantChest () {
     try {
         // 상자 개수 체크
-        var GetUserInventoryRequest = {
-            "PlayFabId": currentPlayerId
-        };
-        var GetUserInventoryResult = server.GetUserInventory(GetUserInventoryRequest);
+        var GetUserInventoryResult = server.GetUserInventory({ "PlayFabId": currentPlayerId });
         
         var _cnt = 0;
         for(var index in GetUserInventoryResult.Inventory)
@@ -537,10 +505,7 @@ handlers.BattleResult = function (args, context) {
         }
     
         // 트로피 관련 테이블 가져오기
-        var tierTableRequest = {
-            "Keys" : [ "TierTable", "General"  ]
-        }
-        var GetTitleDataResult = server.GetTitleData(tierTableRequest);
+        var GetTitleDataResult = server.GetTitleData( { "Keys" : [ "TierTable", "General"  ] } );
         var tierTable = JSON.parse( GetTitleDataResult.Data["TierTable"] );
         var generalTable = JSON.parse( GetTitleDataResult.Data["General"] );
         // 트로피 계산
@@ -631,17 +596,9 @@ handlers.BattleResult = function (args, context) {
         }
         
         // 유저 통계 업데이트 : 트로피
-        var UpdatePlayerStatisticsRequest = {
-            "PlayFabId": currentPlayerId,
-            "Statistics": [trophyStatistic,tierStatistic]
-        };
-        var UpdatePlayerStatisticsResult = server.UpdatePlayerStatistics(UpdatePlayerStatisticsRequest);
+        var UpdatePlayerStatisticsResult = server.UpdatePlayerStatistics({ "PlayFabId": currentPlayerId, "Statistics": [trophyStatistic,tierStatistic] });
         // 유저 정보 업데이트
-        var UpdateUserInternalDataRequest = {
-            "PlayFabId" : currentPlayerId,   
-            "Data" : userData
-        }
-        server.UpdateUserInternalData(UpdateUserInternalDataRequest);
+        server.UpdateUserInternalData({ "PlayFabId" : currentPlayerId, "Data" : userData });
         
         result.mode = args.mode;
         result.totalTier = tierStatistic.Value;
@@ -722,11 +679,7 @@ handlers.Rebirth = function (args, context) {
         result.isRebirth = true;
         
         // 유저 통계 업데이트 : 트로피
-        var UpdatePlayerStatisticsRequest = {
-            "PlayFabId": currentPlayerId,
-            "Statistics": [trophyStatistic,tierStatistic]
-        };
-        var UpdatePlayerStatisticsResult = server.UpdatePlayerStatistics(UpdatePlayerStatisticsRequest);
+        var UpdatePlayerStatisticsResult = server.UpdatePlayerStatistics({ "PlayFabId": currentPlayerId, "Statistics": [trophyStatistic,tierStatistic] });
         
         return result;
         
@@ -763,17 +716,14 @@ function ResetVirtualCurrency( requestedVcType ) {
 // ids : array type
 function GetItemData(ids) {
     var itemResult = [];
-    var GetUserInventoryRequest = {
-            "PlayFabId": currentPlayerId
-    };
-    var GetUserInventoryResult = server.GetUserInventory(GetUserInventoryRequest);
+    var invResult = server.GetUserInventory({ "PlayFabId": currentPlayerId });
     
-    for(var index in GetUserInventoryResult.Inventory)
+    for(var index in invResult.Inventory)
     {
-        for(var id in ids) {
-            if(GetUserInventoryResult.Inventory[index].ItemInstanceId === id)
+        for(var j in ids) {
+            if(invResult.Inventory[index].ItemInstanceId === ids[j])
             {
-                itemResult.push( GetUserInventoryResult.Inventory[id] );
+                itemResult.push( invResult.Inventory[index] );
             }
         }
     }
@@ -782,27 +732,20 @@ function GetItemData(ids) {
 
 function GetItemCatalogData(id) {
     var itemResult;
-    var GetCatalogItemsRequest = {
-            "PlayFabId": currentPlayerId
-    };
-    var GetCatalogItemsResult = server.GetCatalogItems(GetCatalogItemsRequest);
+    var ctgResult = server.GetCatalogItems( { "PlayFabId": currentPlayerId } );
     
-    for(var index in GetCatalogItemsResult.Catalog)
+    for(var index in ctgResult.Catalog)
     {
-        if(GetCatalogItemsResult.Catalog[index].ItemId === id)
+        if(ctgResult.Catalog[index].ItemId === id)
         {
-            itemResult = GetCatalogItemsResult.Catalog[index];
+            itemResult = ctgResult.Catalog[index];
         }
     }
     return itemResult;
 }
 
 function GetInternalDataUser(keys) {
-    var GetUserInternalDataRequest = {
-        "PlayFabId" : currentPlayerId,   
-        "Keys" : keys
-    }
-    return server.GetUserInternalData(GetUserInternalDataRequest);   
+    return server.GetUserInternalData( { "PlayFabId" : currentPlayerId, "Keys" : keys } );   
 }
 
 function GetRandomTier (tier) {
@@ -828,10 +771,7 @@ function CopyObj(obj) {
 
 function SellItem_internal(soldItemInstanceId, requestedVcType) {
     // 아이템 테이블 받아오기
-    var tableRequest = {
-        "Keys" : [ "WorthTable" ]
-    }
-    var GetTitleDataResult = server.GetTitleData(tableRequest);
+    var GetTitleDataResult = server.GetTitleData( { "Keys" : [ "WorthTable" ] } );
     var worthTable = JSON.parse( GetTitleDataResult.Data.WorthTable );        // 가치 테이블
     if(!worthTable) throw "WorthTable not found";
     var ids = [];
@@ -889,10 +829,7 @@ handlers.ExpUp = function (args) {
 
 function ExpUp_internal ( targeInstId, rawInstId ) {
      // 아이템 테이블 받아오기
-    var tableRequest = {
-        "Keys" : [ "LevelTable", "WorthTable" ]
-    }
-    var GetTitleDataResult = server.GetTitleData(tableRequest);
+    var GetTitleDataResult = server.GetTitleData( { "Keys" : [ "LevelTable", "WorthTable" ] } );
     var worthTable = JSON.parse( GetTitleDataResult.Data.WorthTable );        // 가치 테이블
     var levelTable = JSON.parse( GetTitleDataResult.Data.LevelTable );        // 가치 테이블
     // 아이템 검수
@@ -937,12 +874,12 @@ function ExpUp_internal ( targeInstId, rawInstId ) {
     }
     targetItemInstance.CustomData.Stat = JSON.stringify( targetItemStat );
     // 아이템 데이터 업데이트
-    var UpdateItemCustomDataRequest = {
+    var customRequest = {
         "PlayFabId": currentPlayerId,
         "ItemInstanceId": targeInstId,
         "Data": targetItemInstance.CustomData
     }
-    server.UpdateUserInventoryItemCustomData(UpdateItemCustomDataRequest);
+    server.UpdateUserInventoryItemCustomData(customRequest);
 
     // 코스트 처리
     server.SubtractUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: levUpCost, VirtualCurrency: "GO" });
