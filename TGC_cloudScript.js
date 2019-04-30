@@ -674,7 +674,7 @@ function ResetInv( vcType ) {
             }
         }
         while(totalItem.length > 0) {
-            items.push(totalItem.slice(0, 25));
+            items.push(totalItem.splice(0, 25));
         }
         for(var index in items.length) {
             server.RevokeInventoryItems({ "Items" : items[index] });
