@@ -782,13 +782,14 @@ function CalculItemWorth ( customData, worthTable ) {
     var tier = parseInt( customData.Tier );
     var grade = (tier - 1) / 5;
     var stat = JSON.parse( customData.Stat );
+    var skill = JSON.parse( customData.Skill );
     var lev = stat.Lev;
     var atk = 0; var hp = 0; var sta = 0;
     if(stat.hasOwnProperty("Atk")) atk = stat.Atk;
     if(stat.hasOwnProperty("Hp")) hp = stat.Hp;
     if(stat.hasOwnProperty("Sta")) sta = Math.ceil(stat.Sta);
     
-    var result = (worthTable.Grade * grade) + (worthTable.Tier * tier) + (worthTable.Lev * lev) + ( worthTable.Stat * (atk + hp + sta) );
+    var result = (worthTable.Grade * grade) + (worthTable.Tier * tier) + (worthTable.Lev * lev) + ( worthTable.Stat * (atk + hp + sta) ) + (worthTable.SkillLev * skill.Lev);
     
     return result;
     
@@ -1164,14 +1165,23 @@ handlers.ItemUpgradeFinish = function (args) {
 // args.isRestore, args.slotID
 handlers.FailedItemRestore = function (args) {
     try {
+        
+        var result = {};
+        result.isRestore = false;
+        result.isLack = false;
+        
         var userData = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: [args.slotID] } );
+        var titleResult = server.GetTitleData( { "Keys" : [ "General", "WorthTable" ] } );
+        var generalTable = JSON.parse( titleResult.Data["General"] );
+        var worthTable = JSON.parse( titleResult.Data.WorthTable );
+        
         if(!userData.hasOwnProperty(args.slotID)) { throw "slot not found"; }
         var slot = {};
         slot = JSON.parse( userData.Data[args.slotID].Value );
         //get items
         var items = [];
         items = GetItemData(args.itemIds);
-        if(items.length != slot.itemIds.length) { throw "해당 아이템을 찾지못함"; }
+        if(items.length == 0) { throw "Item instance not found"; }
         
         var itemIds = [];
         for(var index in slot.itemIds) {
@@ -1180,16 +1190,30 @@ handlers.FailedItemRestore = function (args) {
         
         if(args.isRestore) {
             var inventory = server.GetUserInventory({PlayFabId : currentPlayerId});
-            // gem check !!! here! 
-            //var needGem = 
-        }
-        
-        if(!args.isRestore) {
+            var needGem = 0;
+            for(var index in items) {
+                needGem += Math.ceil(CalculItemWorth( items[index].CustomData, worthTable ) / generalTable.WorthPerGem);
+            }
             
-            server.RevokeInventoryItems({ "Items" : itemIds });
+            if(inventory.VirtualCurrency["GE"] < needGem) { 
+                
+                result.isLack = true;
+                    
+                return result;
+                
+            }else {
+                
+                result.isRestore = true;
+                server.SubtractUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: needGem, VirtualCurrency: "GE" });
+                    
+                return result;
+                
+            }
         }
         
+        server.RevokeInventoryItems({ "Items" : itemIds });
         
+        return result;
         
     }catch(e) {
         var retObj = {};
