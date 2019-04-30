@@ -631,7 +631,7 @@ handlers.Rebirth = function (args, context) {
         tier = 1;
         tierStc.Value = rebirth * 100 + tier;
         
-        ResetVirtualCurrency("GO");
+        ResetInv("GO");
         //
         
         server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: generalTable.RebirthReward.Gem, VirtualCurrency: "GE" });
@@ -652,7 +652,7 @@ handlers.Rebirth = function (args, context) {
 
 }
 
-function ResetVirtualCurrency( vcType ) {
+function ResetInv( vcType ) {
     try {
         
         var inventory = server.GetUserInventory({"PlayFabId": currentPlayerId});
@@ -665,6 +665,20 @@ function ResetVirtualCurrency( vcType ) {
         
         if(vcAmount > 0)
             server.SubtractUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: vcAmount, VirtualCurrency: vcType });
+        
+        var totalItem = [];
+        var items = [];
+        for(var index in inventory.Inventory) {
+            if(inventory.Inventory[index].ItemClass != IC_CHEST_BATTLE ) {
+                totalItem.push( { ItemInstanceId : inventory.Inventory[index].ItemInstanceId, PlayFabId : currentPlayerId  } );
+            }
+        }
+        while(totalItem.length > 0) {
+            items.push(totalItem.slice(0, 25));
+        }
+        for(var index in items.length) {
+            server.RevokeInventoryItems({ "Items" : items[index] });
+        }
         
         return 0;
         
@@ -731,9 +745,9 @@ function CopyObj(obj) {
 }
 
 function SellItem_internal(soldItemInstanceId, requestedVcType) {
-    // 아이템 테이블 받아오기
+    
     var GetTitleDataResult = server.GetTitleData( { "Keys" : [ "WorthTable" ] } );
-    var worthTable = JSON.parse( GetTitleDataResult.Data.WorthTable );        // 가치 테이블
+    var worthTable = JSON.parse( GetTitleDataResult.Data.WorthTable );
     if(!worthTable) throw "WorthTable not found";
     var ids = [];
     ids.push(soldItemInstanceId);
@@ -742,14 +756,13 @@ function SellItem_internal(soldItemInstanceId, requestedVcType) {
     if(GetItemDataResult.length == 0) { throw "해당 아이템 찾지 못함"; }
     var itemInstance = GetItemDataResult[0];
     if (!itemInstance)
-        throw "Item instance not found"; // Protection against client providing incorrect data
+        throw "Item instance not found";
     if(itemInstance.CustomData === undefined){
         throw "itemInstance.CustomData is undefined";
     }
-    // 아이템 가치 계산
+    // 
     var itemWorth = CalculItemWorth(itemInstance.CustomData, worthTable);
     
-    // Once we get here all safety checks are passed - Perform the sell
     var sellPrice = Math.ceil(itemWorth * worthTable.SellGoldX);
     server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: sellPrice, VirtualCurrency: requestedVcType });
     server.RevokeInventoryItem({ PlayFabId: currentPlayerId, ItemInstanceId: soldItemInstanceId });
@@ -782,14 +795,14 @@ function CalculItemWorth ( customData, worthTable ) {
 }
 
 handlers.ExpUp = function (args) {
-    // targetItem : 경험치업 할 대상 아이템, rawItem : 제물 아이템
+    
      if (!args || !args.targetItemInstanceId || !args.rawItemInstanceId)
         throw "Invalid input parameters, expected TargetItemInstanceId and RawItemInstanceId";
     return ExpUp_internal(args.targetItemInstanceId, args.rawItemInstanceId);  
 }
 
 function ExpUp_internal ( targeInstId, rawInstId ) {
-     // 아이템 테이블 받아오기
+    
     var GetTitleDataResult = server.GetTitleData( { "Keys" : [ "LevelTable", "WorthTable" ] } );
     var worthTable = JSON.parse( GetTitleDataResult.Data.WorthTable );        // 가치 테이블
     var levelTable = JSON.parse( GetTitleDataResult.Data.LevelTable );        // 가치 테이블
@@ -804,7 +817,7 @@ function ExpUp_internal ( targeInstId, rawInstId ) {
             rawItemInstance = inventory.Inventory[i];
     }
     if (!targetItemInstance || !rawItemInstance)
-        throw "Item instance not found"; // Protection against client providing incorrect data
+        throw "Item instance not found";
     if(targetItemInstance.CustomData === undefined || rawItemInstance.CustomData === undefined){
         throw "itemInstance.CustomData is undefined";
     }
@@ -834,15 +847,14 @@ function ExpUp_internal ( targeInstId, rawInstId ) {
         if(targetItemStat.Lev >= levLimit) { targetItemStat.Lev = levLimit; }
     }
     targetItemInstance.CustomData.Stat = JSON.stringify( targetItemStat );
-    // 아이템 데이터 업데이트
+    
     var customRequest = {
         "PlayFabId": currentPlayerId,
         "ItemInstanceId": targeInstId,
         "Data": targetItemInstance.CustomData
     }
     server.UpdateUserInventoryItemCustomData(customRequest);
-
-    // 코스트 처리
+    
     server.SubtractUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: levUpCost, VirtualCurrency: "GO" });
     server.RevokeInventoryItem({ PlayFabId: currentPlayerId, ItemInstanceId: rawInstId });
     
@@ -858,10 +870,10 @@ function CalculLevLimit ( tier, levelTable ) {
 }
 
 handlers.UpdatePartyTabData = function (args) {
-    // targetItem : 경험치업 할 대상 아이템, rawItem : 제물 아이템
+    
     if (!args || !args.tab1 || !args.tab2 || !args.tab3 || !args.lastTab)
         throw "Invalid input parameters";
-    server.UpdateUserData( {  PlayFabId: currentPlayerId, Data : args } );  // 탭정보 : 유저 데이터에 저장
+    server.UpdateUserData( {  PlayFabId: currentPlayerId, Data : args } );
     
     if(!args.hasOwnProperty(args.lastTab)) { throw "args에 lastTab의 value 값 키가 없음"; }
     var equipInfo = JSON.parse( args[args.lastTab] );
@@ -884,18 +896,18 @@ handlers.UpdatePartyTabData = function (args) {
             else customDatas.push(item.CustomData);
         }
     }
-    // 캐릭터 정보 : ReadOnly 데이터에 저장
+    
     var characterInfo = JSON.stringify(customDatas);
     server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { "CharacterInfo" : characterInfo }, Permission : "Public" } );
     
 }
 
-// 스킬 마스터리 업그레이드 args.ID : 마스터리 ID
+// args.ID : 마스터리 ID
 handlers.MasteryUpgrade = function (args) {
     try {
         var userData = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: ["Mastery"] } );
         var inventory = server.GetUserInventory( { PlayFabId: currentPlayerId } );
-        var GetTitleDataResult = server.GetTitleData( { Keys: ["MasteryTable"] } );  // 마스터리 테이블
+        var GetTitleDataResult = server.GetTitleData( { Keys: ["MasteryTable"] } );
         var tableData = JSON.parse( GetTitleDataResult.Data["MasteryTable"] );
         
         var masteryObj = {};
@@ -911,7 +923,7 @@ handlers.MasteryUpgrade = function (args) {
 
         var value = parseInt(masteryObj[String(args.ID)]);
         
-        var masteryData = {};   // 테이블의 해당 마스터리 데이터
+        var masteryData = {};
         for(var index in tableData.Mastery) {
             if(tableData.Mastery[index].ID == args.ID) {
                 masteryData = tableData.Mastery[index];
@@ -1041,30 +1053,25 @@ handlers.ItemUpgradeFinish = function (args) {
         // get item check
         var items = [];
         items = GetItemData(slot.itemIds);
-        if(items.length == 0) { throw "해당 아이템을 찾지못함"; }
+        if(items.length == 0) { throw "Item instance not found"; }
         
         var result = {};
         result.isUp = false;
         
-        // 유저 통계 가져오기 : 총 티어
-        var GetPlayerStatisticsRequest = {
-            "PlayFabId": currentPlayerId,
-            "StatisticNames": [ "TotalTier" ]
-        };
-        var StatisticsResult = server.GetPlayerStatistics(GetPlayerStatisticsRequest);
+        var StcResult = server.GetPlayerStatistics({ "PlayFabId": currentPlayerId, "StatisticNames": [ "TotalTier" ] });
 
-        var tierStatistic = {};
-        tierStatistic.StatisticName = "TotalTier";
-        tierStatistic.Value = 1;
+        var tierStc = {};
+        tierStc.StatisticName = "TotalTier";
+        tierStc.Value = 1;
         
-        if(StatisticsResult.Statistics.length > 0) {
-            for(var index in StatisticsResult.Statistics) {
-                if(StatisticsResult.Statistics[index].StatisticName == "TotalTier") 
-                    tierStatistic = StatisticsResult.Statistics[index];
+        if(StcResult.Statistics.length > 0) {
+            for(var index in StcResult.Statistics) {
+                if(StcResult.Statistics[index].StatisticName == "TotalTier") 
+                    tierStc = StcResult.Statistics[index];
             }
         }
         
-        var totalTier = tierStatistic.Value; // 총 티어
+        var totalTier = tierStc.Value; // 총 티어
         var tier = parseInt(totalTier % 100); // 유저 티어
         var rebirth = parseInt( totalTier / 100 ); // 유저 환생
     
@@ -1134,12 +1141,12 @@ handlers.ItemUpgradeFinish = function (args) {
             
             items[index].CustomData.Skill = JSON.stringify(skill);
             
-            var UpdateItemCustomDataRequest = {
+            var customRequest = {
                 "PlayFabId": currentPlayerId,
                 "ItemInstanceId": items[index].ItemInstanceId,
                 "Data": items[index].CustomData
             }
-            server.UpdateUserInventoryItemCustomData(UpdateItemCustomDataRequest);
+            server.UpdateUserInventoryItemCustomData(customRequest);
             
         }
         
@@ -1240,7 +1247,7 @@ function resetMasteryValue(table){
     return result;
 }
 
-// string -> bool 변환 함수
+// string -> bool
 function isTrue(value){
     if (typeof(value) === 'string'){
         value = value.trim().toLowerCase();
