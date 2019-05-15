@@ -1119,6 +1119,9 @@ handlers.ItemUpgradeFinish = function (args) {
         for(var index in generalTable.ItemUpgradeSlot) {
             if(generalTable.ItemUpgradeSlot[index].ID == args.slotID) { slotData = generalTable.ItemUpgradeSlot[index]; }
         }
+        
+        var upData = {};
+        
         // 아이템 확률계산
         var randomTry = Math.floor(Math.random() * 100) + 1;
         
@@ -1126,9 +1129,9 @@ handlers.ItemUpgradeFinish = function (args) {
             // upgrade failed
             result.items = items;
             slot.state = "FAIL";
-            var value = JSON.stringify(slot);
+            upData[slotData.ID] = JSON.stringify(slot);
             
-            server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { dataName : value }, Permission : "Public" } );;
+            server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : upData, Permission : "Public" } );;
             
             return result; 
         } 
@@ -1179,6 +1182,15 @@ handlers.ItemUpgradeFinish = function (args) {
             
         }
         
+        slot.state = "NONE";
+        slot.itemIds = null;
+        slot.openTime = null;
+        
+        upData[slotData.ID] = JSON.stringify(slot);
+        
+        server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : upData, Permission : "Public" } );;
+        
+        result.isUp = true;
         result.items = items;
         
         return result;
