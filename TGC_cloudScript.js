@@ -1207,7 +1207,6 @@ handlers.FailedItemRestore = function (args) {
     try {
         
         var result = {};
-        result.isRestore = false;
         result.isLackGem = false;
         result.isSuccess = false;
         
