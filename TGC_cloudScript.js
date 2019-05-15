@@ -919,9 +919,11 @@ handlers.MasteryUpgrade = function (args) {
             masteryObj = resetMasteryValue(tableData);
         }
         // 체크
-        if(!masteryObj.hasOwnProperty(String(args.ID))) { throw "masteryObj에 해당 마스터리 ID가 없습니다"; }
-        if(!tableData.Mastery.hasOwnProperty(String(args.ID))) { throw "table에 해당 마스터리 ID가 없습니다"; }
-
+        if(!tableData.Mastery.hasOwnProperty(String(args.ID))) { throw "MasteryId not found in table"; }
+        if(!masteryObj.hasOwnProperty(String(args.ID))) {
+            masteryObj[String(args.ID)] = "0";
+        }
+        
         var value = parseInt(masteryObj[String(args.ID)]);
         
         var masteryData = {};
@@ -978,12 +980,20 @@ handlers.FirstCheck = function (args) {
         MakeItemData(pull.ItemGrantResults);
         server.UpdateUserInternalData( { PlayFabId: currentPlayerId, Data: {"isFirstGift": "true"} } );
         result.isFirstGift = true;
-        // 마스터리 init
-        var GetTitleDataResult = server.GetTitleData( { Keys: ["MasteryTable"] } );  // 마스터리 테이블
+        // mastery init
+        var GetTitleDataResult = server.GetTitleData( { Keys: ["MasteryTable", "General"] } );
         var tableData = JSON.parse( GetTitleDataResult.Data["MasteryTable"] );
+        var generalData = JSON.parse( GetTitleDataResult.Data["General"] );
         var masteryObj = resetMasteryValue(tableData);
-        var value = JSON.stringify(masteryObj);
-        server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { "Mastery" : value }, Permission : "Public" } );
+        var rdata = {};
+        rdata.Mastery = JSON.stringify(masteryObj);
+        // slot init
+        var slotObj = ResetUpgradeSlot(generalData);
+        
+        Object.assign(rdata, slotObj);
+        
+        server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : rdata, Permission : "Public" } );
+        
     }
     if(internalData.Data.hasOwnProperty("isTutoComplete") && isTrue( internalData.Data["isTutoComplete"].Value )) {
         result.isTutoComplete = internalData.Data["isTutoComplete"].Value;
@@ -994,13 +1004,25 @@ handlers.FirstCheck = function (args) {
     return result;
 }
 
-// args.slotID, args.itemIds, state: ING, FAIL
+function ResetUpgradeSlot(table) {
+    
+    var slot = {};
+    var result = {};
+    for(var index in table.ItemUpgradeSlot) {
+        slot.state = table.ItemUpgradeSlot[index].Default;
+        result[table.ItemUpgradeSlot[index].ID] = JSON.stringify(slot);
+    }
+    return result;
+    
+}
+
+// args.slotID, args.itemIds, state: ING, FAIL, LOCK, NONE, READY
 handlers.ItemUpgradeStart = function (args) {
     try {
         // get item data
         var items = [];
         items = GetItemData(args.itemIds);
-        if(items.length != args.itemIds.length) { throw "해당 아이템을 찾지못함"; }
+        if(items.length != args.itemIds.length) { throw "Item instance not found"; }
         // get title data
         var slot = {};
         var slotData = {};
@@ -1046,10 +1068,10 @@ handlers.ItemUpgradeFinish = function (args) {
             var currentTime = new Date();
             
             if(currentTime.getTime() < unLockDate.getTime()) {
-                throw "upgrade 시간이 안됨";
+                throw "lack of upgrade time";
             }
         }else {
-            throw "slot에 openTime 키가 없음";
+            throw "slot has not openTime's key";
         }
         // get item check
         var items = [];
