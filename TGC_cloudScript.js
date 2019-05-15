@@ -1028,7 +1028,7 @@ handlers.ItemUpgradeStart = function (args) {
         var slotData = {};
         var GetTitleDataResult = server.GetTitleData({ "Keys" : "General" });
         var generalData = {};
-        generalData = JSON.parse(GetTitleDataResult.General);
+        generalData = JSON.parse(GetTitleDataResult.Data["General"]);
         for(var index in generalData.ItemUpgradeSlot) {
             if(generalData.ItemUpgradeSlot[index].ID == args.slotID) {
                 slotData = generalData.ItemUpgradeSlot[index];
