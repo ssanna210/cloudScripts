@@ -1044,10 +1044,10 @@ handlers.ItemUpgradeStart = function (args) {
         slot.itemIds = args.itemIds;
         slot.state = "ING";
         
-        var value = JSON.stringify(slot);
-        var dataName = slotData.ID;
+        var upData = {};
+        upData[slotData.ID] = JSON.stringify(slot);
         
-        return server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { dataName : value }, Permission : "Public" } );;
+        return server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : upData, Permission : "Public" } );;
         
     } catch(e) {
         var retObj = {};
