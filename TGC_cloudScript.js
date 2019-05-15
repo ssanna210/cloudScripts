@@ -1059,9 +1059,14 @@ handlers.ItemUpgradeStart = function (args) {
 // args.slotID
 handlers.ItemUpgradeFinish = function (args) {
     try {
+        
+        var result = {};
+        result.isUp = false;
+        result.isLackTime = false;
+        
         // get user slot data
         var userData = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: [args.slotID] } );
-        if(!userData.hasOwnProperty(args.slotID)) { throw "slot not found"; }
+        if(!userData.Data.hasOwnProperty(args.slotID)) { throw "slot not found"; }
         var slot = {};
         slot = JSON.parse( userData.Data[args.slotID].Value );
         // time check
@@ -1070,7 +1075,8 @@ handlers.ItemUpgradeFinish = function (args) {
             var currentTime = new Date();
             
             if(currentTime.getTime() < unLockDate.getTime()) {
-                throw "lack of upgrade time";
+                result.isLackTime = true;
+                return result;
             }
         }else {
             throw "slot has not openTime's key";
@@ -1080,8 +1086,6 @@ handlers.ItemUpgradeFinish = function (args) {
         items = GetItemData(slot.itemIds);
         if(items.length == 0) { throw "Item instance not found"; }
         
-        var result = {};
-        result.isUp = false;
         
         var StcResult = server.GetPlayerStatistics({ "PlayFabId": currentPlayerId, "StatisticNames": [ "TotalTier" ] });
 
