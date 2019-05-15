@@ -1120,7 +1120,7 @@ handlers.ItemUpgradeFinish = function (args) {
             if(generalTable.ItemUpgradeSlot[index].ID == args.slotID) { slotData = generalTable.ItemUpgradeSlot[index]; }
         }
         // 아이템 확률계산
-        var randomTry = Math.Floor(Math.random() * 100) + 1;
+        var randomTry = Math.floor(Math.random() * 100) + 1;
         
         if(randomTry > slotData.Rate) { 
             // upgrade failed
