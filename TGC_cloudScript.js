@@ -1027,9 +1027,11 @@ handlers.ItemUpgradeStart = function (args) {
         var slot = {};
         var slotData = {};
         var GetTitleDataResult = server.GetTitleData({ "Keys" : "General" });
-        for(var index in GetTitleDataResult.ItemUpgradeSlot) {
-            if(GetTitleDataResult.ItemUpgradeSlot[index].ID == args.slotID) {
-                slotData = GetTitleDataResult.ItemUpgradeSlot[index];
+        var generalData = {};
+        generalData = JSON.parse(GetTitleDataResult.General);
+        for(var index in generalData.ItemUpgradeSlot) {
+            if(generalData.ItemUpgradeSlot[index].ID == args.slotID) {
+                slotData = generalData.ItemUpgradeSlot[index];
             }
         }
         var unLockDate = new Date();
