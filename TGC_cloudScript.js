@@ -1221,7 +1221,7 @@ handlers.FailedItemRestore = function (args) {
         slot = JSON.parse( userData.Data[args.slotID].Value );
         //get items
         var items = [];
-        items = GetItemData(args.itemIds);
+        items = GetItemData(slot.itemIds);
         if(items.length == 0) { throw "Item instance not found"; }
         
         var itemIds = [];
