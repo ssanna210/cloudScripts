@@ -1142,6 +1142,8 @@ handlers.ItemUpgradeFinish = function (args) {
             var skill = {};
             skill = JSON.parse(items[index].CustomData.Skill);
             
+            var itemInfo = JSON.parse( items[index].CustomData.Info );
+            
             if(skill.hasOwnProperty("Lev")) {
                 skill.Lev += slotData.Amount;
                 // limit check
@@ -1152,7 +1154,7 @@ handlers.ItemUpgradeFinish = function (args) {
                 
                 var tableData = {};
                 for(var j in itemTable.Equipments) {
-                    if(itemTable.Equipments[j].ItemID == items[index].ItemId) {
+                    if(itemTable.Equipments[j].ItemID == itemInfo.ItemID) {
                         tableData = CopyObj( itemTable.Equipments[j] );
                     }
                 }
