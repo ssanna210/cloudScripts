@@ -1238,7 +1238,7 @@ handlers.FailedItemRestore = function (args) {
         
         var upData = {};
         
-        if(result.isRestore) {
+        if(args.isRestore) {
             
             if(inventory.VirtualCurrency["GE"] < needGem) { 
                 result.isLackGem = true;
