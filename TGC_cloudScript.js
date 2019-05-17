@@ -1208,6 +1208,8 @@ handlers.ItemUpgradeFinish = function (args) {
 handlers.FailedItemRestore = function (args) {
     try {
         
+        if(!args.hasOwnProperty("isRestore")) { throw "isRestore not found"; }
+        
         var result = {};
         result.isLackGem = false;
         result.isSuccess = false;
