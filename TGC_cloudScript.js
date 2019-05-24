@@ -977,13 +977,13 @@ handlers.FirstCheck = function (args) {
         result.isFirstGift = true;
         // mastery init
         var TitleR = server.GetTitleData( { Keys: ["MasteryTable", "General"] } );
-        var tableData = JSON.parse( TitleR.Data["MasteryTable"] );
-        var generalData = JSON.parse( TitleR.Data["General"] );
-        var mObj = resetMasteryValue(tableData);
+        var tableD = JSON.parse( TitleR.Data["MasteryTable"] );
+        var generalD = JSON.parse( TitleR.Data["General"] );
+        var mObj = resetMasteryValue(tableD);
         var rdata = {};
         rdata.Mastery = JSON.stringify(mObj);
         // slot init
-        var slotObj = ResetUpgradeSlot(generalData);
+        var slotObj = ResetUpgradeSlot(generalD);
         
         Object.assign(rdata, slotObj);
         
@@ -1021,12 +1021,12 @@ handlers.ItemUpgradeStart = function (args) {
         // get title data
         var slot = {};
         var slotData = {};
-        var GetTitleDataResult = server.GetTitleData({ "Keys" : "General" });
-        var generalData = {};
-        generalData = JSON.parse(GetTitleDataResult.Data["General"]);
-        for(var index in generalData.ItemUpgradeSlot) {
-            if(generalData.ItemUpgradeSlot[index].ID == args.slotID) {
-                slotData = generalData.ItemUpgradeSlot[index];
+        var TitleR = server.GetTitleData({ "Keys" : "General" });
+        var generalD = {};
+        generalD = JSON.parse(TitleR.Data["General"]);
+        for(var index in generalD.ItemUpgradeSlot) {
+            if(generalD.ItemUpgradeSlot[index].ID == args.slotID) {
+                slotData = generalD.ItemUpgradeSlot[index];
             }
         }
         var unLockDate = new Date();
@@ -1060,10 +1060,10 @@ handlers.ItemUpgradeFinish = function (args) {
         result.isLackTime = false;
         
         // get user slot data
-        var userData = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: [args.slotID] } );
-        if(!userData.Data.hasOwnProperty(args.slotID)) { throw "slot not found"; }
+        var userD = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: [args.slotID] } );
+        if(!userD.Data.hasOwnProperty(args.slotID)) { throw "slot not found"; }
         var slot = {};
-        slot = JSON.parse( userData.Data[args.slotID].Value );
+        slot = JSON.parse( userD.Data[args.slotID].Value );
         // time check
         if(slot.hasOwnProperty("openTime")) {
             var unLockDate = new Date( slot.openTime );
@@ -1082,16 +1082,16 @@ handlers.ItemUpgradeFinish = function (args) {
         if(items.length == 0) { throw "Item instance not found"; }
         
         
-        var StcResult = server.GetPlayerStatistics({ "PlayFabId": currentPlayerId, "StatisticNames": [ "TotalTier" ] });
+        var StcR = server.GetPlayerStatistics({ "PlayFabId": currentPlayerId, "StatisticNames": [ "TotalTier" ] });
 
         var tierStc = {};
         tierStc.StatisticName = "TotalTier";
         tierStc.Value = 1;
         
-        if(StcResult.Statistics.length > 0) {
-            for(var index in StcResult.Statistics) {
-                if(StcResult.Statistics[index].StatisticName == "TotalTier") 
-                    tierStc = StcResult.Statistics[index];
+        if(StcR.Statistics.length > 0) {
+            for(var index in StcR.Statistics) {
+                if(StcR.Statistics[index].StatisticName == "TotalTier") 
+                    tierStc = StcR.Statistics[index];
             }
         }
         
@@ -1103,8 +1103,8 @@ handlers.ItemUpgradeFinish = function (args) {
         var TitleR = server.GetTitleData({ "Keys" : [ "ItemStatTable", "TierTable", "SkillTable", "General" ] });
         
         var itemT = JSON.parse( TitleR.Data["ItemStatTable"] );
-        var tierTable = JSON.parse( TitleR.Data["TierTable"] );
-        var skillTable = JSON.parse( TitleR.Data["SkillTable"] );
+        var tierT = JSON.parse( TitleR.Data["TierTable"] );
+        var skillT = JSON.parse( TitleR.Data["SkillTable"] );
         var generalT = JSON.parse( TitleR.Data["General"] );
         // get slot table data
         var slotData = {};
@@ -1143,10 +1143,10 @@ handlers.ItemUpgradeFinish = function (args) {
                 }
             }else {
                 
-                var tableData = {};
+                var tableD = {};
                 for(var j in itemT.Equipments) {
                     if(itemT.Equipments[j].ItemID == itemInfo.ItemID) {
-                        tableData = CopyObj( itemT.Equipments[j] );
+                        tableD = CopyObj( itemT.Equipments[j] );
                     }
                 }
         
@@ -1154,24 +1154,24 @@ handlers.ItemUpgradeFinish = function (args) {
                 var EquipArray = [];
                 var EquipListData = {};
         
-                for(var i = 0; i < tierTable.EquipList.length; i++) {
-                    if(tierTable.EquipList[i].Tier <= totalTier) {
-                        EquipArray.push(tierTable.EquipList[i]);
+                for(var i = 0; i < tierT.EquipList.length; i++) {
+                    if(tierT.EquipList[i].Tier <= totalTier) {
+                        EquipArray.push(tierT.EquipList[i]);
                     }
                 }
                 
-                skill = GetRandomSkill( tableData.ItemClass, skillTable.SkillInfos, EquipListData, EquipArray );
+                skill = GetRandomSkill( tableD.ItemClass, skillT.SkillInfos, EquipListData, EquipArray );
                 
             }
             
             items[index].CustomData.Skill = JSON.stringify(skill);
             
-            var customRequest = {
+            var customReq = {
                 "PlayFabId": currentPlayerId,
                 "ItemInstanceId": items[index].ItemInstanceId,
                 "Data": items[index].CustomData
             }
-            server.UpdateUserInventoryItemCustomData(customRequest);
+            server.UpdateUserInventoryItemCustomData(customReq);
             
         }
         
@@ -1205,14 +1205,14 @@ handlers.FailedItemRestore = function (args) {
         result.isLackGem = false;
         result.isSuccess = false;
         
-        var userData = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: [args.slotID] } );
-        var titleResult = server.GetTitleData( { "Keys" : [ "General", "WorthTable" ] } );
-        var generalTable = JSON.parse( titleResult.Data["General"] );
-        var worthTable = JSON.parse( titleResult.Data.WorthTable );
+        var userD = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: [args.slotID] } );
+        var titleR = server.GetTitleData( { "Keys" : [ "General", "WorthTable" ] } );
+        var generalT = JSON.parse( titleR.Data["General"] );
+        var worthT = JSON.parse( titleR.Data.WorthTable );
         
-        if(!userData.Data.hasOwnProperty(args.slotID)) { throw "slot not found"; }
+        if(!userD.Data.hasOwnProperty(args.slotID)) { throw "slot not found"; }
         var slot = {};
-        slot = JSON.parse( userData.Data[args.slotID].Value );
+        slot = JSON.parse( userD.Data[args.slotID].Value );
         //get items
         var items = [];
         items = GetItemData(slot.itemIds);
@@ -1226,7 +1226,7 @@ handlers.FailedItemRestore = function (args) {
         var inventory = server.GetUserInventory({PlayFabId : currentPlayerId});
         var needGem = 0;
         for(var index in items) {
-            needGem += Math.ceil(CalculItemWorth( items[index].CustomData, worthTable ) / generalTable.WorthPerGem);
+            needGem += Math.ceil(CalculItemWorth( items[index].CustomData, worthT ) / generalT.WorthPerGem);
         }
         
         var upData = {};
