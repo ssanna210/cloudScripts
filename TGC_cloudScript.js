@@ -6,12 +6,12 @@ var RANDOM_TIER_AMOUNT = 3;
 handlers.unlockChest = function (args, context) {
     try {
         
-        var GetItemDataResult = GetItemData([args.InstanceId]);
-        if(GetItemDataResult.length == 0) { throw "Item instance not found"; }
-        var chestDataResult = GetItemDataResult[0];
+        var ItemR = GetItemData([args.InstanceId]);
+        if(ItemR.length == 0) { throw "Item instance not found"; }
+        var chestR = ItemR[0];
         
-        if(chestDataResult.CustomData.hasOwnProperty("openTime")) {
-            var unLockDate = new Date( chestDataResult.CustomData.openTime );
+        if(chestR.CustomData.hasOwnProperty("openTime")) {
+            var unLockDate = new Date( chestR.CustomData.openTime );
             var currentTime = new Date();
             
             if(currentTime.getTime() < unLockDate.getTime()) {
@@ -39,16 +39,16 @@ handlers.unlockChest = function (args, context) {
 function MakeItemData(items) {
     try {
         
-        var StatisticsResult = server.GetPlayerStatistics({ "PlayFabId": currentPlayerId, "StatisticNames": [ "TotalTier" ] });
+        var StatisticsR = server.GetPlayerStatistics({ "PlayFabId": currentPlayerId, "StatisticNames": [ "TotalTier" ] });
 
         var tierStatistic = {};
         tierStatistic.StatisticName = "TotalTier";
         tierStatistic.Value = 1;
         
-        if(StatisticsResult.Statistics.length > 0) {
-            for(var index in StatisticsResult.Statistics) {
-                if(StatisticsResult.Statistics[index].StatisticName == "TotalTier") 
-                    tierStatistic = StatisticsResult.Statistics[index];
+        if(StatisticsR.Statistics.length > 0) {
+            for(var index in StatisticsR.Statistics) {
+                if(StatisticsR.Statistics[index].StatisticName == "TotalTier") 
+                    tierStatistic = StatisticsR.Statistics[index];
             }
         }
         
@@ -56,11 +56,11 @@ function MakeItemData(items) {
         var tier = parseInt(totalTier % 100);
         var rebirth = parseInt( totalTier / 100 );
         
-        var GetTitleDataResult = server.GetTitleData( { "Keys" : [ "ItemStatTable", "TierTable", "SkillTable" ] } );
+        var TitleR = server.GetTitleData( { "Keys" : [ "ItemStatTable", "TierTable", "SkillTable" ] } );
 
-        var itemTable = JSON.parse( GetTitleDataResult.Data["ItemStatTable"] );
-        var tierTable = JSON.parse( GetTitleDataResult.Data["TierTable"] );
-        var skillTable = JSON.parse( GetTitleDataResult.Data["SkillTable"] );
+        var itemTable = JSON.parse( TitleR.Data["ItemStatTable"] );
+        var tierTable = JSON.parse( TitleR.Data["TierTable"] );
+        var skillTable = JSON.parse( TitleR.Data["SkillTable"] );
         
         var EquipArray = [];
         var EquipListData = {};
@@ -72,9 +72,9 @@ function MakeItemData(items) {
         }
         
         // get item catalog
-        var GetCatalogItemsResult = server.GetCatalogItems({ "PlayFabId": currentPlayerId });
+        var CatalR = server.GetCatalogItems({ "PlayFabId": currentPlayerId });
         
-        var equipmentData = [];
+        var equipD = [];
         
         for(var key in items) {
             
@@ -90,22 +90,21 @@ function MakeItemData(items) {
                 }
             }
             
-            var catalogDataResult = {};
-            for(var index in GetCatalogItemsResult.Catalog)
+            var catalD = {};
+            for(var index in CatalR.Catalog)
             {
-                if(GetCatalogItemsResult.Catalog[index].ItemId === items[key].ItemId)
+                if(CatalR.Catalog[index].ItemId === items[key].ItemId)
                 {
-                    catalogDataResult = GetCatalogItemsResult.Catalog[index];
+                    catalD = CatalR.Catalog[index];
                 }
             }
-            if(catalogDataResult == null){
+            if(catalD == null){
                 throw "catalog not found";
             }
-            if(catalogDataResult.CustomData === undefined){
-                throw "catalogDataResult.CustomData is undefined";
-                //throw JSON.stringify(items[key]);
+            if(catalD.CustomData === undefined){
+                throw "catalD.CustomData is undefined";
             }
-            var customObj = JSON.parse(catalogDataResult.CustomData);
+            var customObj = JSON.parse(catalD.CustomData);
             
             if(!EquipListData.hasOwnProperty(items[key].ItemClass)) {
                 var tempList = [];
@@ -125,11 +124,11 @@ function MakeItemData(items) {
             var info = {};
             var stat = {};
             var skill = {};
-            equipmentData[key] = {};
-            equipmentData[key].Info = "NONE";
-            equipmentData[key].Stat = "NONE";
-            equipmentData[key].Skill = "NONE";
-            equipmentData[key].Tier = randomTier.toString();
+            equipD[key] = {};
+            equipD[key].Info = "NONE";
+            equipD[key].Stat = "NONE";
+            equipD[key].Skill = "NONE";
+            equipD[key].Tier = randomTier.toString();
             // set stat
             for(var index in itemTable.Equipments) {
                 if(itemTable.Equipments[index].ItemID == itemId) {
@@ -180,15 +179,15 @@ function MakeItemData(items) {
                 else { info.slot = "2,3,4"; }
             }
             
-            equipmentData[key].Info = JSON.stringify( info );
-            equipmentData[key].Stat = JSON.stringify( stat );
-            equipmentData[key].Skill = JSON.stringify( skill );
+            equipD[key].Info = JSON.stringify( info );
+            equipD[key].Stat = JSON.stringify( stat );
+            equipD[key].Skill = JSON.stringify( skill );
             // update item data
             server.UpdateUserInventoryItemCustomData( { "PlayFabId": currentPlayerId, "ItemInstanceId": items[key].ItemInstanceId, "Data": equipmentData[key] } );
             
         }
         
-        return equipmentData;
+        return equipD;
   
     } catch(e) {
         var retObj = {};
@@ -200,36 +199,36 @@ function MakeItemData(items) {
 handlers.openStartChest = function (args, context) {
     try {
         
-        var GetItemDataResult = GetItemData([args.InstanceId]);
-        if(GetItemDataResult.length == 0) { throw "Item instance not found"; }
-        var chestDataResult = GetItemDataResult[0];
+        var ItemD = GetItemData([args.InstanceId]);
+        if(ItemD.length == 0) { throw "Item instance not found"; }
+        var chestD = ItemD[0];
         
-        var catalogDataResult = GetItemCatalogData(chestDataResult.ItemId);
+        var catalD = GetItemCatalogData(chestD.ItemId);
         
-        if(catalogDataResult == null) {
+        if(catalD == null) {
             throw "catalog not found";
         }
         
-        var StatisticsResult = server.GetPlayerStatistics( { "PlayFabId": currentPlayerId, "StatisticNames": [ "TotalTier" ] } );
+        var StcR = server.GetPlayerStatistics( { "PlayFabId": currentPlayerId, "StatisticNames": [ "TotalTier" ] } );
 
-        var tierStatistic = {};
-        tierStatistic.StatisticName = "TotalTier";
-        tierStatistic.Value = 1;
+        var tierStc = {};
+        tierStc.StatisticName = "TotalTier";
+        tierStc.Value = 1;
         
-        if(StatisticsResult.Statistics.length > 0) {
-            for(var index in StatisticsResult.Statistics) {
-                if(StatisticsResult.Statistics[index].StatisticName == "TotalTier") 
-                    tierStatistic = StatisticsResult.Statistics[index];
+        if(StcR.Statistics.length > 0) {
+            for(var index in StcR.Statistics) {
+                if(StcR.Statistics[index].StatisticName == "TotalTier") 
+                    tierStc = StcR.Statistics[index];
             }
         }
         
-        var totalTier = tierStatistic.Value;
+        var totalTier = tierStc.Value;
         var tier = parseInt( totalTier % 100 );
 
         var randomTier = GetRandomTier( tier );
         randomTier = randomTier.toString();
-        // 보상 상자 시간 설정
-        var customObj = JSON.parse(catalogDataResult.CustomData);
+        // set time
+        var customObj = JSON.parse(catalD.CustomData);
         
         var unLockDate = new Date();
         var currentTime = new Date();
@@ -237,7 +236,7 @@ handlers.openStartChest = function (args, context) {
                 
         unLockDate.setTime(currentTime.getTime() + (waitTime * 1000 * 60));
 
-        var CustomRequest= { 
+        var req= { 
             "PlayFabId": currentPlayerId,
             "ItemInstanceId": args.InstanceId,
             "Data": {
@@ -248,7 +247,7 @@ handlers.openStartChest = function (args, context) {
             }
         }
 
-        var result = server.UpdateUserInventoryItemCustomData(CustomRequest);
+        var result = server.UpdateUserInventoryItemCustomData(req);
         
         return result;
         
@@ -264,13 +263,13 @@ handlers.openStartChest = function (args, context) {
 handlers.videoChest = function (args, context) {
     try {
         
-        var GetItemDataResult = GetItemData([args.InstanceId]);
-        if(GetItemDataResult.length == 0) { throw "Item instance not found"; }
-        var chestDataResult = GetItemDataResult[0];
+        var ItemR = GetItemData([args.InstanceId]);
+        if(ItemR.length == 0) { throw "Item instance not found"; }
+        var chestD = ItemR[0];
         
         // 보상 상자 시간 설정
-        var unLockDate = new Date( chestDataResult.CustomData.openTime );
-        var startTime = new Date( chestDataResult.CustomData.startTime );
+        var unLockDate = new Date( chestD.CustomData.openTime );
+        var startTime = new Date( chestD.CustomData.startTime );
         var reduceTime = REDUCETIME_AD * 60 * 1000; //단축되는 시간
             
         unLockDate.setTime(unLockDate.getTime() - reduceTime);
@@ -279,7 +278,7 @@ handlers.videoChest = function (args, context) {
             unLockDate.setTime(startTime.getTime());
         }
             
-        var customRequest= { 
+        var req = { 
             "PlayFabId": currentPlayerId,
             "ItemInstanceId": args.InstanceId,
             "Data": {
@@ -287,7 +286,7 @@ handlers.videoChest = function (args, context) {
             }
         }
 
-        var result = server.UpdateUserInventoryItemCustomData(customRequest);    
+        var result = server.UpdateUserInventoryItemCustomData(req);    
         
         return result;
         
@@ -305,17 +304,17 @@ handlers.openGem = function (args, context) {
         
         var invResult = server.GetUserInventory( { "PlayFabId": currentPlayerId } );
         
-        var chestDataResult;
+        var chestD;
         
         for(var index in invResult.Inventory)
         {
             if(invResult.Inventory[index].ItemInstanceId === args.InstanceId)
             {
-                chestDataResult = invResult.Inventory[index];
+                chestD = invResult.Inventory[index];
             }
         }
         
-        if(chestDataResult == null) {
+        if(chestD == null) {
             throw "Item instance not found";
         }
         
@@ -323,8 +322,8 @@ handlers.openGem = function (args, context) {
         var currentTime = new Date();
         
         var chestCustomData = {};
-        if(chestDataResult.CustomData != null)
-            chestCustomData = chestDataResult.CustomData;
+        if(chestD.CustomData != null)
+            chestCustomData = chestD.CustomData;
         
         if("openTime" in chestCustomData) {
             
@@ -332,13 +331,13 @@ handlers.openGem = function (args, context) {
             
         }else {
             
-            var catalogDataResult = GetItemCatalogData(chestDataResult.ItemId);
+            var catalD = GetItemCatalogData(chestD.ItemId);
         
-            if(catalogDataResult == null) {
+            if(catalD == null) {
                 throw "catalog not found";
             }
             
-            var customObj = JSON.parse(catalogDataResult.CustomData);
+            var customObj = JSON.parse(catalD.CustomData);
             
             var waitTime = parseInt(customObj.time);
             unLockDate.setTime(currentTime.getTime() + (waitTime * 1000 * 60));
@@ -355,7 +354,7 @@ handlers.openGem = function (args, context) {
                 "VirtualCurrency": "GE",
                 "Amount": needGem   
             };
-            var GemCostResult = server.SubtractUserVirtualCurrency(GemCostRequest); 
+            var GemCostR = server.SubtractUserVirtualCurrency(GemCostRequest); 
         }
         
         var result = server.UnlockContainerInstance({ PlayFabId: currentPlayerId, ContainerItemInstanceId: args.InstanceId });  
@@ -444,40 +443,40 @@ handlers.BattleResult = function (args, context) {
         var tier = parseInt(totalTier % 100);
         var rebirth = parseInt( totalTier / 100 );
         
-        var internalRequest = {
+        var internalReq = {
             "PlayFabId" : currentPlayerId,   
             "Keys" : [ "WinCount", "WinningStreak", "BeforeWin" ]
         }
-        var internalData = server.GetUserInternalData(internalRequest);
+        var internalD = server.GetUserInternalData(internalReq);
         
-        var userData = {};
+        var userD = {};
         
-        if(internalData.Data.hasOwnProperty("WinCount")) {
-            userData.WinCount = parseInt( internalData.Data["WinCount"].Value );
+        if(internalD.Data.hasOwnProperty("WinCount")) {
+            userD.WinCount = parseInt( internalD.Data["WinCount"].Value );
         }else {
-            userData.WinCount = 0;
+            userD.WinCount = 0;
         }
         
-        if(internalData.Data.hasOwnProperty("WinningStreak")) {
-            userData.WinningStreak = parseInt( internalData.Data["WinningStreak"].Value );
+        if(internalD.Data.hasOwnProperty("WinningStreak")) {
+            userD.WinningStreak = parseInt( internalD.Data["WinningStreak"].Value );
         }else {
-            userData.WinningStreak = 0;
+            userD.WinningStreak = 0;
         }
         // 1 : true, 0 : false
-        if(internalData.Data.hasOwnProperty("BeforeWin")) {
-            userData.BeforeWin = parseInt( internalData.Data["BeforeWin"].Value );
+        if(internalD.Data.hasOwnProperty("BeforeWin")) {
+            userD.BeforeWin = parseInt( internalD.Data["BeforeWin"].Value );
         }else {
-            userData.BeforeWin = 0;
+            userD.BeforeWin = 0;
         }
         
-        var GetTitleDataResult = server.GetTitleData( { "Keys" : [ "TierTable", "General"  ] } );
-        var tierTable = JSON.parse( GetTitleDataResult.Data["TierTable"] );
-        var generalTable = JSON.parse( GetTitleDataResult.Data["General"] );
+        var TitleR = server.GetTitleData( { "Keys" : [ "TierTable", "General"  ] } );
+        var tierT = JSON.parse( TitleR.Data["TierTable"] );
+        var generalT = JSON.parse( TitleR.Data["General"] );
         
         var tierInfo = {};
-        for(var index in tierTable.TierInfos) {
-            if( tierTable.TierInfos[index].Tier == tierStc.Value) {
-                tierInfo = tierTable.TierInfos[index];
+        for(var index in tierT.TierInfos) {
+            if( tierT.TierInfos[index].Tier == tierStc.Value) {
+                tierInfo = tierT.TierInfos[index];
             }
         }
         var trophyAmount = 0;
@@ -486,15 +485,15 @@ handlers.BattleResult = function (args, context) {
             // victory
             if(args.isVictory) {
                 // streak
-                if(userData.BeforeWin == 1) {
-                    userData.WinningStreak += 1;
+                if(userD.BeforeWin == 1) {
+                    userD.WinningStreak += 1;
                 }
                 if(trophyStc.Value < parseInt(tierInfo.TrophyLimit)) {
                 
-                    if(userData.WinningStreak > parseInt(tierTable.StreakLimit)) {
-                        trophyAmount = parseInt(tierTable.Unit) + parseInt(tierTable.StreakLimit);
+                    if(userD.WinningStreak > parseInt(tierT.StreakLimit)) {
+                        trophyAmount = parseInt(tierT.Unit) + parseInt(tierT.StreakLimit);
                     }else {
-                        trophyAmount = parseInt(tierTable.Unit) + userData.WinningStreak;
+                        trophyAmount = parseInt(tierT.Unit) + userD.WinningStreak;
                     }
                 
                     trophyStc.Value += trophyAmount;
@@ -504,19 +503,19 @@ handlers.BattleResult = function (args, context) {
                     }
                 }
                 // check win cnt
-                userData.WinCount += 1;
-                if(userData.WinCount >= generalTable.PerWinChest) {
+                userD.WinCount += 1;
+                if(userD.WinCount >= generalT.PerWinChest) {
                     result.chestValue = grantChest();
                     delete result.chestValue;
                 
-                    userData.WinCount = 0;
+                    userD.WinCount = 0;
                 }
-                userData.BeforeWin = 1; // 다음 연산을 위하여
+                userD.BeforeWin = 1; // 다음 연산을 위하여
 
             }else {
                 // fail
-                userData.BeforeWin = 0; // 0: false
-                userData.WinningStreak = 0; // 연승 초기화
+                userD.BeforeWin = 0; // 0: false
+                userD.WinningStreak = 0; // 연승 초기화
             }   
         }
         
@@ -545,9 +544,9 @@ handlers.BattleResult = function (args, context) {
                 promoData.afterTier = totalTier;
                 promoData.isPromotion = true;
                 
-                promoData.gold = parseInt( parseInt(tierInfo.StatAmount) * tierTable.GoldX );
-                promoData.gem = generalTable.PromoReward.Gem;
-                promoData.sp = generalTable.PromoReward.SP;
+                promoData.gold = parseInt( parseInt(tierInfo.StatAmount) * tierT.GoldX );
+                promoData.gem = generalT.PromoReward.Gem;
+                promoData.sp = generalT.PromoReward.SP;
                 
                 server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: promoData.gold, VirtualCurrency: "GO" });
                 server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: promoData.gem, VirtualCurrency: "GE" });
@@ -555,21 +554,21 @@ handlers.BattleResult = function (args, context) {
                 
             }else {
                 // fail
-                trophyAmount = generalTable.Promopenalty;
+                trophyAmount = generalT.Promopenalty;
                 trophyStc.Value -= trophyAmount;
                 if(trophyStc.Value < 0) trophyStc.Value = 0;
             }
         }
         
         server.UpdatePlayerStatistics({ "PlayFabId": currentPlayerId, "Statistics": [trophyStc, tierStc] });
-        server.UpdateUserInternalData({ "PlayFabId" : currentPlayerId, "Data" : userData });
+        server.UpdateUserInternalData({ "PlayFabId" : currentPlayerId, "Data" : userD });
         
         result.mode = args.mode;
         result.totalTier = tierStc.Value;
         result.trophy = tierStc.Value;
-        result.userData = userData;
+        result.userData = userD;
         result.trophyAmount = trophyAmount;
-        result.perWinChest = generalTable.PerWinChest;
+        result.perWinChest = generalT.PerWinChest;
         result.promoData = promoData;
         
         return result;
@@ -582,7 +581,7 @@ handlers.BattleResult = function (args, context) {
 
 }
 
-// 환생 함수
+
 handlers.Rebirth = function (args, context) {
     try {
         var result = {};
@@ -612,9 +611,9 @@ handlers.Rebirth = function (args, context) {
         var tier = parseInt(totalTier % 100);
         var rebirth = parseInt( totalTier / 100 );
         
-        var GetTitleDataResult = server.GetTitleData( { "Keys" : [ "TierTable", "General" ] } );
-        var tierTable = JSON.parse( GetTitleDataResult.Data["TierTable"] );
-        var generalTable = JSON.parse( GetTitleDataResult.Data["General"] );
+        var TitleR = server.GetTitleData( { "Keys" : [ "TierTable", "General" ] } );
+        var tierTable = JSON.parse( TitleR.Data["TierTable"] );
+        var generalT = JSON.parse( TitleR.Data["General"] );
         
         if(tier < parseInt(tierTable.TierLimit)) {
             throw "lack of Tier";
@@ -631,8 +630,8 @@ handlers.Rebirth = function (args, context) {
         ResetInv("GO");
         //
         
-        server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: generalTable.RebirthReward.Gem, VirtualCurrency: "GE" });
-        server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: generalTable.RebirthReward.SP, VirtualCurrency: "SP" });
+        server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: generalT.RebirthReward.Gem, VirtualCurrency: "GE" });
+        server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: generalT.RebirthReward.SP, VirtualCurrency: "SP" });
         trophyStc.Value += tierTable.RebirthTrophy;
         
         result.isRebirth = true;
@@ -703,17 +702,17 @@ function GetItemData(ids) {
 }
 
 function GetItemCatalogData(id) {
-    var itemResult;
-    var ctgResult = server.GetCatalogItems( { "PlayFabId": currentPlayerId } );
+    var itemR;
+    var ctgR = server.GetCatalogItems( { "PlayFabId": currentPlayerId } );
     
-    for(var index in ctgResult.Catalog)
+    for(var index in ctgR.Catalog)
     {
-        if(ctgResult.Catalog[index].ItemId === id)
+        if(ctgR.Catalog[index].ItemId === id)
         {
-            itemResult = ctgResult.Catalog[index];
+            itemR = ctgR.Catalog[index];
         }
     }
-    return itemResult;
+    return itemR;
 }
 
 function GetInternalDataUser(keys) {
@@ -741,27 +740,27 @@ function CopyObj(obj) {
   return copy;
 }
 
-function SellItem_internal(soldItemInstanceId, requestedVcType) {
+function SellItem_internal(soldItemInstanceId, vcType) {
     
-    var GetTitleDataResult = server.GetTitleData( { "Keys" : [ "WorthTable" ] } );
-    var worthTable = JSON.parse( GetTitleDataResult.Data.WorthTable );
-    if(!worthTable) throw "WorthTable not found";
+    var TitleR = server.GetTitleData( { "Keys" : [ "WorthTable" ] } );
+    var worthT = JSON.parse( TitleR.Data.WorthTable );
+    if(!worthT) throw "WorthTable not found";
     var ids = [];
     ids.push(soldItemInstanceId);
     // get item
-    var GetItemDataResult = GetItemData(ids);
-    if(GetItemDataResult.length == 0) { throw "item instance not found"; }
-    var itemInstance = GetItemDataResult[0];
-    if (!itemInstance)
+    var ItemR = GetItemData(ids);
+    if(ItemR.length == 0) { throw "item instance not found"; }
+    var itemD = ItemR[0];
+    if (!itemD)
         throw "Item instance not found";
-    if(itemInstance.CustomData === undefined){
+    if(itemD.CustomData === undefined){
         throw "itemInstance.CustomData is undefined";
     }
     // 
-    var itemWorth = CalculItemWorth(itemInstance.CustomData, worthTable);
+    var itemWorth = CalculItemWorth(itemD.CustomData, worthT);
     
-    var sellPrice = Math.ceil(itemWorth * worthTable.SellGoldX);
-    server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: sellPrice, VirtualCurrency: requestedVcType });
+    var sellPrice = Math.ceil(itemWorth * worthT.SellGoldX);
+    server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: sellPrice, VirtualCurrency: vcType });
     server.RevokeInventoryItem({ PlayFabId: currentPlayerId, ItemInstanceId: soldItemInstanceId });
     
     return sellPrice;
@@ -801,57 +800,57 @@ handlers.ExpUp = function (args) {
 
 function ExpUp_internal ( targeInstId, rawInstId ) {
     
-    var GetTitleDataResult = server.GetTitleData( { "Keys" : [ "LevelTable", "WorthTable" ] } );
-    var worthTable = JSON.parse( GetTitleDataResult.Data.WorthTable );
-    var levelTable = JSON.parse( GetTitleDataResult.Data.LevelTable );
+    var TitleR = server.GetTitleData( { "Keys" : [ "LevelTable", "WorthTable" ] } );
+    var worthTable = JSON.parse( TitleR.Data.WorthTable );
+    var levelTable = JSON.parse( TitleR.Data.LevelTable );
     // check item
     var inventory = server.GetUserInventory({ PlayFabId: currentPlayerId });
-    var targetItemInstance = null;
-    var rawItemInstance = null;
+    var targetItem = null;
+    var rawItem = null;
     for (var i = 0; i < inventory.Inventory.length; i++) {
         if (inventory.Inventory[i].ItemInstanceId === targeInstId)
-            targetItemInstance = inventory.Inventory[i];
+            targetItem = inventory.Inventory[i];
         else if (inventory.Inventory[i].ItemInstanceId === rawInstId)
-            rawItemInstance = inventory.Inventory[i];
+            rawItem = inventory.Inventory[i];
     }
-    if (!targetItemInstance || !rawItemInstance)
+    if (!targetItem || !rawItem)
         throw "Item instance not found";
-    if(targetItemInstance.CustomData === undefined || rawItemInstance.CustomData === undefined){
+    if(targetItem.CustomData === undefined || rawItem.CustomData === undefined){
         throw "itemInstance.CustomData is undefined";
     }
-    var targetItemStat = {};
-    var rawItemStat = {};
-    var levLimit = CalculLevLimit( parseInt( targetItemInstance.CustomData.Tier ), levelTable );
-    targetItemStat = JSON.parse( targetItemInstance.CustomData.Stat );
-    rawItemStat = JSON.parse( rawItemInstance.CustomData.Stat );
-    if(targetItemStat.Lev >= levLimit) { targetItemStat.Lev = levLimit;  throw "item level MAX"; }
+    var targetStat = {};
+    var rawStat = {};
+    var levLimit = CalculLevLimit( parseInt( targetItem.CustomData.Tier ), levelTable );
+    targetStat = JSON.parse( targetItem.CustomData.Stat );
+    rawStat = JSON.parse( rawItem.CustomData.Stat );
+    if(targetStat.Lev >= levLimit) { targetStat.Lev = levLimit;  throw "item level MAX"; }
     
     // 아이템 가치 계산
-    var targetItemWorth = CalculItemWorth(targetItemInstance.CustomData, worthTable);
-    var rawItemWorth = CalculItemWorth(rawItemInstance.CustomData, worthTable);
-    var exp = Math.ceil(rawItemWorth * worthTable.ExpX * rawItemStat.Lev);
-    var levUpCost = rawItemStat.Lev * Math.ceil( rawItemWorth * worthTable.LevUpCostX );
+    var targetWorth = CalculItemWorth(targetItem.CustomData, worthTable);
+    var rawWorth = CalculItemWorth(rawItem.CustomData, worthTable);
+    var exp = Math.ceil(rawWorth * worthTable.ExpX * rawStat.Lev);
+    var levUpCost = rawStat.Lev * Math.ceil( rawWorth * worthTable.LevUpCostX );
     if(levUpCost > inventory.VirtualCurrency["GO"]) throw "lack of Gold";
     
     // Exp Up
-    targetItemStat.Exp += exp;
-    if(targetItemStat.Exp >= targetItemWorth) { 
-        targetItemStat.Exp = targetItemStat.Exp - targetItemWorth;
-        targetItemStat.Lev += 1;
-        if(targetItemStat.hasOwnProperty("Atk")) targetItemStat.Atk += Math.ceil( targetItemStat.Atk * levelTable.XperLevel );
-        if(targetItemStat.hasOwnProperty("Hp")) targetItemStat.Hp += Math.ceil( targetItemStat.Hp * levelTable.XperLevel );
-        if(targetItemStat.hasOwnProperty("Sta")) targetItemStat.Sta += Math.ceil( targetItemStat.Sta * levelTable.XperLevel );
+    targetStat.Exp += exp;
+    if(targetStat.Exp >= targetWorth) { 
+        targetStat.Exp = targetStat.Exp - targetWorth;
+        targetStat.Lev += 1;
+        if(targetStat.hasOwnProperty("Atk")) targetStat.Atk += Math.ceil( targetStat.Atk * levelTable.XperLevel );
+        if(targetStat.hasOwnProperty("Hp")) targetStat.Hp += Math.ceil( targetStat.Hp * levelTable.XperLevel );
+        if(targetStat.hasOwnProperty("Sta")) targetStat.Sta += Math.ceil( targetStat.Sta * levelTable.XperLevel );
         
-        if(targetItemStat.Lev >= levLimit) { targetItemStat.Lev = levLimit; }
+        if(targetStat.Lev >= levLimit) { targetStat.Lev = levLimit; }
     }
-    targetItemInstance.CustomData.Stat = JSON.stringify( targetItemStat );
+    targetItem.CustomData.Stat = JSON.stringify( targetStat );
     
-    var customRequest = {
+    var customReq = {
         "PlayFabId": currentPlayerId,
         "ItemInstanceId": targeInstId,
-        "Data": targetItemInstance.CustomData
+        "Data": targetItem.CustomData
     }
-    server.UpdateUserInventoryItemCustomData(customRequest);
+    server.UpdateUserInventoryItemCustomData(customReq);
     
     server.SubtractUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: levUpCost, VirtualCurrency: "GO" });
     server.RevokeInventoryItem({ PlayFabId: currentPlayerId, ItemInstanceId: rawInstId });
@@ -876,18 +875,18 @@ handlers.UpdatePartyTabData = function (args) {
     if(!args.hasOwnProperty(args.lastTab)) { throw "args not have key : args.lastTab"; }
     var equipInfo = JSON.parse( args[args.lastTab] );
     var customDatas = [];
-    var inventoryResult = server.GetUserInventory( {"PlayFabId": currentPlayerId} );
+    var invR = server.GetUserInventory( {"PlayFabId": currentPlayerId} );
     var item = null;
     for(var index in equipInfo) {
         if(equipInfo[index] == null) {
             customDatas.push(null);
         }else {
             item = null;
-            for(var i in inventoryResult.Inventory)
+            for(var i in invR.Inventory)
             {
-                if(inventoryResult.Inventory[i].ItemInstanceId === equipInfo[index])
+                if(invR.Inventory[i].ItemInstanceId === equipInfo[index])
                 {
-                    item = inventoryResult.Inventory[i];
+                    item = invR.Inventory[i];
                 }
             }
             if(item == null) customDatas.push(null);
@@ -895,62 +894,62 @@ handlers.UpdatePartyTabData = function (args) {
         }
     }
     
-    var characterInfo = JSON.stringify(customDatas);
-    server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { "CharacterInfo" : characterInfo }, Permission : "Public" } );
+    var cInfo = JSON.stringify(customDatas);
+    server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { "CharacterInfo" : cInfo }, Permission : "Public" } );
     
 }
 
 // args.ID : mastery ID
 handlers.MasteryUpgrade = function (args) {
     try {
-        var userData = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: ["Mastery"] } );
+        var userD = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: ["Mastery"] } );
         var inventory = server.GetUserInventory( { PlayFabId: currentPlayerId } );
-        var GetTitleDataResult = server.GetTitleData( { Keys: ["MasteryTable"] } );
-        var tableData = JSON.parse( GetTitleDataResult.Data["MasteryTable"] );
+        var TitleR = server.GetTitleData( { Keys: ["MasteryTable"] } );
+        var tableD = JSON.parse( TitleR.Data["MasteryTable"] );
         
-        var masteryObj = {};
-        if(userData.Data.hasOwnProperty("Mastery")) {
-            masteryObj = JSON.parse( userData.Data["Mastery"].Value );
+        var mObj = {};
+        if(userD.Data.hasOwnProperty("Mastery")) {
+            mObj = JSON.parse( userD.Data["Mastery"].Value );
         }else {
-            masteryObj = resetMasteryValue(tableData);
+            mObj = resetMasteryValue(tableD);
         }
         // check
-        if(!tableData.Mastery.hasOwnProperty(String(args.ID))) { throw "MasteryId not found in table"; }
-        if(!masteryObj.hasOwnProperty(String(args.ID))) {
-            masteryObj[String(args.ID)] = "0";
+        if(!tableD.Mastery.hasOwnProperty(String(args.ID))) { throw "MasteryId not found in table"; }
+        if(!mObj.hasOwnProperty(String(args.ID))) {
+            mObj[String(args.ID)] = "0";
         }
         
-        var value = parseInt(masteryObj[String(args.ID)]);
+        var value = parseInt(mObj[String(args.ID)]);
         
-        var masteryData = {};
-        for(var index in tableData.Mastery) {
-            if(tableData.Mastery[index].ID == args.ID) {
-                masteryData = tableData.Mastery[index];
+        var masteryD = {};
+        for(var index in tableD.Mastery) {
+            if(tableD.Mastery[index].ID == args.ID) {
+                masteryD = tableD.Mastery[index];
             }
         }
         // Limit check
-        if(value >= masteryData.Limit) {
+        if(value >= masteryD.Limit) {
             throw "마스터리 레벨 제한";
         }
         // cost check
         var needSP = 0;
-        needSP = masteryData.Cost * (value + 1);
+        needSP = masteryD.Cost * (value + 1);
         if( inventory.VirtualCurrency.SP < needSP ) {
             throw "SP 부족";
         }else {
             // skill up
             value += 1;
-            masteryObj[String(args.ID)] = String(value);
+            mObj[String(args.ID)] = String(value);
             // cost
-            var spCostRequest = {
+            var spCostReq = {
                 "PlayFabId": currentPlayerId,
                 "VirtualCurrency": "SP",
                 "Amount": needSP   
             };
-            var costResult = server.SubtractUserVirtualCurrency(spCostRequest); 
+            var costR = server.SubtractUserVirtualCurrency(spCostReq); 
         }
         
-        var value = JSON.stringify(masteryObj);
+        var value = JSON.stringify(mObj);
         
         return server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { "Mastery" : value }, Permission : "Public" } );
         
@@ -964,9 +963,9 @@ handlers.MasteryUpgrade = function (args) {
 
 handlers.FirstCheck = function (args) {
     var result = {};
-    var internalData = server.GetUserInternalData( { PlayFabId: currentPlayerId, Keys: ["isFirstGift", "isTutoComplete"] } );
-    if(internalData.Data.hasOwnProperty("isFirstGift") && isTrue( internalData.Data["isFirstGift"].Value )) {
-        result.isFirstGift = internalData.Data["isFirstGift"].Value;
+    var internalD = server.GetUserInternalData( { PlayFabId: currentPlayerId, Keys: ["isFirstGift", "isTutoComplete"] } );
+    if(internalD.Data.hasOwnProperty("isFirstGift") && isTrue( internalD.Data["isFirstGift"].Value )) {
+        result.isFirstGift = internalD.Data["isFirstGift"].Value;
     }else {
         // first gift
         var pull = server.GrantItemsToUser({ 
@@ -977,12 +976,12 @@ handlers.FirstCheck = function (args) {
         server.UpdateUserInternalData( { PlayFabId: currentPlayerId, Data: {"isFirstGift": "true"} } );
         result.isFirstGift = true;
         // mastery init
-        var GetTitleDataResult = server.GetTitleData( { Keys: ["MasteryTable", "General"] } );
-        var tableData = JSON.parse( GetTitleDataResult.Data["MasteryTable"] );
-        var generalData = JSON.parse( GetTitleDataResult.Data["General"] );
-        var masteryObj = resetMasteryValue(tableData);
+        var TitleR = server.GetTitleData( { Keys: ["MasteryTable", "General"] } );
+        var tableData = JSON.parse( TitleR.Data["MasteryTable"] );
+        var generalData = JSON.parse( TitleR.Data["General"] );
+        var mObj = resetMasteryValue(tableData);
         var rdata = {};
-        rdata.Mastery = JSON.stringify(masteryObj);
+        rdata.Mastery = JSON.stringify(mObj);
         // slot init
         var slotObj = ResetUpgradeSlot(generalData);
         
@@ -991,8 +990,8 @@ handlers.FirstCheck = function (args) {
         server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : rdata, Permission : "Public" } );
         
     }
-    if(internalData.Data.hasOwnProperty("isTutoComplete") && isTrue( internalData.Data["isTutoComplete"].Value )) {
-        result.isTutoComplete = internalData.Data["isTutoComplete"].Value;
+    if(internalD.Data.hasOwnProperty("isTutoComplete") && isTrue( internalD.Data["isTutoComplete"].Value )) {
+        result.isTutoComplete = internalD.Data["isTutoComplete"].Value;
     }else {
         result.isTutoComplete = false;
     }
@@ -1101,19 +1100,16 @@ handlers.ItemUpgradeFinish = function (args) {
         var rebirth = parseInt( totalTier / 100 );
     
         // get item table
-        var itemTableRequest = {
-            "Keys" : [ "ItemStatTable", "TierTable", "SkillTable", "General" ]
-        }
-        var GetTitleDataResult = server.GetTitleData(itemTableRequest);
-
-        var itemTable = JSON.parse( GetTitleDataResult.Data["ItemStatTable"] );
-        var tierTable = JSON.parse( GetTitleDataResult.Data["TierTable"] );
-        var skillTable = JSON.parse( GetTitleDataResult.Data["SkillTable"] );
-        var generalTable = JSON.parse( GetTitleDataResult.Data["General"] );
+        var TitleR = server.GetTitleData({ "Keys" : [ "ItemStatTable", "TierTable", "SkillTable", "General" ] });
+        
+        var itemT = JSON.parse( TitleR.Data["ItemStatTable"] );
+        var tierTable = JSON.parse( TitleR.Data["TierTable"] );
+        var skillTable = JSON.parse( TitleR.Data["SkillTable"] );
+        var generalT = JSON.parse( TitleR.Data["General"] );
         // get slot table data
         var slotData = {};
-        for(var index in generalTable.ItemUpgradeSlot) {
-            if(generalTable.ItemUpgradeSlot[index].ID == args.slotID) { slotData = generalTable.ItemUpgradeSlot[index]; }
+        for(var index in generalT.ItemUpgradeSlot) {
+            if(generalT.ItemUpgradeSlot[index].ID == args.slotID) { slotData = generalT.ItemUpgradeSlot[index]; }
         }
         
         var upData = {};
@@ -1148,9 +1144,9 @@ handlers.ItemUpgradeFinish = function (args) {
             }else {
                 
                 var tableData = {};
-                for(var j in itemTable.Equipments) {
-                    if(itemTable.Equipments[j].ItemID == itemInfo.ItemID) {
-                        tableData = CopyObj( itemTable.Equipments[j] );
+                for(var j in itemT.Equipments) {
+                    if(itemT.Equipments[j].ItemID == itemInfo.ItemID) {
+                        tableData = CopyObj( itemT.Equipments[j] );
                     }
                 }
         
