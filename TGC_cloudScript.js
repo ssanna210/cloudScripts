@@ -1,6 +1,4 @@
-var DT_CHEST_BATTLE = "dropTable_battleChest";
 var IC_CHEST_BATTLE = "BattleChest";
-var MAXIMUM_CHEST_BATTLE = 4;
 var MinutePerGem = 12;
 var REDUCETIME_AD = 30;
 var RANDOM_TIER_AMOUNT = 3;
@@ -84,7 +82,7 @@ function MakeItemData(items) {
             var randomTier = 1;
             if(items[key].CustomData !== undefined && items[key].CustomData.hasOwnProperty("tier")) { 
                 randomTier = items[key].CustomData["tier"]; 
-            }else { randomTier = GetRandomTier ( tier ); }   // randomTier 값 없으면 새로 생성
+            }else { randomTier = GetRandomTier ( tier ); }
             
             for(var index in tierTable.TierInfos) {
                 if(tierTable.TierInfos[index].Tier == randomTier) {
@@ -132,7 +130,7 @@ function MakeItemData(items) {
             equipmentData[key].Stat = "NONE";
             equipmentData[key].Skill = "NONE";
             equipmentData[key].Tier = randomTier.toString();
-            // 스탯 설정
+            // set stat
             for(var index in itemTable.Equipments) {
                 if(itemTable.Equipments[index].ItemID == itemId) {
                     tableData = CopyObj( itemTable.Equipments[index] );
@@ -167,17 +165,17 @@ function MakeItemData(items) {
                 if(customObj.grade == "legend") { skill.Lev = skill.Limit; }
                 
             }
-            // customData.info 설정
+            // customData.info
             info.ItemID = tableData.ItemID;
             
-            // 캐릭터 설정
+            // set character
             if(tableData.ItemClass == "character") {
                 
-                info.hc = parseInt(Math.random() * 6); // 헤어 컬러
-                info.sc = parseInt(Math.random() * 3); // 스킨 컬러
+                info.hc = parseInt(Math.random() * 6); // hair color
+                info.sc = parseInt(Math.random() * 3); // skin color
                 var hairIdList = tableData["HairRange"].split(",");
-                info.ht = hairIdList[ parseInt(Math.random() * hairIdList.length) ];   // 헤어 타입
-                // acc 슬롯 개수 정하기
+                info.ht = hairIdList[ parseInt(Math.random() * hairIdList.length) ];   // hair type
+                // acc slot count
                 if( parseInt(Math.random() * 100) < 2 ) { info.slot = "2,3,4,4"; }
                 else { info.slot = "2,3,4"; }
             }
@@ -225,8 +223,8 @@ handlers.openStartChest = function (args, context) {
             }
         }
         
-        var totalTier = tierStatistic.Value; // 총 티어
-        var tier = parseInt( totalTier % 100 ); // 유저 티어
+        var totalTier = tierStatistic.Value;
+        var tier = parseInt( totalTier % 100 );
 
         var randomTier = GetRandomTier( tier );
         randomTier = randomTier.toString();
@@ -391,7 +389,7 @@ function grantChest () {
         
         var chestValue = "NONE";
         
-        if(_cnt < MAXIMUM_CHEST_BATTLE) {
+        if(_cnt < 4) {
             chestValue = ProcessGrantChest();   
         }else {
             throw "chest counts over";    
@@ -410,7 +408,7 @@ function grantChest () {
 
 function ProcessGrantChest()
 {
-    var DTresult = server.EvaluateRandomResultTable({ TableId : DT_CHEST_BATTLE });
+    var DTresult = server.EvaluateRandomResultTable({ TableId : "dropTable_battleChest" });
     
     var pull = server.GrantItemsToUser({ 
         PlayFabId: currentPlayerId, 
@@ -422,7 +420,7 @@ function ProcessGrantChest()
     return instId;
 }
 
-// args.mode, 0: normal mode 1: promotion mode
+// args.mode, 0: normal 1: promotion
 handlers.BattleResult = function (args, context) {
     try {
         var result = {};
@@ -442,11 +440,10 @@ handlers.BattleResult = function (args, context) {
             }
         }
         
-        var totalTier = tierStc.Value; // 총 티어
-        var tier = parseInt(totalTier % 100); // 유저 티어
-        var rebirth = parseInt( totalTier / 100 ); // 유저 환생
+        var totalTier = tierStc.Value;
+        var tier = parseInt(totalTier % 100);
+        var rebirth = parseInt( totalTier / 100 );
         
-        // 승수, 연승수, 전에 이겼는지
         var internalRequest = {
             "PlayFabId" : currentPlayerId,   
             "Keys" : [ "WinCount", "WinningStreak", "BeforeWin" ]
@@ -483,14 +480,14 @@ handlers.BattleResult = function (args, context) {
                 tierInfo = tierTable.TierInfos[index];
             }
         }
-        var trophyAmount = 0; // 보상 트로피 양
-        // 일반 모드
+        var trophyAmount = 0;
+        // normal
         if(args.mode == 0) {
             // victory
             if(args.isVictory) {
-                // 연승 계산
+                // streak
                 if(userData.BeforeWin == 1) {
-                    userData.WinningStreak += 1; // 연승 추가
+                    userData.WinningStreak += 1;
                 }
                 if(trophyStc.Value < parseInt(tierInfo.TrophyLimit)) {
                 
@@ -506,11 +503,11 @@ handlers.BattleResult = function (args, context) {
                         trophyStc.Value = parseInt(tierInfo.TrophyLimit);
                     }
                 }
-                // 이긴 횟수 체크
-                userData.WinCount += 1; // 승리 추가
+                // check win cnt
+                userData.WinCount += 1;
                 if(userData.WinCount >= generalTable.PerWinChest) {
                     result.chestValue = grantChest();
-                    delete result.chestValue;       // 그냥 생략
+                    delete result.chestValue;
                 
                     userData.WinCount = 0;
                 }
@@ -611,9 +608,9 @@ handlers.Rebirth = function (args, context) {
             }
         }
         
-        var totalTier = tierStc.Value; // 총 티어
-        var tier = parseInt(totalTier % 100); // 유저 티어
-        var rebirth = parseInt( totalTier / 100 ); // 유저 환생
+        var totalTier = tierStc.Value;
+        var tier = parseInt(totalTier % 100);
+        var rebirth = parseInt( totalTier / 100 );
         
         var GetTitleDataResult = server.GetTitleData( { "Keys" : [ "TierTable", "General" ] } );
         var tierTable = JSON.parse( GetTitleDataResult.Data["TierTable"] );
@@ -627,7 +624,7 @@ handlers.Rebirth = function (args, context) {
         }
         
         rebirth ++;
-        // 초기화
+        // reset
         tier = 1;
         tierStc.Value = rebirth * 100 + tier;
         
@@ -753,7 +750,7 @@ function SellItem_internal(soldItemInstanceId, requestedVcType) {
     ids.push(soldItemInstanceId);
     // get item
     var GetItemDataResult = GetItemData(ids);
-    if(GetItemDataResult.length == 0) { throw "해당 아이템 찾지 못함"; }
+    if(GetItemDataResult.length == 0) { throw "item instance not found"; }
     var itemInstance = GetItemDataResult[0];
     if (!itemInstance)
         throw "Item instance not found";
@@ -805,9 +802,9 @@ handlers.ExpUp = function (args) {
 function ExpUp_internal ( targeInstId, rawInstId ) {
     
     var GetTitleDataResult = server.GetTitleData( { "Keys" : [ "LevelTable", "WorthTable" ] } );
-    var worthTable = JSON.parse( GetTitleDataResult.Data.WorthTable );        // 가치 테이블
-    var levelTable = JSON.parse( GetTitleDataResult.Data.LevelTable );        // 가치 테이블
-    // 아이템 검수
+    var worthTable = JSON.parse( GetTitleDataResult.Data.WorthTable );
+    var levelTable = JSON.parse( GetTitleDataResult.Data.LevelTable );
+    // check item
     var inventory = server.GetUserInventory({ PlayFabId: currentPlayerId });
     var targetItemInstance = null;
     var rawItemInstance = null;
@@ -827,14 +824,14 @@ function ExpUp_internal ( targeInstId, rawInstId ) {
     var levLimit = CalculLevLimit( parseInt( targetItemInstance.CustomData.Tier ), levelTable );
     targetItemStat = JSON.parse( targetItemInstance.CustomData.Stat );
     rawItemStat = JSON.parse( rawItemInstance.CustomData.Stat );
-    if(targetItemStat.Lev >= levLimit) { targetItemStat.Lev = levLimit;  throw "아이템 레벨 MAX"; }
+    if(targetItemStat.Lev >= levLimit) { targetItemStat.Lev = levLimit;  throw "item level MAX"; }
     
     // 아이템 가치 계산
     var targetItemWorth = CalculItemWorth(targetItemInstance.CustomData, worthTable);
     var rawItemWorth = CalculItemWorth(rawItemInstance.CustomData, worthTable);
     var exp = Math.ceil(rawItemWorth * worthTable.ExpX * rawItemStat.Lev);
     var levUpCost = rawItemStat.Lev * Math.ceil( rawItemWorth * worthTable.LevUpCostX );
-    if(levUpCost > inventory.VirtualCurrency["GO"]) throw "Gold가 모자릅니다.";
+    if(levUpCost > inventory.VirtualCurrency["GO"]) throw "lack of Gold";
     
     // Exp Up
     targetItemStat.Exp += exp;
@@ -876,7 +873,7 @@ handlers.UpdatePartyTabData = function (args) {
         throw "Invalid input parameters";
     server.UpdateUserData( {  PlayFabId: currentPlayerId, Data : args } );
     
-    if(!args.hasOwnProperty(args.lastTab)) { throw "args에 lastTab의 value 값 키가 없음"; }
+    if(!args.hasOwnProperty(args.lastTab)) { throw "args not have key : args.lastTab"; }
     var equipInfo = JSON.parse( args[args.lastTab] );
     var customDatas = [];
     var inventoryResult = server.GetUserInventory( {"PlayFabId": currentPlayerId} );
@@ -903,7 +900,7 @@ handlers.UpdatePartyTabData = function (args) {
     
 }
 
-// args.ID : 마스터리 ID
+// args.ID : mastery ID
 handlers.MasteryUpgrade = function (args) {
     try {
         var userData = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: ["Mastery"] } );
@@ -915,10 +912,9 @@ handlers.MasteryUpgrade = function (args) {
         if(userData.Data.hasOwnProperty("Mastery")) {
             masteryObj = JSON.parse( userData.Data["Mastery"].Value );
         }else {
-            // 스킬 마스터리 처음일때
             masteryObj = resetMasteryValue(tableData);
         }
-        // 체크
+        // check
         if(!tableData.Mastery.hasOwnProperty(String(args.ID))) { throw "MasteryId not found in table"; }
         if(!masteryObj.hasOwnProperty(String(args.ID))) {
             masteryObj[String(args.ID)] = "0";
@@ -932,20 +928,20 @@ handlers.MasteryUpgrade = function (args) {
                 masteryData = tableData.Mastery[index];
             }
         }
-        // 레벨 Limit 체크
+        // Limit check
         if(value >= masteryData.Limit) {
             throw "마스터리 레벨 제한";
         }
-        // 코스트 체크
+        // cost check
         var needSP = 0;
         needSP = masteryData.Cost * (value + 1);
         if( inventory.VirtualCurrency.SP < needSP ) {
             throw "SP 부족";
         }else {
-            // 스킬 업그레이드
+            // skill up
             value += 1;
             masteryObj[String(args.ID)] = String(value);
-            // 코스트
+            // cost
             var spCostRequest = {
                 "PlayFabId": currentPlayerId,
                 "VirtualCurrency": "SP",
@@ -965,14 +961,14 @@ handlers.MasteryUpgrade = function (args) {
     }
 };
 
-// 유저가 처음 접속했는지 체크하는 함수
+
 handlers.FirstCheck = function (args) {
     var result = {};
     var internalData = server.GetUserInternalData( { PlayFabId: currentPlayerId, Keys: ["isFirstGift", "isTutoComplete"] } );
     if(internalData.Data.hasOwnProperty("isFirstGift") && isTrue( internalData.Data["isFirstGift"].Value )) {
         result.isFirstGift = internalData.Data["isFirstGift"].Value;
     }else {
-        // 처음 접속이면 아이템 증정
+        // first gift
         var pull = server.GrantItemsToUser({ 
             PlayFabId: currentPlayerId, 
             ItemIds: ["bundle_firstGift"]
@@ -1100,9 +1096,9 @@ handlers.ItemUpgradeFinish = function (args) {
             }
         }
         
-        var totalTier = tierStc.Value; // 총 티어
-        var tier = parseInt(totalTier % 100); // 유저 티어
-        var rebirth = parseInt( totalTier / 100 ); // 유저 환생
+        var totalTier = tierStc.Value;
+        var tier = parseInt(totalTier % 100);
+        var rebirth = parseInt( totalTier / 100 );
     
         // get item table
         var itemTableRequest = {
@@ -1122,7 +1118,6 @@ handlers.ItemUpgradeFinish = function (args) {
         
         var upData = {};
         
-        // 아이템 확률계산
         var randomTry = Math.floor(Math.random() * 100) + 1;
         
         if(randomTry > slotData.Rate) { 
@@ -1138,7 +1133,7 @@ handlers.ItemUpgradeFinish = function (args) {
         
         // upgrade success
         for(var index in items) {
-            // 스탯 설정
+            // set stat
             var skill = {};
             skill = JSON.parse(items[index].CustomData.Skill);
             
@@ -1289,7 +1284,7 @@ function GetRandomSkill( itemClass, SkillInfos, EquipListData, EquipArray ) {
     
     skill.Lev = 1;
     
-    // 타겟 장비ID 리스트에서 랜덤뽑기
+    // random
     if(!EquipListData.hasOwnProperty(skill.TargetClass)) {
         var tempList = [];
         for(var i=0; i< EquipArray.length; i++) {
@@ -1302,7 +1297,7 @@ function GetRandomSkill( itemClass, SkillInfos, EquipListData, EquipArray ) {
     var equipIdList = EquipListData[skill.TargetClass].split(",");
     skill.TargetId = equipIdList[ parseInt(Math.random() * equipIdList.length) ];
     
-    // 아이템 커스텀데이터 정리하기
+    
     delete skill.ItemClass;
     delete skill.Skill;
     delete skill.TargetClass;
@@ -1312,7 +1307,7 @@ function GetRandomSkill( itemClass, SkillInfos, EquipListData, EquipArray ) {
 }
 
 function resetMasteryValue(table){
-    // 스킬 마스터리 처음일때
+    
     var result = {};
     for(var index in table.Mastery) {
         result[String(table.Mastery[index].ID)] = String(0);
