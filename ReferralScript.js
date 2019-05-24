@@ -13,32 +13,32 @@ handlers.RedeemReferral = function(args) {
             throw "You are not allowed to refer yourself.";
         }
         
-        var invResult = server.GetUserInventory({ "PlayFabId": currentPlayerId });
-        for(var index in invResult.Inventory)
+        var invR = server.GetUserInventory({ "PlayFabId": currentPlayerId });
+        for(var index in invR.Inventory)
         {
-            if(invResult.Inventory[index].ItemId === REFERRAL_BADGE)
+            if(invR.Inventory[index].ItemId === REFERRAL_BADGE)
             {
                 throw "You are only allowed one Referral Badge.";
             }
         }
         
         var rData = server.GetUserReadOnlyData({ "PlayFabId": args.referralCode, "Keys": [ "Referrals" ] });
-        var referralValues = [];
+        var rValues = [];
 
         if(!rData.Data.hasOwnProperty("Referrals"))
         {
-            referralValues.push(currentPlayerId);
-            ProcessReferrer(args.referralCode, referralValues);
+            rValues.push(currentPlayerId);
+            ProcessReferrer(args.referralCode, rValues);
         }
         else
         {
-            referralValues = JSON.parse(rData.Data["Referrals"].Value);
-            if(Array.isArray(referralValues))
+            rValues = JSON.parse(rData.Data["Referrals"].Value);
+            if(Array.isArray(rValues))
             {
-                if(referralValues.length < 10)
+                if(rValues.length < 10)
                 {
-                    referralValues.push(currentPlayerId);
-                    ProcessReferrer(args.referralCode, referralValues);
+                    rValues.push(currentPlayerId);
+                    ProcessReferrer(args.referralCode, rValues);
                 }
                 else
                 {
@@ -65,32 +65,32 @@ handlers.RedeemReferral = function(args) {
 function ProcessReferrer(id, referrals)
 {
     
-    var rdRequest = {
+    var rdReq = {
         "PlayFabId": id,
         "Data": {}
     };
-    rdRequest.Data["Referrals"] = JSON.stringify(referrals);
-    var UpdateUserReadOnlyDataResult = server.UpdateUserReadOnlyData(rdRequest);
+    rdReq.Data["Referrals"] = JSON.stringify(referrals);
+    var rdR = server.UpdateUserReadOnlyData(rdReq);
     
-    var vcRequest = {
+    var vcReq = {
         "PlayFabId" : id,
         "VirtualCurrency": "GE",
         "Amount": 10
     };
-    var result = server.AddUserVirtualCurrency(vcRequest);
+    var result = server.AddUserVirtualCurrency(vcReq);
 
-    log.info(vcRequest.Amount + " " + "GE" + " granted to " + id);
+    log.info(vcReq.Amount + " " + "GE" + " granted to " + id);
 }
 
 
 function GrantReferralBonus(code)
 {
-    var request = {
+    var req = {
         "PlayFabId" : currentPlayerId,
         "ItemIds" : [ REFERRAL_BADGE, REFERRAL_BONUS_BUNDLE ],
         "Annotation" : "Referred by: " + code
     };
 
-    var result = server.GrantItemsToUser(request);
+    var result = server.GrantItemsToUser(req);
     return result.ItemGrantResults;
 }
