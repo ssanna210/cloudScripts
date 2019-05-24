@@ -1,6 +1,3 @@
-var VIRTUAL_CURRENCY_CODE = "GM";
-var PLAYER_REFERRAL_KEY = "Referrals";
-var MAXIMUM_REFERRALS = 10;
 var REFERRAL_BONUS_BUNDLE = "premiumStarterPack";
 var REFERRAL_BADGE = "referralBadge";
 
@@ -16,44 +13,36 @@ handlers.RedeemReferral = function(args) {
             throw "You are not allowed to refer yourself.";
         }
         
-        var GetUserInventoryRequest = {
-            "PlayFabId": currentPlayerId
-        };
-
-        var GetUserInventoryResult = server.GetUserInventory(GetUserInventoryRequest);
-        for(var index in GetUserInventoryResult.Inventory)
+        var invResult = server.GetUserInventory({ "PlayFabId": currentPlayerId });
+        for(var index in invResult.Inventory)
         {
-            if(GetUserInventoryResult.Inventory[index].ItemId === REFERRAL_BADGE)
+            if(invResult.Inventory[index].ItemId === REFERRAL_BADGE)
             {
                 throw "You are only allowed one Referral Badge.";
             }
         }
         
-        var GetUserReadOnlyDataRequest = {
-            "PlayFabId": args.referralCode,
-            "Keys": [ PLAYER_REFERRAL_KEY ]
-        }; 
-        var GetUserReadOnlyDataResult = server.GetUserReadOnlyData(GetUserReadOnlyDataRequest);
+        var rData = server.GetUserReadOnlyData({ "PlayFabId": args.referralCode, "Keys": [ "Referrals" ] });
         var referralValues = [];
 
-        if(!GetUserReadOnlyDataResult.Data.hasOwnProperty(PLAYER_REFERRAL_KEY))
+        if(!rData.Data.hasOwnProperty("Referrals"))
         {
             referralValues.push(currentPlayerId);
             ProcessReferrer(args.referralCode, referralValues);
         }
         else
         {
-            referralValues = JSON.parse(GetUserReadOnlyDataResult.Data[PLAYER_REFERRAL_KEY].Value);
+            referralValues = JSON.parse(rData.Data["Referrals"].Value);
             if(Array.isArray(referralValues))
             {
-                if(referralValues.length < MAXIMUM_REFERRALS)
+                if(referralValues.length < 10)
                 {
                     referralValues.push(currentPlayerId);
                     ProcessReferrer(args.referralCode, referralValues);
                 }
                 else
                 {
-                    log.info("Player:" + args.referralCode + " has hit the maximum number of referrals (" + MAXIMUM_REFERRALS + ")." );
+                    log.info("Player:" + args.referralCode + " has hit the maximum number of referrals (" + 10 + ")." );
                 }
             }
             else
@@ -76,32 +65,32 @@ handlers.RedeemReferral = function(args) {
 function ProcessReferrer(id, referrals)
 {
     
-    var UpdateUserReadOnlyDataRequest = {
+    var rdRequest = {
         "PlayFabId": id,
         "Data": {}
     };
-    UpdateUserReadOnlyDataRequest.Data[PLAYER_REFERRAL_KEY] = JSON.stringify(referrals);
-    var UpdateUserReadOnlyDataResult = server.UpdateUserReadOnlyData(UpdateUserReadOnlyDataRequest);
+    rdRequest.Data["Referrals"] = JSON.stringify(referrals);
+    var UpdateUserReadOnlyDataResult = server.UpdateUserReadOnlyData(rdRequest);
     
-    var AddUserVirtualCurrencyRequest = {
+    var vcRequest = {
         "PlayFabId" : id,
-        "VirtualCurrency": VIRTUAL_CURRENCY_CODE,
+        "VirtualCurrency": "GE",
         "Amount": 10
     };
-    var AddUserVirtualCurrencyResult = server.AddUserVirtualCurrency(AddUserVirtualCurrencyRequest);
+    var result = server.AddUserVirtualCurrency(vcRequest);
 
-    log.info(AddUserVirtualCurrencyRequest.Amount + " " + VIRTUAL_CURRENCY_CODE + " granted to " + id);
+    log.info(vcRequest.Amount + " " + "GE" + " granted to " + id);
 }
 
 
 function GrantReferralBonus(code)
 {
-    var GrantItemsToUserRequest = {
+    var request = {
         "PlayFabId" : currentPlayerId,
         "ItemIds" : [ REFERRAL_BADGE, REFERRAL_BONUS_BUNDLE ],
         "Annotation" : "Referred by: " + code
     };
 
-    var GrantItemsToUserResult = server.GrantItemsToUser(GrantItemsToUserRequest);
-    return GrantItemsToUserResult.ItemGrantResults;
+    var result = server.GrantItemsToUser(request);
+    return result.ItemGrantResults;
 }
