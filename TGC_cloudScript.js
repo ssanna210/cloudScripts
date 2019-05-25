@@ -183,7 +183,7 @@ function MakeItemData(items) {
             equipD[key].Stat = JSON.stringify( stat );
             equipD[key].Skill = JSON.stringify( skill );
             // update item data
-            server.UpdateUserInventoryItemCustomData( { "PlayFabId": currentPlayerId, "ItemInstanceId": items[key].ItemInstanceId, "Data": equipmentData[key] } );
+            server.UpdateUserInventoryItemCustomData( { "PlayFabId": currentPlayerId, "ItemInstanceId": items[key].ItemInstanceId, "Data": equipD[key] } );
             
         }
         
