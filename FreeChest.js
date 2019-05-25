@@ -1,7 +1,7 @@
 var stackLimit = 2;
 var cKey = "FreeChests";
 
-handlers.FreeChestCheck = function (args) {
+handlers.FreeChestOpen = function (args) {
     try {
         
         var items = [];
