@@ -7,7 +7,7 @@ handlers.FreeChestOpen = function (args) {
         
         var items = [];
         var cTime = new Date();
-        var uDate = new Date();
+        var uDate;
         var waitTime = 240 * (1000 * 60);
         var cnt = 0;
         var ids = [];
@@ -18,13 +18,13 @@ handlers.FreeChestOpen = function (args) {
 
             if(rData.Data.hasOwnProperty(cKey)) {
                 uDate = new Date( rData.Data[cKey].Value );
-                cnt = parseInt((uDate.getTime() - cTime.getTime()) / waitTime);
+                cnt = parseInt( ( uDate.getTime() - cTime.getTime() ) / waitTime );
             }else {
                 cnt = cLimit;
             }
 
             if(cnt > cLimit) { cnt = cLimit; }
-            if(cnt == 0) { throw "FreeChest not yet"; }
+            if(cnt <= 0) { throw "FreeChest not yet"; }
 
             for(var i=0; i< cnt; i++) { 
                 ids.push(cSupID);
