@@ -17,7 +17,7 @@ handlers.FreeChestOpen = function (args) {
         if(GetChestCnt(cSupID) == 0) {
 
             if(rData.Data.hasOwnProperty(cKey)) {
-                uDate = new Date( rData.Data[cKey].Value );
+                uDate = new Date( JSON.parse(rData.Data[cKey].Value) );
                 cnt = parseInt( ( uDate.getTime() - cTime.getTime() ) / waitTime );
             }else {
                 cnt = cLimit;
