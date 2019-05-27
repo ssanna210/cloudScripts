@@ -7,7 +7,7 @@ handlers.FreeChestOpen = function (args) {
         
         var items = [];
         var cTime = new Date();
-        var uDate;
+        var uDate = new Date();
         var waitTime = 240 * (1000 * 60);
         var cnt = 0;
         var ids = [];
