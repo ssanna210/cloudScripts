@@ -772,22 +772,22 @@ handlers.SellItem = function (args) {
     return SellItem_internal(args.soldItemInstanceId, "GO");
 };
 
-function CalculItemWorth ( customData, worthTable ) {
+function CalculItemWorth ( cData, wTable ) {
     
     // stat : Atk, Hp, Sta
-    var tier = parseInt( customData.Tier );
+    var tier = parseInt( cData.Tier );
     var grade = (tier - 1) / 5;
-    var stat = JSON.parse( customData.Stat );
-    var skill = JSON.parse( customData.Skill );
+    var stat = JSON.parse( cData.Stat );
+    var skill = JSON.parse( cData.Skill );
     var lev = stat.Lev;
     var atk = 0; var hp = 0; var sta = 0;
     if(stat.hasOwnProperty("Atk")) atk = stat.Atk;
     if(stat.hasOwnProperty("Hp")) hp = stat.Hp;
     if(stat.hasOwnProperty("Sta")) sta = Math.ceil(stat.Sta);
     
-    var result = (worthTable.Grade * grade) + (worthTable.Tier * tier) + (worthTable.Lev * lev) + ( worthTable.Stat * (atk + hp + sta) ) + (worthTable.SkillLev * skill.Lev);
+    var r = (wTable.Grade * grade) + (wTable.Tier * tier) + (wTable.Lev * lev) + ( wTable.Stat * (atk + hp + sta) ) + (wTable.SkillLev * skill.Lev);
     
-    return result;
+    return r;
     
 }
 
@@ -859,11 +859,11 @@ function ExpUp_internal ( targeInstId, rawInstId ) {
 }
 
 function CalculLevLimit ( tier, levelTable ) {
-    var starCnt = 0;
-    starCnt = (tier % 5);
-    if (starCnt == 0) starCnt = 5;
-    var result = levelTable.LimitList[starCnt-1];
-    return result;
+    var cnt = 0;
+    cnt = (tier % 5);
+    if (cnt == 0) cnt = 5;
+    var r = levelTable.LimitList[cnt-1];
+    return r;
 }
 
 handlers.UpdatePartyTabData = function (args) {
@@ -999,15 +999,15 @@ handlers.FirstCheck = function (args) {
     return result;
 }
 
-function ResetUpgradeSlot(table) {
+function ResetUpgradeSlot(t) {
     
     var slot = {};
-    var result = {};
-    for(var index in table.ItemUpgradeSlot) {
-        slot.state = table.ItemUpgradeSlot[index].Default;
-        result[table.ItemUpgradeSlot[index].ID] = JSON.stringify(slot);
+    var r = {};
+    for(var index in t.ItemUpgradeSlot) {
+        slot.state = t.ItemUpgradeSlot[index].Default;
+        r[t.ItemUpgradeSlot[index].ID] = JSON.stringify(slot);
     }
-    return result;
+    return r;
     
 }
 
@@ -1302,13 +1302,13 @@ function GetRandomSkill( itemClass, SkillInfos, EquipListData, EquipArray ) {
     
 }
 
-function resetMasteryValue(table){
+function resetMasteryValue(t){
     
-    var result = {};
-    for(var index in table.Mastery) {
-        result[String(table.Mastery[index].ID)] = String(0);
+    var r = {};
+    for(var i in t.Mastery) {
+        r[String(t.Mastery[i].ID)] = String(0);
     }
-    return result;
+    return r;
 }
 
 // string -> bool
