@@ -4,29 +4,32 @@ var cSupID = "chest_supply";
 
 handlers.FreeChestOpen = function (args) {
     try {
-        
+
         var items = [];
         var cTime = new Date();
         var uDate = new Date();
         var waitTime = 240 * (1000 * 60);
-        var cnt = 0;
         var ids = [];
+        var chest = {};
 
         var rData = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: [cKey] } );
 
         if(GetChestCnt(cSupID) == 0) {
 
             if(rData.Data.hasOwnProperty(cKey)) {
-                uDate = new Date( JSON.parse(rData.Data[cKey].Value) );
-                cnt = parseInt( ( cTime.getTime() - uDate.getTime() ) / waitTime);
+                chest = JSON.parse(rData.Data[cKey].Value);
+                uDate = new Date(chest.uDate);
+                if(chest.cnt == 0){
+                    chest.cnt = parseInt( ( cTime.getTime() - uDate.getTime() ) / waitTime);
+                }
             }else {
-                cnt = cLimit;
+                chest.cnt = cLimit;
             }
 
-            if(cnt > cLimit) { cnt = cLimit; }
-            if(cnt <= 0) { throw "FreeChest not yet"; }
+            if(chest.cnt > cLimit) { chest.cnt = cLimit; }
+            if(chest.cnt <= 0) { throw "FreeChest not yet"; }
 
-            for(var i=0; i< cnt; i++) { 
+            for(var i=0; i< chest.cnt; i++) { 
                 ids.push(cSupID);
             }
 
@@ -36,6 +39,7 @@ handlers.FreeChestOpen = function (args) {
 
         var pull = server.UnlockContainerItem( { PlayFabId: currentPlayerId, ContainerItemId: cSupID } );
         items = MakeItemData(pull.GrantedItems);
+        chest.cnt -= 1;
 
         if(GetChestCnt(cSupID) == 0) {
             uDate = new Date();
@@ -44,7 +48,7 @@ handlers.FreeChestOpen = function (args) {
                 "PlayFabId": currentPlayerId,
                 "Data": {}
             };
-            rdReq.Data[cKey] = JSON.stringify( uDate );
+            rdReq.Data[cKey] = JSON.stringify( chest );
             var rdR = server.UpdateUserReadOnlyData(rdReq);
         }
 
