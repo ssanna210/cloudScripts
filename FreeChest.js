@@ -18,7 +18,7 @@ handlers.FreeChestOpen = function (args) {
 
             if(rData.Data.hasOwnProperty(cKey)) {
                 uDate = new Date( JSON.parse(rData.Data[cKey].Value) );
-                cnt = parseInt( ( uDate.getTime() - cTime.getTime() ) / waitTime );
+                cnt = parseInt( ( cTime.getTime() - uDate.getTime() ) / waitTime);
             }else {
                 cnt = cLimit;
             }
@@ -38,7 +38,7 @@ handlers.FreeChestOpen = function (args) {
         items = MakeItemData(pull.GrantedItems);
 
         if(GetChestCnt(cSupID) == 0) {
-            uDate.setTime(cTime.getTime() + waitTime);
+            uDate = new Date();
 
             var rdReq = {
                 "PlayFabId": currentPlayerId,
