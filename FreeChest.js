@@ -43,14 +43,14 @@ handlers.FreeChestOpen = function (args) {
 
         if(GetChestCnt(cSupID) == 0) {
             uDate = new Date();
-
-            var rdReq = {
-                "PlayFabId": currentPlayerId,
-                "Data": {}
-            };
-            rdReq.Data[cKey] = JSON.stringify( chest );
-            var rdR = server.UpdateUserReadOnlyData(rdReq);
         }
+        chest.uDate = uDate;
+        var rdReq = {
+            "PlayFabId": currentPlayerId,
+            "Data": {}
+        };
+        rdReq.Data[cKey] = JSON.stringify( chest );
+        var rdR = server.UpdateUserReadOnlyData(rdReq);
 
         if(items.length == 0) { throw "result is nothing"; }
 
