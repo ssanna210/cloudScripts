@@ -11,6 +11,8 @@ handlers.FreeChestOpen = function (args) {
         var wTime = 240 * (1000 * 60);
         var lTime = 0;
         var chest = {};
+        chest.uDate = new Date();
+        chest.lTime = 0;
 
         var rData = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: [cKey] } );
         if(rData.Data.hasOwnProperty(cKey)) {
@@ -28,10 +30,8 @@ handlers.FreeChestOpen = function (args) {
             }
         }else {
             chest.cnt = cLimit;
-            chest.uDate = new Date();
-            chest.lTime = 0;
         }
-        if(chest.cnt == null) {chest.cnt = 2; rdUpdate(cKey,chest);}
+        if(chest.cnt == null) {chest.cnt = cLimit; rdUpdate(cKey,chest);}
         if(chest.cnt <= 0) { throw "FreeChest not yet"; }
 
         if(GetChestCnt(cSupID) == 0) {
