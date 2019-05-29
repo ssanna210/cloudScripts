@@ -15,6 +15,7 @@ handlers.FreeChestOpen = function (args) {
         var rData = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: [cKey] } );
         if(rData.Data.hasOwnProperty(cKey)) {
             chest = JSON.parse(rData.Data[cKey].Value);
+            if(chest.cnt == null) {chest.cnt = 0;}
             uDate = new Date(chest.uDate);
             lTime = cTime.getTime() - uDate.getTime() - chest.lTime;
             for(var i=0; i<cLimit; i++){
