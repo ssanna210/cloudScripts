@@ -8,28 +8,28 @@ handlers.FreeChestOpen = function (args) {
         var items = [];
         var cTime = new Date();
         var uDate = new Date();
-        var waitTime = 240 * (1000 * 60);
-        var leftTime = 0;
+        var wTime = 240 * (1000 * 60);
+        var lTime = 0;
         var chest = {};
 
         var rData = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: [cKey] } );
         if(rData.Data.hasOwnProperty(cKey)) {
             chest = JSON.parse(rData.Data[cKey].Value);
             uDate = new Date(chest.uDate);
-            leftTime = cTime.getTime() - uDate.getTime() - chest.leftTime;
+            lTime = cTime.getTime() - uDate.getTime() - chest.lTime;
             for(var i=0; i<cLimit; i++){
-                leftTime -= waitTime;
-                if(leftTime >= 0){chest.cnt += 1}
-                else{leftTime += waitTime; break;}
+                lTime -= wTime;
+                if(lTime >= 0){chest.cnt += 1}
+                else{lTime += wTime; break;}
             }
             if(chest.cnt >= cLimit) {
                 chest.cnt = cLimit;
-                leftTime = 0;
+                lTime = 0;
             }
         }else {
             chest.cnt = cLimit;
             chest.uDate = new Date();
-            chest.leftTime = 0;
+            chest.lTime = 0;
         }
         if(chest.cnt <= 0) { throw "FreeChest not yet"; }
 
@@ -43,7 +43,7 @@ handlers.FreeChestOpen = function (args) {
 
         uDate = new Date();
         chest.uDate = uDate;
-        chest.leftTime = leftTime;
+        chest.lTime = lTime;
 
         var rdReq = {
             "PlayFabId": currentPlayerId,
