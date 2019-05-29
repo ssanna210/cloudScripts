@@ -15,7 +15,6 @@ handlers.FreeChestOpen = function (args) {
         var rData = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: [cKey] } );
         if(rData.Data.hasOwnProperty(cKey)) {
             chest = JSON.parse(rData.Data[cKey].Value);
-            if(chest.cnt == null) {chest.cnt = 0;}
             uDate = new Date(chest.uDate);
             lTime = cTime.getTime() - uDate.getTime() - chest.lTime;
             for(var i=0; i<cLimit; i++){
@@ -32,6 +31,7 @@ handlers.FreeChestOpen = function (args) {
             chest.uDate = new Date();
             chest.lTime = 0;
         }
+        if(chest.cnt == null) {chest.cnt = 0; rdUpdate(cKey,chest);}
         if(chest.cnt <= 0) { throw "FreeChest not yet"; }
 
         if(GetChestCnt(cSupID) == 0) {
@@ -46,12 +46,7 @@ handlers.FreeChestOpen = function (args) {
         chest.uDate = uDate;
         chest.lTime = lTime;
 
-        var rdReq = {
-            "PlayFabId": currentPlayerId,
-            "Data": {}
-        };
-        rdReq.Data[cKey] = JSON.stringify( chest );
-        var rdR = server.UpdateUserReadOnlyData(rdReq);
+        rdUpdate(cKey,chest);
 
         if(items.length == 0) { throw "result is nothing"; }
 
@@ -62,6 +57,12 @@ handlers.FreeChestOpen = function (args) {
         retObj["errorDetails"] = "Error: " + e;
         return retObj;
     }
+}
+
+function rdUpdate(key,obj){
+    var req = { "PlayFabId": currentPlayerId, "Data": {} }
+    req.Data[key] = JSON.stringify(obj);
+    return server.UpdateUserReadOnlyData(req);
 }
 
 function GetChestCnt (id) {
