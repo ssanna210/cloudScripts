@@ -31,7 +31,7 @@ handlers.FreeChestOpen = function (args) {
             chest.uDate = new Date();
             chest.lTime = 0;
         }
-        if(chest.cnt == null) {chest.cnt = 0; rdUpdate(cKey,chest);}
+        if(chest.cnt == null) {chest.cnt = 2; rdUpdate(cKey,chest);}
         if(chest.cnt <= 0) { throw "FreeChest not yet"; }
 
         if(GetChestCnt(cSupID) == 0) {
