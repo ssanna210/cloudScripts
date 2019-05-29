@@ -9,42 +9,42 @@ handlers.FreeChestOpen = function (args) {
         var cTime = new Date();
         var uDate = new Date();
         var waitTime = 240 * (1000 * 60);
-        var ids = [];
+        var leftTime = 0;
         var chest = {};
 
         var rData = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: [cKey] } );
+        if(rData.Data.hasOwnProperty(cKey)) {
+            chest = JSON.parse(rData.Data[cKey].Value);
+            uDate = new Date(chest.uDate);
+            leftTime = cTime.getTime() - uDate.getTime() - chest.leftTime;
+            for(var i=0; i<cLimit; i++){
+                leftTime -= waitTime;
+                if(leftTime >= 0){chest.cnt += 1}
+                else{leftTime += waitTime; break;}
+            }
+            if(chest.cnt >= cLimit) {
+                chest.cnt = cLimit;
+                leftTime = 0;
+            }
+        }else {
+            chest.cnt = cLimit;
+            chest.uDate = new Date();
+            chest.leftTime = 0;
+        }
+        if(chest.cnt <= 0) { throw "FreeChest not yet"; }
 
         if(GetChestCnt(cSupID) == 0) {
-
-            if(rData.Data.hasOwnProperty(cKey)) {
-                chest = JSON.parse(rData.Data[cKey].Value);
-                uDate = new Date(chest.uDate);
-                if(chest.cnt == 0){
-                    chest.cnt = parseInt( ( cTime.getTime() - uDate.getTime() ) / waitTime);
-                }
-            }else {
-                chest.cnt = cLimit;
-            }
-
-            if(chest.cnt > cLimit) { chest.cnt = cLimit; }
-            if(chest.cnt <= 0) { throw "FreeChest not yet"; }
-
-            for(var i=0; i< chest.cnt; i++) { 
-                ids.push(cSupID);
-            }
-
-            server.GrantItemsToUser({ PlayFabId: currentPlayerId, ItemIds: ids });
-
+            server.GrantItemsToUser({ PlayFabId: currentPlayerId, ItemIds: [cSupID] });
         }
 
         var pull = server.UnlockContainerItem( { PlayFabId: currentPlayerId, ContainerItemId: cSupID } );
-        items = MakeItemData(pull.GrantedItems);
         chest.cnt -= 1;
+        items = MakeItemData(pull.GrantedItems);
 
-        if(GetChestCnt(cSupID) == 0) {
-            uDate = new Date();
-        }
+        uDate = new Date();
         chest.uDate = uDate;
+        chest.leftTime = leftTime;
+
         var rdReq = {
             "PlayFabId": currentPlayerId,
             "Data": {}
