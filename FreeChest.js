@@ -80,3 +80,21 @@ function GetChestCnt (id) {
     }
     return r;
 }
+
+handlers.SubUpdate = function (args) {
+    try {
+        var stc;
+        var stcR = server.GetPlayerStatistics({PlayFabId: currentPlayerId, StatisticNames: [ args.mode ]});
+        if(stcR.Statistics.length == 0) { throw "key not found"; }
+        stc = stcR.Statistics[0];
+        stc.Value = args.score;
+        server.UpdatePlayerStatistics({ PlayFabId: currentPlayerId, Statistics: [stc] });
+        server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: args.amount, VirtualCurrency: "CM" });
+    }catch(e) {
+        var retObj = {};
+        retObj["errorDetails"] = "Error: " + e;
+        return retObj;
+    }
+}
+
+
