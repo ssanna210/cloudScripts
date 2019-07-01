@@ -38,17 +38,17 @@ handlers.unlockChest = function (args, context) {
 
 function MakeItemData(items) {
     try {
-        
-        var StatisticsR = server.GetPlayerStatistics({ "PlayFabId": currentPlayerId, "StatisticNames": [ "TotalTier" ] });
+        var cId = currentPlayerId;
+        var StcR = server.GetPlayerStatistics({ "PlayFabId": cId, "StatisticNames": [ "TotalTier" ] });
 
         var tierStatistic = {};
         tierStatistic.StatisticName = "TotalTier";
         tierStatistic.Value = 1;
         
-        if(StatisticsR.Statistics.length > 0) {
-            for(var index in StatisticsR.Statistics) {
-                if(StatisticsR.Statistics[index].StatisticName == "TotalTier") 
-                    tierStatistic = StatisticsR.Statistics[index];
+        if(StcR.Statistics.length > 0) {
+            for(var index in StcR.Statistics) {
+                if(StcR.Statistics[index].StatisticName == "TotalTier") 
+                    tierStatistic = StcR.Statistics[index];
             }
         }
         
@@ -72,7 +72,7 @@ function MakeItemData(items) {
         }
         
         // get item catalog
-        var CatalR = server.GetCatalogItems({ "PlayFabId": currentPlayerId });
+        var CatalR = server.GetCatalogItems({ "PlayFabId": cId });
         
         var equipD = [];
         
@@ -183,7 +183,7 @@ function MakeItemData(items) {
             equipD[key].Stat = JSON.stringify( stat );
             equipD[key].Skill = JSON.stringify( skill );
             // update item data
-            server.UpdateUserInventoryItemCustomData( { "PlayFabId": currentPlayerId, "ItemInstanceId": items[key].ItemInstanceId, "Data": equipD[key] } );
+            server.UpdateUserInventoryItemCustomData( { "PlayFabId": cId, "ItemInstanceId": items[key].ItemInstanceId, "Data": equipD[key] } );
             
         }
         
@@ -198,7 +198,7 @@ function MakeItemData(items) {
 
 handlers.openStartChest = function (args, context) {
     try {
-        
+        var cId = currentPlayerId;
         var ItemD = GetItemData([args.InstanceId]);
         if(ItemD.length == 0) { throw "Item instance not found"; }
         var chestD = ItemD[0];
@@ -209,7 +209,7 @@ handlers.openStartChest = function (args, context) {
             throw "catalog not found";
         }
         
-        var StcR = server.GetPlayerStatistics( { "PlayFabId": currentPlayerId, "StatisticNames": [ "TotalTier" ] } );
+        var StcR = server.GetPlayerStatistics( { "PlayFabId": cId, "StatisticNames": [ "TotalTier" ] } );
 
         var tierStc = {};
         tierStc.StatisticName = "TotalTier";
@@ -237,7 +237,7 @@ handlers.openStartChest = function (args, context) {
         unLockDate.setTime(currentTime.getTime() + (waitTime * 1000 * 60));
 
         var req= { 
-            "PlayFabId": currentPlayerId,
+            "PlayFabId": cId,
             "ItemInstanceId": args.InstanceId,
             "Data": {
                 "openTime" : unLockDate,
@@ -262,7 +262,7 @@ handlers.openStartChest = function (args, context) {
 
 handlers.videoChest = function (args, context) {
     try {
-        
+
         var ItemR = GetItemData([args.InstanceId]);
         if(ItemR.length == 0) { throw "Item instance not found"; }
         var chestD = ItemR[0];
