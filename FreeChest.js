@@ -4,7 +4,7 @@ var cSupID = "chest_supply";
 
 handlers.FreeChestOpen = function (args) {
     try {
-
+        var cId = currentPlayerId;
         var items = [];
         var cTime = new Date();
         var uDate = new Date();
@@ -14,7 +14,7 @@ handlers.FreeChestOpen = function (args) {
         chest.uDate = new Date();
         chest.lTime = 0;
 
-        var rData = server.GetUserReadOnlyData( { PlayFabId: currentPlayerId, Keys: [cKey] } );
+        var rData = server.GetUserReadOnlyData( { PlayFabId: cId, Keys: [cKey] } );
         if(rData.Data.hasOwnProperty(cKey)) {
             chest = JSON.parse(rData.Data[cKey].Value);
 
@@ -42,10 +42,10 @@ handlers.FreeChestOpen = function (args) {
         if(chest.cnt <= 0) { throw "FreeChest not yet"; }
 
         if(GetChestCnt(cSupID) == 0) {
-            server.GrantItemsToUser({ PlayFabId: currentPlayerId, ItemIds: [cSupID] });
+            server.GrantItemsToUser({ PlayFabId: cId, ItemIds: [cSupID] });
         }
 
-        var pull = server.UnlockContainerItem( { PlayFabId: currentPlayerId, ContainerItemId: cSupID } );
+        var pull = server.UnlockContainerItem( { PlayFabId: cId, ContainerItemId: cSupID } );
         chest.cnt -= 1;
         items = MakeItemData(pull.GrantedItems);
 
@@ -83,13 +83,14 @@ function GetChestCnt (id) {
 
 handlers.SubUpdate = function (args) {
     try {
+        var cId = currentPlayerId;
         var stc;
-        var stcR = server.GetPlayerStatistics({PlayFabId: currentPlayerId, StatisticNames: [ args.mode ]});
+        var stcR = server.GetPlayerStatistics({PlayFabId: cId, StatisticNames: [ args.mode ]});
         if(stcR.Statistics.length == 0) { throw "key not found"; }
         stc = stcR.Statistics[0];
         stc.Value = args.score;
-        server.UpdatePlayerStatistics({ PlayFabId: currentPlayerId, Statistics: [stc] });
-        server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: args.amount, VirtualCurrency: "CM" });
+        server.UpdatePlayerStatistics({ PlayFabId: cId, Statistics: [stc] });
+        server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: args.amount, VirtualCurrency: "CM" });
     }catch(e) {
         var retObj = {};
         retObj["errorDetails"] = "Error: " + e;
