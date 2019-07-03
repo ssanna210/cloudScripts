@@ -2,7 +2,7 @@ var cLimit = 2;
 var cKey = "FreeChest";
 var cSupID = "chest_supply";
 
-handlers.FreeChestOpen = function (args) {
+handlers.FreeChestOpen = function (args, context) {
     try {
         var cId = currentPlayerId;
         var items = [];
@@ -81,14 +81,14 @@ function GetChestCnt (id) {
     return r;
 }
 
-handlers.SubUpdate = function (args) {
+handlers.SubUpdate = function (args, context) {
     try {
         var cId = currentPlayerId;
         var inven = server.GetUserInventory({PlayFabId:cId});
         var vc = inven.VirtualCurrency["CM"];
         var amount = args.amount;
         
-        var stc;
+        var stc = {};
         stc.StatisticName = args.mode;
         stc.Value = 1;
         
