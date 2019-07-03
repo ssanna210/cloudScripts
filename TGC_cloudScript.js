@@ -41,18 +41,18 @@ function MakeItemData(items) {
         var cId = currentPlayerId;
         var StcR = server.GetPlayerStatistics({ "PlayFabId": cId, "StatisticNames": [ "TotalTier" ] });
 
-        var tierStatistic = {};
-        tierStatistic.StatisticName = "TotalTier";
-        tierStatistic.Value = 1;
+        var tierStc = {};
+        tierStc.StatisticName = "TotalTier";
+        tierStc.Value = 1;
         
         if(StcR.Statistics.length > 0) {
             for(var index in StcR.Statistics) {
                 if(StcR.Statistics[index].StatisticName == "TotalTier") 
-                    tierStatistic = StcR.Statistics[index];
+                    tierStc = StcR.Statistics[index];
             }
         }
         
-        var totalTier = tierStatistic.Value;
+        var totalTier = tierStc.Value;
         var tier = parseInt(totalTier % 100);
         var rebirth = parseInt( totalTier / 100 );
         
@@ -120,7 +120,7 @@ function MakeItemData(items) {
             var randomValue = parseInt(Math.random() * equipList.length);
             var itemId = equipList[randomValue];
             //
-            var tableData = {};
+            var t = {};
             var info = {};
             var stat = {};
             var skill = {};
@@ -132,47 +132,47 @@ function MakeItemData(items) {
             // set stat
             for(var index in itemTable.Equipments) {
                 if(itemTable.Equipments[index].ItemID == itemId) {
-                    tableData = CopyObj( itemTable.Equipments[index] );
+                    t = CopyObj( itemTable.Equipments[index] );
                 }
             }
             //Lev, Atk, Hp
             stat.Lev = 1;
             stat.Exp = 0;
-            if(tableData.hasOwnProperty("AtkX")) {
-                stat.Atk = parseInt( tierInfo.StatAmount * tableData.AtkX );
+            if(t.hasOwnProperty("AtkX")) {
+                stat.Atk = parseInt( tierInfo.StatAmount * t.AtkX );
                 stat.Atk += parseInt( Math.random() * tier );
             }
-            if(tableData.hasOwnProperty("HpX")) {
-                stat.Hp = parseInt( tierInfo.StatAmount * tableData.HpX );
+            if(t.hasOwnProperty("HpX")) {
+                stat.Hp = parseInt( tierInfo.StatAmount * t.HpX );
                 stat.Hp += parseInt( Math.random() * tier );
             }
-            if(tableData.hasOwnProperty("Sta")) {
-                stat.Sta = tableData.Sta;
+            if(t.hasOwnProperty("Sta")) {
+                stat.Sta = t.Sta;
             }
-            if(tableData.hasOwnProperty("StaReX")) {
-                stat.StaReX = tableData.StaReX;
+            if(t.hasOwnProperty("StaReX")) {
+                stat.StaReX = t.StaReX;
             }
-            if(tableData.hasOwnProperty("Wg")) {
-                stat.Wg = tableData.Wg;
+            if(t.hasOwnProperty("Wg")) {
+                stat.Wg = t.Wg;
             }
             
             if(customObj.grade == "rare" || customObj.grade == "legend") {
                 
-                skill = GetRandomSkill( tableData.ItemClass, skillTable.SkillInfos, EquipListData, EquipArray );
+                skill = GetRandomSkill( t.ItemClass, skillTable.SkillInfos, EquipListData, EquipArray );
                 
                 if(customObj.grade == "rare") { skill.Lev = 20 + (parseInt(Math.random() * 10) - 8); }
                 if(customObj.grade == "legend") { skill.Lev = skill.Limit; }
                 
             }
-            // customData.info
-            info.ItemID = tableData.ItemID;
+            
+            info.ItemID = t.ItemID;
             
             // set character
-            if(tableData.ItemClass == "character") {
+            if(t.ItemClass == "character") {
                 
                 info.hc = parseInt(Math.random() * 6); // hair color
                 info.sc = parseInt(Math.random() * 3); // skin color
-                var hairIdList = tableData["HairRange"].split(",");
+                var hairIdList = t["HairRange"].split(",");
                 info.ht = hairIdList[ parseInt(Math.random() * hairIdList.length) ];   // hair type
                 // acc slot count
                 if( parseInt(Math.random() * 100) < 2 ) { info.slot = "2,3,4,4"; }
@@ -182,7 +182,7 @@ function MakeItemData(items) {
             equipD[key].Info = JSON.stringify( info );
             equipD[key].Stat = JSON.stringify( stat );
             equipD[key].Skill = JSON.stringify( skill );
-            // update item data
+            
             server.UpdateUserInventoryItemCustomData( { "PlayFabId": cId, "ItemInstanceId": items[key].ItemInstanceId, "Data": equipD[key] } );
             
         }
@@ -247,9 +247,7 @@ handlers.openStartChest = function (args, context) {
             }
         }
 
-        var result = server.UpdateUserInventoryItemCustomData(req);
-        
-        return result;
+        return server.UpdateUserInventoryItemCustomData(req);
         
     } catch(e) {
         var retObj = {};
@@ -267,10 +265,9 @@ handlers.videoChest = function (args, context) {
         if(ItemR.length == 0) { throw "Item instance not found"; }
         var chestD = ItemR[0];
         
-        // 보상 상자 시간 설정
         var unLockDate = new Date( chestD.CustomData.openTime );
         var startTime = new Date( chestD.CustomData.startTime );
-        var reduceTime = REDUCETIME_AD * 60 * 1000; //단축되는 시간
+        var reduceTime = REDUCETIME_AD * 60 * 1000;
             
         unLockDate.setTime(unLockDate.getTime() - reduceTime);
             
@@ -286,9 +283,7 @@ handlers.videoChest = function (args, context) {
             }
         }
 
-        var result = server.UpdateUserInventoryItemCustomData(req);    
-        
-        return result;
+        return server.UpdateUserInventoryItemCustomData(req);
         
     } catch(e) {
         var retObj = {};
@@ -306,11 +301,11 @@ handlers.openGem = function (args, context) {
         
         var chestD;
         
-        for(var index in invResult.Inventory)
+        for(var i in invResult.Inventory)
         {
-            if(invResult.Inventory[index].ItemInstanceId === args.InstanceId)
+            if(invResult.Inventory[i].ItemInstanceId === args.InstanceId)
             {
-                chestD = invResult.Inventory[index];
+                chestD = invResult.Inventory[i];
             }
         }
         
@@ -321,13 +316,13 @@ handlers.openGem = function (args, context) {
         var unLockDate = new Date();
         var currentTime = new Date();
         
-        var chestCustomData = {};
+        var customData = {};
         if(chestD.CustomData != null)
-            chestCustomData = chestD.CustomData;
+            customData = chestD.CustomData;
         
-        if("openTime" in chestCustomData) {
+        if("openTime" in customData) {
             
-            unLockDate = new Date( chestCustomData.openTime );
+            unLockDate = new Date( customData.openTime );
             
         }else {
             
@@ -349,19 +344,12 @@ handlers.openGem = function (args, context) {
         if(invResult.VirtualCurrency.GE < needGem) {
             throw "lack of GEM";
         }else {
-            var GemCostRequest = {
-                "PlayFabId": cId,
-                "VirtualCurrency": "GE",
-                "Amount": needGem   
-            };
-            var GemCostR = server.SubtractUserVirtualCurrency(GemCostRequest); 
+            server.SubtractUserVirtualCurrency( { PlayFabId: cId, VirtualCurrency: "GE", Amount: needGem } ); 
         }
         
-        var result = server.UnlockContainerInstance({ PlayFabId: cId, ContainerItemInstanceId: args.InstanceId });  
+        var r = server.UnlockContainerInstance({ PlayFabId: cId, ContainerItemInstanceId: args.InstanceId });  
         
-        var itemValues = MakeItemData(result.GrantedItems);
-        
-        return itemValues;
+        return MakeItemData(r.GrantedItems);
         
     } catch(e) {
         var retObj = {};
@@ -380,7 +368,7 @@ function grantChest () {
         var _cnt = 0;
         for(var i in inv.Inventory)
         {
-            if(inv.Inventory[i].ItemClass === IC_CHEST_BATTLE) {_cnt++;}
+            if(inv.Inventory[i].ItemClass === IC_CHEST_BATTLE) { _cnt++; }
         }
 
         var r = "NONE";
@@ -404,11 +392,11 @@ function grantChest () {
 
 function ProcessGrantChest()
 {
-    var DTresult = server.EvaluateRandomResultTable({ TableId : "dropTable_battleChest" });
+    var dT = server.EvaluateRandomResultTable({ TableId : "dropTable_battleChest" });
     
     var pull = server.GrantItemsToUser({ 
         PlayFabId: currentPlayerId, 
-        ItemIds: [DTresult.ResultItemId]
+        ItemIds: [dT.ResultItemId]
     });
     var r = pull.ItemGrantResults;
     var instId = r[0].ItemInstanceId;
@@ -627,7 +615,6 @@ handlers.Rebirth = function (args, context) {
         tierStc.Value = rebirth * 100 + tier;
         
         ResetInv("GO");
-        //
         
         server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: generalT.RebirthReward.Gem, VirtualCurrency: "GE" });
         server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: generalT.RebirthReward.SP, VirtualCurrency: "SP" });
@@ -688,12 +675,12 @@ function GetItemData(ids) {
     var r = [];
     var inv = server.GetUserInventory({ "PlayFabId": currentPlayerId });
     
-    for(var index in inv.Inventory)
+    for(var i in inv.Inventory)
     {
         for(var j in ids) {
-            if(inv.Inventory[index].ItemInstanceId === ids[j])
+            if(inv.Inventory[i].ItemInstanceId === ids[j])
             {
-                r.push( inv.Inventory[index] );
+                r.push( inv.Inventory[i] );
             }
         }
     }
@@ -704,11 +691,11 @@ function GetItemCatalogData(id) {
     var itemR;
     var ctgR = server.GetCatalogItems( { "PlayFabId": currentPlayerId } );
     
-    for(var index in ctgR.Catalog)
+    for(var i in ctgR.Catalog)
     {
-        if(ctgR.Catalog[index].ItemId === id)
+        if(ctgR.Catalog[i].ItemId === id)
         {
-            itemR = ctgR.Catalog[index];
+            itemR = ctgR.Catalog[i];
         }
     }
     return itemR;
@@ -763,7 +750,7 @@ function SellItem_internal(slodInstId, vcType) {
 
 handlers.SellItem = function (args) {
     if (!args || !args.soldItemInstanceId)
-        throw "Invalid input parameters, expected soldItemInstanceId and requestedVcType";
+        throw "Invalid input parameters";
     return SellItem_internal(args.soldItemInstanceId, "GO");
 };
 
@@ -789,7 +776,7 @@ function CalculItemWorth ( cData, wTable ) {
 handlers.ExpUp = function (args) {
     
      if (!args || !args.targetItemInstanceId || !args.rawItemInstanceId)
-        throw "Invalid input parameters, expected TargetItemInstanceId and RawItemInstanceId";
+        throw "Invalid input parameters";
     return ExpUp_internal(args.targetItemInstanceId, args.rawItemInstanceId);  
 }
 
@@ -921,15 +908,15 @@ handlers.MasteryUpgrade = function (args) {
                 masteryD = tableD.Mastery[index];
             }
         }
-        // Limit check
+        
         if(value >= masteryD.Limit) {
-            throw "마스터리 레벨 제한";
+            throw "mastery lev full";
         }
-        // cost check
+        
         var needSP = 0;
         needSP = masteryD.Cost * (value + 1);
         if( inv.VirtualCurrency.SP < needSP ) {
-            throw "SP 부족";
+            throw "SP lack";
         }else {
             // skill up
             value += 1;
@@ -956,9 +943,9 @@ handlers.MasteryUpgrade = function (args) {
 handlers.FirstCheck = function (args) {
     var cId = currentPlayerId;
     var r = {};
-    var internalD = server.GetUserInternalData( { PlayFabId: cId, Keys: ["isFirstGift", "isTutoComplete"] } );
-    if(internalD.Data.hasOwnProperty("isFirstGift") && isTrue( internalD.Data["isFirstGift"].Value )) {
-        r.isFirstGift = internalD.Data["isFirstGift"].Value;
+    var d = server.GetUserInternalData( { PlayFabId: cId, Keys: ["isFirstGift", "isTutoComplete"] } );
+    if(d.Data.hasOwnProperty("isFirstGift") && isTrue( d.Data["isFirstGift"].Value )) {
+        r.isFirstGift = d.Data["isFirstGift"].Value;
     }else {
         // first gift
         var pull = server.GrantItemsToUser({ 
@@ -983,8 +970,8 @@ handlers.FirstCheck = function (args) {
         server.UpdateUserReadOnlyData( {  PlayFabId: cId, Data : rdata, Permission : "Public" } );
         
     }
-    if(internalD.Data.hasOwnProperty("isTutoComplete") && isTrue( internalD.Data["isTutoComplete"].Value )) {
-        r.isTutoComplete = internalD.Data["isTutoComplete"].Value;
+    if(d.Data.hasOwnProperty("isTutoComplete") && isTrue( d.Data["isTutoComplete"].Value )) {
+        r.isTutoComplete = d.Data["isTutoComplete"].Value;
     }else {
         r.isTutoComplete = false;
     }
