@@ -84,13 +84,30 @@ function GetChestCnt (id) {
 handlers.SubUpdate = function (args) {
     try {
         var cId = currentPlayerId;
+        var inven = server.GetUserInventory({PlayFabId:cId});
+        var vc = inven.VirtualCurrency["CM"];
+        var amount = args.amount;
+        
         var stc;
-        var stcR = server.GetPlayerStatistics({PlayFabId: cId, StatisticNames: [ args.mode ]});
-        if(stcR.Statistics.length == 0) { throw "key not found"; }
-        stc = stcR.Statistics[0];
+        stc.StatisticName = args.mode;
+        stc.Value = 1;
+        
+        var tD = server.GetTitleData( { "Keys" : [ "General"] } );
+        var t = JSON.parse(tD.Data["General"]);
+        var isReal = false;
+        for(var i in t.SubContentsList){ if(t[i] == args.mode) isReal = true; }
+        if(!isReal || amount < 0) { throw "invalid input parameters"; }
+        if(vc >= t.ChestMedalLimit) { throw "vc full"; }
+        
+        if(vc + amount > t.ChestMedalLimit) { amount = t.ChestMedalLimit - vc; }
+        
+        var stcR = server.GetPlayerStatistics( {PlayFabId: cId, StatisticNames: [ args.mode ]} );
+        if(stcR.Statistics.length > 0) { stc = stcR.Statistics[0]; }
         stc.Value = args.score;
         server.UpdatePlayerStatistics({ PlayFabId: cId, Statistics: [stc] });
-        server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: args.amount, VirtualCurrency: "CM" });
+        if(amount > 0) {
+            server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: args.amount, VirtualCurrency: "CM" });
+        }
     }catch(e) {
         var retObj = {};
         retObj["errorDetails"] = "Error: " + e;
