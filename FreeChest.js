@@ -95,7 +95,7 @@ handlers.SubUpdate = function (args, context) {
         var tD = server.GetTitleData( { "Keys" : [ "General"] } );
         var t = JSON.parse(tD.Data["General"]);
         var isReal = false;
-        for(var i in t.SubContentsList){ if(t[i] == args.mode) isReal = true; }
+        for(var i in t.SubContentsList){ if(t.SubContentsList[i] == args.mode) isReal = true; }
         if(!isReal || amount < 0) { throw "invalid input parameters"; }
         if(vc >= t.ChestMedalLimit) { throw "vc full"; }
         
