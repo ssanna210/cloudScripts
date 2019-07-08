@@ -128,6 +128,9 @@ handlers.MedalChestOpen = function (args, context) {
                 throw "lack:" + customD.costs[i].vc;
             }
         }
+        if(GetChestCnt(cSupID) == 0) {
+            server.GrantItemsToUser({ PlayFabId: cId, ItemIds: [cMedID] });
+        }
         var pull = server.UnlockContainerItem( { PlayFabId: cId, ContainerItemId: cMedID } );
         var items = MakeItemData(pull.GrantedItems);
         for(var i in customD.costs) {
