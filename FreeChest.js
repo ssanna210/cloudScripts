@@ -116,7 +116,7 @@ handlers.SubUpdate = function (args, context) {
     }
 }
 
-handlers.Open = function (args, context) {
+handlers.MedalChestOpen = function (args, context) {
     try {
         var cId = currentPlayerId;
         var inv = server.GetUserInventory({ PlayFabId: cId });
