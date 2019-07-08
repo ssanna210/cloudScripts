@@ -1,6 +1,7 @@
 var cLimit = 2;
 var cKey = "FreeChest";
 var cSupID = "chest_supply";
+var cMedID = "chest_medal";
 
 handlers.FreeChestOpen = function (args, context) {
     try {
@@ -46,8 +47,8 @@ handlers.FreeChestOpen = function (args, context) {
         }
 
         var pull = server.UnlockContainerItem( { PlayFabId: cId, ContainerItemId: cSupID } );
-        chest.cnt -= 1;
         items = MakeItemData(pull.GrantedItems);
+        chest.cnt -= 1;
 
         uDate = new Date();
         chest.uDate = uDate;
@@ -115,4 +116,28 @@ handlers.SubUpdate = function (args, context) {
     }
 }
 
-
+handlers.Open = function (args, context) {
+    try {
+        var cId = currentPlayerId;
+        var inv = server.GetUserInventory({ PlayFabId: cId });
+        var cD = GetItemCatalogData(cMedID);
+        if(cD == null) { throw "catalog not found"; }
+        var customD = JSON.parse(cD.CustomData);
+        for(var i in customD.costs) {
+            if(!inv.VirtualCurrency.hasOwnProperty(customD.costs[i].vc) || inv.VirtualCurrency[customD.costs[i].vc] < customD.costs[i].cost) {
+                throw "lack:" + customD.costs[i].vc;
+            }
+        }
+        var pull = server.UnlockContainerItem( { PlayFabId: cId, ContainerItemId: cMedID } );
+        var items = MakeItemData(pull.GrantedItems);
+        for(var i in customD.costs) {
+            server.SubtractUserVirtualCurrency({ PlayFabId: cId, Amount: customD.costs[i].cost, VirtualCurrency: customD.costs[i].vc });
+        }
+        
+        return items;
+    }catch(e) {
+        var retObj = {};
+        retObj["errorDetails"] = "Error: " + e;
+        return retObj;
+    }
+}
