@@ -726,8 +726,6 @@ function SellItem_internal(soldInstId, vcType) {
     var ItemR = GetItemData(ids);
     if(ItemR.length == 0) { throw "item instance not found"; }
     var itemD = ItemR[0];
-    if (!itemD)
-        throw "Item instance not found";
     if(itemD.CustomData === undefined){
         throw "itemInstance.CustomData is undefined";
     }
@@ -758,6 +756,7 @@ function CalculItemWorth ( cData, wTable ) {
     if(stat.hasOwnProperty("Atk")) atk = stat.Atk;
     if(stat.hasOwnProperty("Hp")) hp = stat.Hp;
     if(stat.hasOwnProperty("Sta")) sta = Math.ceil(stat.Sta);
+    if(!skill.hasOwnProperty("Lev")) skill.Lev = 0;
     
     var r = (wTable.Grade * grade) + (wTable.Tier * tier) + (wTable.Lev * lev) + ( wTable.Stat * (atk + hp + sta) ) + (wTable.SkillLev * skill.Lev);
     
