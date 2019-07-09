@@ -714,13 +714,14 @@ function CopyObj(obj) {
   return copy;
 }
 
-function SellItem_internal(slodInstId, vcType) {
+function SellItem_internal(soldInstId, vcType) {
     
+    var cId = currentPlayerId;
     var TitleR = server.GetTitleData( { Keys : [ "WorthTable" ] } );
     var worthT = JSON.parse( TitleR.Data.WorthTable );
     if(!worthT) throw "WorthTable not found";
     var ids = [];
-    ids.push(slodInstId);
+    ids.push(soldInstId);
     // get item
     var ItemR = GetItemData(ids);
     if(ItemR.length == 0) { throw "item instance not found"; }
@@ -730,12 +731,11 @@ function SellItem_internal(slodInstId, vcType) {
     if(itemD.CustomData === undefined){
         throw "itemInstance.CustomData is undefined";
     }
-    // 
-    var itemWorth = CalculItemWorth(itemD.CustomData, worthT);
+    var worth = CalculItemWorth(itemD.CustomData, worthT);
     
-    var sellPrice = Math.ceil(itemWorth * worthT.SellGoldX);
-    server.AddUserVirtualCurrency({ PlayFabId: currentPlayerId, Amount: sellPrice, VirtualCurrency: vcType });
-    server.RevokeInventoryItem({ PlayFabId: currentPlayerId, ItemInstanceId: slodInstId });
+    var sellPrice = Math.ceil(worth * worthT.SellGoldX);
+    server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: sellPrice, VirtualCurrency: vcType });
+    server.RevokeInventoryItem({ PlayFabId: cId, ItemInstanceId: soldInstId });
     
     return sellPrice;
 }
