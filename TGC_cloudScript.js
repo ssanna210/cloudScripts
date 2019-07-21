@@ -71,7 +71,6 @@ function MakeItemData(items) {
             }
         }
         
-        // get item catalog
         var CatalR = server.GetCatalogItems({ "PlayFabId": cId });
         
         var equipD = [];
@@ -140,11 +139,11 @@ function MakeItemData(items) {
             stat.Exp = 0;
             if(t.hasOwnProperty("AtkX")) {
                 stat.Atk = parseInt( tierInfo.StatAmount * t.AtkX );
-                stat.Atk += parseInt( Math.random() * tier );
+                stat.Atk += parseInt( Math.random() * stat.Atk * 0.3 );
             }
             if(t.hasOwnProperty("HpX")) {
                 stat.Hp = parseInt( tierInfo.StatAmount * t.HpX );
-                stat.Hp += parseInt( Math.random() * tier );
+                stat.Hp += parseInt( Math.random() * stat.Hp * 0.3 );
             }
             if(t.hasOwnProperty("Sta")) {
                 stat.Sta = t.Sta;
