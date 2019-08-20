@@ -403,7 +403,7 @@ function ProcessGrantChest()
     return instId;
 }
 
-// args.mode, 0: normal 1: promotion
+// 0: normal 1: promotion
 handlers.BattleResult = function (args, context) {
     try {
         var cId = currentPlayerId;
@@ -460,7 +460,7 @@ handlers.BattleResult = function (args, context) {
                 tierInfo = tierT.TierInfos[i];
             }
         }
-        var trophyAmount = 0;
+        var trpAmnt = 0;
         // normal
         if(args.mode == 0) {
             // victory
@@ -472,12 +472,12 @@ handlers.BattleResult = function (args, context) {
                 if(trophyStc.Value < parseInt(tierInfo.TrophyLimit)) {
                 
                     if(userD.WinningStreak > parseInt(tierT.StreakLimit)) {
-                        trophyAmount = parseInt(tierT.Unit) + parseInt(tierT.StreakLimit);
+                        trpAmnt = parseInt(tierT.Unit) + parseInt(tierT.StreakLimit);
                     }else {
-                        trophyAmount = parseInt(tierT.Unit) + userD.WinningStreak;
+                        trpAmnt = parseInt(tierT.Unit) + userD.WinningStreak;
                     }
                 
-                    trophyStc.Value += trophyAmount;
+                    trophyStc.Value += trpAmnt;
                 
                     if(trophyStc.Value > parseInt(tierInfo.TrophyLimit)) {
                         trophyStc.Value = parseInt(tierInfo.TrophyLimit);
@@ -529,8 +529,8 @@ handlers.BattleResult = function (args, context) {
                 promoData.gem = generalT.PromoReward.Gem;
                 promoData.sp = generalT.PromoReward.SP;
                 
-                trophyAmount = 1;
-                trophyStc.Value += trophyAmount;
+                trpAmnt = 1;
+                trophyStc.Value += trpAmnt;
                 
                 server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: promoData.gold, VirtualCurrency: "GO" });
                 server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: promoData.gem, VirtualCurrency: "GE" });
@@ -538,8 +538,8 @@ handlers.BattleResult = function (args, context) {
                 
             }else {
                 // fail
-                trophyAmount = generalT.Promopenalty;
-                trophyStc.Value -= trophyAmount;
+                trpAmnt = generalT.Promopenalty;
+                trophyStc.Value -= trpAmnt;
                 if(trophyStc.Value < 0) trophyStc.Value = 0;
             }
         }
@@ -551,7 +551,7 @@ handlers.BattleResult = function (args, context) {
         r.totalTier = tierStc.Value;
         r.trophy = tierStc.Value;
         r.userData = userD;
-        r.trophyAmount = trophyAmount;
+        r.trophyAmount = trpAmnt;
         r.perWinChest = generalT.PerWinChest;
         r.promoData = promoData;
         
