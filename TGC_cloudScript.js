@@ -529,6 +529,9 @@ handlers.BattleResult = function (args, context) {
                 promoData.gem = generalT.PromoReward.Gem;
                 promoData.sp = generalT.PromoReward.SP;
                 
+                trophyAmount = 1;
+                trophyStc.Value += trophyAmount;
+                
                 server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: promoData.gold, VirtualCurrency: "GO" });
                 server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: promoData.gem, VirtualCurrency: "GE" });
                 server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: promoData.sp, VirtualCurrency: "SP" });
