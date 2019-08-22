@@ -731,6 +731,7 @@ function SellItem_internal(soldInstId, vcType) {
     if(itemD.CustomData === undefined){
         throw "itemInstance.CustomData is undefined";
     }
+    stat = JSON.parse(itemD.CustomData.Stat);
     var worth = CalculItemWorth(itemD.CustomData, worthT);
     
     var sellPrice = Math.ceil(worth * worthT.SellGoldX);
@@ -760,7 +761,7 @@ function CalculItemWorth ( cData, wTable ) {
     if(stat.hasOwnProperty("Sta")) sta = Math.ceil(stat.Sta);
     if(!skill.hasOwnProperty("Lev")) skill.Lev = 0;
     
-    var r = (wTable.Grade * grade) + (wTable.Tier * tier) + (wTable.Lev * lev) + ( wTable.Stat * (atk + hp + sta) ) + (wTable.SkillLev * skill.Lev);
+    var r = (wTable.Grade * grade) + (wTable.Tier * tier) + ( wTable.Stat * (atk + hp + sta) ) + (wTable.SkillLev * skill.Lev) * lev;
     
     return r;
     
@@ -803,8 +804,8 @@ function ExpUp_internal ( targeInstId, rawInstId ) {
     // 아이템 가치 계산
     var targetWorth = CalculItemWorth(targetItem.CustomData, worthT);
     var rawWorth = CalculItemWorth(rawItem.CustomData, worthT);
-    var exp = Math.ceil(rawWorth * worthT.ExpX * rawStat.Lev);
-    var levUpCost = rawStat.Lev * Math.ceil( rawWorth * worthT.LevUpCostX );
+    var exp = Math.ceil(rawWorth * worthT.ExpX);
+    var levUpCost = Math.ceil( rawWorth * worthT.LevUpCostX );
     if(levUpCost > inv.VirtualCurrency["GO"]) throw "lack of Gold";
     
     // Exp Up
