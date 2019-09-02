@@ -14,9 +14,9 @@ handlers.RedeemReferral = function(args) {
         }
         
         var invR = server.GetUserInventory({ "PlayFabId": currentPlayerId });
-        for(var index in invR.Inventory)
+        for(var i in invR.Inventory)
         {
-            if(invR.Inventory[index].ItemId === REFERRAL_BADGE)
+            if(invR.Inventory[i].ItemId === REFERRAL_BADGE)
             {
                 throw "You are only allowed one Referral Badge.";
             }
