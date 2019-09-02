@@ -11,22 +11,20 @@ handlers.unlockChest = function (args, context) {
         var chestR = ItemR[0];
         
         if(chestR.CustomData.hasOwnProperty("openTime")) {
-            var unLockDate = new Date( chestR.CustomData.openTime );
-            var currentTime = new Date();
+            var uDate = new Date( chestR.CustomData.openTime );
+            var ctime = new Date();
             
-            if(currentTime.getTime() < unLockDate.getTime()) {
+            if(ctime.getTime() < uDate.getTime()) {
                 throw "Time is shot yet";
             }
         }else {
             throw "not have key : openTime ";
         }
         
-        var result = server.UnlockContainerInstance({ PlayFabId: currentPlayerId, ContainerItemInstanceId: args.InstanceId });  
+        var r = server.UnlockContainerInstance({ PlayFabId: currentPlayerId, ContainerItemInstanceId: args.InstanceId });  
         
         // make item data
-        var r = MakeItemData(result.GrantedItems);
-        
-        return r;
+        return MakeItemData(r.GrantedItems);
         
     } catch(e) {
         var retObj = {};
@@ -58,16 +56,16 @@ function MakeItemData(items) {
         
         var TitleR = server.GetTitleData( { "Keys" : [ "ItemStatTable", "TierTable", "SkillTable" ] } );
 
-        var itemTable = JSON.parse( TitleR.Data["ItemStatTable"] );
-        var tierTable = JSON.parse( TitleR.Data["TierTable"] );
-        var skillTable = JSON.parse( TitleR.Data["SkillTable"] );
+        var itemT = JSON.parse( TitleR.Data["ItemStatTable"] );
+        var tierT = JSON.parse( TitleR.Data["TierTable"] );
+        var skillT = JSON.parse( TitleR.Data["SkillTable"] );
         
-        var EquipArray = [];
-        var EquipListData = {};
+        var equipA = [];
+        var equipLD = {};
         
-        for(var i = 0; i < tierTable.EquipList.length; i++) {
-            if(tierTable.EquipList[i].Tier <= totalTier) {
-                EquipArray.push(tierTable.EquipList[i]);
+        for(var i = 0; i < tierT.EquipList.length; i++) {
+            if(tierT.EquipList[i].Tier <= totalTier) {
+                equipA.push(tierT.EquipList[i]);
             }
         }
         
@@ -77,24 +75,24 @@ function MakeItemData(items) {
         
         for(var key in items) {
             
-            var tierInfo = {};
-            var randomTier = 1;
+            var tierI = {};
+            var rndTier = 1;
             if(items[key].CustomData !== undefined && items[key].CustomData.hasOwnProperty("tier")) { 
-                randomTier = items[key].CustomData["tier"]; 
-            }else { randomTier = GetRandomTier ( tier ); }
+                rndTier = items[key].CustomData["tier"]; 
+            }else { rndTier = GetRandomTier ( tier ); }
             
-            for(var index in tierTable.TierInfos) {
-                if(tierTable.TierInfos[index].Tier == randomTier) {
-                    tierInfo = tierTable.TierInfos[index];    
+            for(var i in tierT.TierInfos) {
+                if(tierT.TierInfos[i].Tier == rndTier) {
+                    tierI = tierT.TierInfos[i];    
                 }
             }
             
             var catalD = {};
-            for(var index in CatalR.Catalog)
+            for(var i in CatalR.Catalog)
             {
-                if(CatalR.Catalog[index].ItemId === items[key].ItemId)
+                if(CatalR.Catalog[i].ItemId === items[key].ItemId)
                 {
-                    catalD = CatalR.Catalog[index];
+                    catalD = CatalR.Catalog[i];
                 }
             }
             if(catalD == null){
@@ -105,19 +103,19 @@ function MakeItemData(items) {
             }
             var customObj = JSON.parse(catalD.CustomData);
             
-            if(!EquipListData.hasOwnProperty(items[key].ItemClass)) {
+            if(!equipLD.hasOwnProperty(items[key].ItemClass)) {
                 var tempList = [];
-                for(var i=0; i< EquipArray.length; i++) {
-                    if(EquipArray[i].hasOwnProperty(items[key].ItemClass)) {
-                        tempList.push(EquipArray[i][items[key].ItemClass]);
+                for(var i=0; i< equipA.length; i++) {
+                    if(equipA[i].hasOwnProperty(items[key].ItemClass)) {
+                        tempList.push(equipA[i][items[key].ItemClass]);
                     }
                 }
-                EquipListData[items[key].ItemClass] = tempList.join(',');
+                equipLD[items[key].ItemClass] = tempList.join(',');
             }
             
-            var equipList = EquipListData[items[key].ItemClass].split(",");
-            var randomValue = parseInt(Math.random() * equipList.length);
-            var itemId = equipList[randomValue];
+            var equipList = equipLD[items[key].ItemClass].split(",");
+            var rndV = parseInt(Math.random() * equipList.length);
+            var itemId = equipList[rndV];
             //
             var t = {};
             var info = {};
@@ -127,22 +125,22 @@ function MakeItemData(items) {
             equipD[key].Info = "NONE";
             equipD[key].Stat = "NONE";
             equipD[key].Skill = "NONE";
-            equipD[key].Tier = randomTier.toString();
+            equipD[key].Tier = rndTier.toString();
             // set stat
-            for(var index in itemTable.Equipments) {
-                if(itemTable.Equipments[index].ItemID == itemId) {
-                    t = CopyObj( itemTable.Equipments[index] );
+            for(var i in itemT.Equipments) {
+                if(itemT.Equipments[i].ItemID == itemId) {
+                    t = CopyObj( itemT.Equipments[i] );
                 }
             }
             //Lev, Atk, Hp
             stat.Lev = 1;
             stat.Exp = 0;
             if(t.hasOwnProperty("AtkX")) {
-                stat.Atk = parseInt( tierInfo.StatAmount * t.AtkX );
+                stat.Atk = parseInt( tierI.StatAmount * t.AtkX );
                 stat.Atk += parseInt( Math.random() * stat.Atk * 0.3 );
             }
             if(t.hasOwnProperty("HpX")) {
-                stat.Hp = parseInt( tierInfo.StatAmount * t.HpX );
+                stat.Hp = parseInt( tierI.StatAmount * t.HpX );
                 stat.Hp += parseInt( Math.random() * stat.Hp * 0.3 );
             }
             if(t.hasOwnProperty("Sta")) {
@@ -157,7 +155,7 @@ function MakeItemData(items) {
             
             if(customObj.grade == "rare" || customObj.grade == "legend") {
                 
-                skill = GetRandomSkill( t.ItemClass, skillTable.SkillInfos, EquipListData, EquipArray );
+                skill = GetRandomSkill( t.ItemClass, skillT.SkillInfos, equipLD, equipA );
                 
                 if(customObj.grade == "rare") { skill.Lev = 20 + (parseInt(Math.random() * 10) - 8); }
                 if(customObj.grade == "legend") { skill.Lev = skill.Limit; }
