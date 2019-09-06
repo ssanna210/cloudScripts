@@ -9,35 +9,29 @@ handlers.HTCheck = function (args, context) {
         var tStc = {};
         tStc.StatisticName = "TotalTier";
         tStc.Value = 1;
-                                              
-        if(StcR.Statistics.length == 0) {throw "nothing Stc";}
+        
         for(var i in stcR.Statistics) {
-            if(stcR.Statistics[i].StatisticName == HTN) 
-                hTStc = stcR.Statistics[i];
             if(stcR.Statistics[i].StatisticName == "TotalTier") 
                 tStc = stcR.Statistics[i];
         }
-        var hTVer = 0;
-        if(hTStc.hasOwnProperty("Version")) {
-            hTVer = hTStc.Version;
-        }
-        
+        var verR = server.GetPlayerStatisticVersions({"StatisticName": HTN});
+        var hTVer = verR.StatisticVersions[0] - 1;
         var TitleR = server.GetTitleData( { "Keys" : [ "General" ] } );
         var gT = JSON.parse( TitleR.Data["General"] );
-        if(tStc.Value < gT.TierForHighTrophy) { throw "not yet tier for "+ HTN; }
+        if(hTVer < 0 || tStc.Value < gT.TierForHighTrophy) { return lp; }
         
         var iD = server.GetUserInternalData( {PlayFabId : cId} );
         if(iD.Data.hasOwnProperty("HTBVer")){
-            if(iD.Data.HTBVer >= hTStc.Version) throw "aleady get reward";
+            if(iD.Data.HTBVer >= hTVer) return lp;
         }
         var stcR2 = server.GetPlayerStatistics
-            ({ "PlayFabId": cId, "StatisticNameVersions":[{"StatisticName":HTN, "Version": hTVer -1 }] });
+            ({ "PlayFabId": cId, "StatisticNameVersions":[{"StatisticName":HTN, "Version": hTVer }] });
         for(var i in stcR2.Statistics){
            if(stcR2.Statistics[i].StatisticName == HTN) hTStc = stcR2.Statistics[i];
         }
-        if(hTStc.Version == htVer) throw "not found";
+        if(hTStc.Value === undefined) return lp;
         var uData = {};
-        uData.HTBVer = hTVer-1;
+        uData.HTBVer = hTVer;
         lp = hTStc.Value * gT.HTtoLPx;
         server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: lp, VirtualCurrency: "LP" });
         server.UpdateUserInternalData({ PlayFabId : cId, Data : uData });
