@@ -1,25 +1,25 @@
-var REFERRAL_BONUS_BUNDLE = "premiumStarterPack";
-var REFERRAL_BADGE = "referralBadge";
+var REF_REW = "premiumStarterPack";
+var REF_BADGE = "referralBadge";
 
 handlers.RedeemReferral = function(args) {
 
     try{
+        
+        var cId = currentPlayerId;
+        
         if(args == null || typeof args.referralCode === undefined || args.referralCode === "")
         {
-            throw "Failed to redeem. args.referralCode is undefined or blank";
+            throw "1000";
         }
-        else if(args.referralCode === currentPlayerId)
+        else if(args.referralCode === cId)
         {
-            throw "You are not allowed to refer yourself.";
+            throw "1001";
         }
         
-        var invR = server.GetUserInventory({ "PlayFabId": currentPlayerId });
+        var invR = server.GetUserInventory({ "PlayFabId": cId });
         for(var i in invR.Inventory)
         {
-            if(invR.Inventory[i].ItemId === REFERRAL_BADGE)
-            {
-                throw "You are only allowed one Referral Badge.";
-            }
+            if(invR.Inventory[i].ItemId === REF_BADGE) throw "1002";
         }
         
         var rData = server.GetUserReadOnlyData({ "PlayFabId": args.referralCode, "Keys": [ "Referrals" ] });
@@ -27,7 +27,7 @@ handlers.RedeemReferral = function(args) {
 
         if(!rData.Data.hasOwnProperty("Referrals"))
         {
-            rValues.push(currentPlayerId);
+            rValues.push(cId);
             ProcessReferrer(args.referralCode, rValues);
         }
         else
@@ -37,7 +37,7 @@ handlers.RedeemReferral = function(args) {
             {
                 if(rValues.length < 10)
                 {
-                    rValues.push(currentPlayerId);
+                    rValues.push(cId);
                     ProcessReferrer(args.referralCode, rValues);
                 }
                 else
@@ -47,7 +47,7 @@ handlers.RedeemReferral = function(args) {
             }
             else
             {
-                throw "An error occured when parsing the referrer's player data.";
+                throw "1003";
             }
         }
         
@@ -87,10 +87,10 @@ function GrantReferralBonus(code)
 {
     var req = {
         "PlayFabId" : currentPlayerId,
-        "ItemIds" : [ REFERRAL_BADGE, REFERRAL_BONUS_BUNDLE ],
+        "ItemIds" : [ REF_BADGE, REF_REW ],
         "Annotation" : "Referred by: " + code
     };
 
-    var result = server.GrantItemsToUser(req);
-    return result.ItemGrantResults;
+    var r = server.GrantItemsToUser(req);
+    return r.ItemGrantResults;
 }
