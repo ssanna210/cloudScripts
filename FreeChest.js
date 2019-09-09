@@ -40,7 +40,7 @@ handlers.FreeChestOpen = function (args, context) {
             chest.cnt = cLimit;
         }
 
-        if(chest.cnt <= 0) { throw "FreeChest not yet"; }
+        if(chest.cnt <= 0) { throw "1004"; }
 
         if(GetChestCnt(cSupID) == 0) {
             server.GrantItemsToUser({ PlayFabId: cId, ItemIds: [cSupID] });
@@ -56,7 +56,7 @@ handlers.FreeChestOpen = function (args, context) {
 
         rdUpdate(cKey,chest);
 
-        if(items.length == 0) { throw "result is nothing"; }
+        if(items.length == 0) { throw "1005"; }
 
         return items;
 
@@ -97,8 +97,8 @@ handlers.SubUpdate = function (args, context) {
         var t = JSON.parse(tD.Data["General"]);
         var isReal = false;
         for(var i in t.SubContentsList){ if(t.SubContentsList[i] == args.mode) isReal = true; }
-        if(!isReal || amount < 0) { throw "invalid input parameters"; }
-        if(vc >= t.ChestMedalLimit) { throw "vc full"; }
+        if(!isReal || amount < 0) { throw "1006"; }
+        if(vc >= t.ChestMedalLimit) { throw "1007"; }
         
         if(vc + amount > t.ChestMedalLimit) { amount = t.ChestMedalLimit - vc; }
         
