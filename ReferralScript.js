@@ -2,7 +2,7 @@ var REF_REW = "premiumStarterPack";
 var REF_BADGE = "referralBadge";
 var REF_MAX = 10;
 
-handlers.RedeemReferral = function(args) {
+handlers.RedeemRef = function(args) {
 
     try{
         
@@ -29,7 +29,7 @@ handlers.RedeemReferral = function(args) {
         if(!rData.Data.hasOwnProperty("Referrals"))
         {
             rValues.push(cId);
-            ProcessReferrer(args.code, rValues);
+            ProcessRef(args.code, rValues);
         }
         else
         {
@@ -39,7 +39,7 @@ handlers.RedeemReferral = function(args) {
                 if(rValues.length < REF_MAX)
                 {
                     rValues.push(cId);
-                    ProcessReferrer(args.code, rValues);
+                    ProcessRef(args.code, rValues);
                 }
                 else
                 {
@@ -52,7 +52,7 @@ handlers.RedeemReferral = function(args) {
             }
         }
         
-        return GrantReferralBonus(args.code);
+        return GrantRefBonus(args.code);
         
     } catch(e) {
         var retObj = {};
@@ -61,9 +61,7 @@ handlers.RedeemReferral = function(args) {
     }
 };
 
-
-
-function ProcessReferrer(id, referrals)
+function ProcessRef(id, referrals)
 {
     
     var rdReq = {
@@ -83,8 +81,7 @@ function ProcessReferrer(id, referrals)
     log.info(vcReq.Amount + " " + "GE" + " granted to " + id);
 }
 
-
-function GrantReferralBonus(code)
+function GrantRefBonus(code)
 {
     var req = {
         "PlayFabId" : currentPlayerId,
