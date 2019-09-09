@@ -1,5 +1,4 @@
 HTN = "HighTrophy";
-
 handlers.HTCheck = function (args, context) {
     try {
         var cId = currentPlayerId;
@@ -9,7 +8,6 @@ handlers.HTCheck = function (args, context) {
         var tStc = {};
         tStc.StatisticName = "TotalTier";
         tStc.Value = 1;
-        
         for(var i in stcR.Statistics) {
             if(stcR.Statistics[i].StatisticName == "TotalTier") 
                 tStc = stcR.Statistics[i];
@@ -19,7 +17,6 @@ handlers.HTCheck = function (args, context) {
         var TitleR = server.GetTitleData( { "Keys" : [ "General" ] } );
         var gT = JSON.parse( TitleR.Data["General"] );
         if(hTVer < 0 || tStc.Value < gT.TierForHighTrophy) { return lp; }
-        
         var iD = server.GetUserInternalData( {PlayFabId : cId} );
         if(iD.Data.hasOwnProperty("HTBVer")){
             if(iD.Data.HTBVer >= hTVer) return lp;
@@ -37,7 +34,6 @@ handlers.HTCheck = function (args, context) {
         server.UpdateUserInternalData({ PlayFabId : cId, Data : uData });
         
         return lp;
-        
     }catch(e) {
         var r = {};
         r["errorDetails"] = "Error: " + e;
