@@ -2,7 +2,6 @@ var cLimit = 2;
 var cKey = "FreeChest";
 var cSupID = "chest_supply";
 var cMedID = "chest_medal";
-
 handlers.FreeChestOpen = function (args, context) {
     try {
         var cId = currentPlayerId;
@@ -14,17 +13,14 @@ handlers.FreeChestOpen = function (args, context) {
         var chest = {};
         chest.uDate = new Date();
         chest.lTime = 0;
-
         var rData = server.GetUserReadOnlyData( { PlayFabId: cId, Keys: [cKey] } );
         if(rData.Data.hasOwnProperty(cKey)) {
             chest = JSON.parse(rData.Data[cKey].Value);
-
             if(chest.cnt == null || chest.lTime === undefined) {
                 chest.cnt = cLimit;
                 chest.lTime = 0;
                 rdUpdate(cKey,chest);
             }
-
             uDate = new Date(chest.uDate);
             lTime = cTime.getTime() - uDate.getTime() - chest.lTime;
             for(var i=0; i<cLimit; i++){
@@ -39,40 +35,31 @@ handlers.FreeChestOpen = function (args, context) {
         }else {
             chest.cnt = cLimit;
         }
-
         if(chest.cnt <= 0) { throw "1004"; }
-
         if(GetChestCnt(cSupID) == 0) {
             server.GrantItemsToUser({ PlayFabId: cId, ItemIds: [cSupID] });
         }
-
         var pull = server.UnlockContainerItem( { PlayFabId: cId, ContainerItemId: cSupID } );
         items = MakeItemData(pull.GrantedItems);
         chest.cnt -= 1;
-
         uDate = new Date();
         chest.uDate = uDate;
         chest.lTime = lTime;
-
         rdUpdate(cKey,chest);
-
         if(items.length == 0) { throw "1005"; }
 
         return items;
-
     }catch(e) {
         var retObj = {};
         retObj["errorDetails"] = "Error: " + e;
         return retObj;
     }
 }
-
 function rdUpdate(key,obj){
     var req = { "PlayFabId": currentPlayerId, "Data": {} }
     req.Data[key] = JSON.stringify(obj);
     return server.UpdateUserReadOnlyData(req);
 }
-
 function GetChestCnt (id) {
     var r = 0;
     var inv = server.GetUserInventory({ PlayFabId: currentPlayerId });
@@ -81,25 +68,21 @@ function GetChestCnt (id) {
     }
     return r;
 }
-
 handlers.SubUpdate = function (args, context) {
     try {
         var cId = currentPlayerId;
         var inven = server.GetUserInventory({PlayFabId:cId});
         var vc = inven.VirtualCurrency["CM"];
         var amount = args.amount;
-        
         var stc = {};
         stc.StatisticName = args.mode;
         stc.Value = 1;
-        
         var tD = server.GetTitleData( { "Keys" : [ "General"] } );
         var t = JSON.parse(tD.Data["General"]);
         var isReal = false;
         for(var i in t.SubContentsList){ if(t.SubContentsList[i] == args.mode) isReal = true; }
         if(!isReal || amount < 0) { throw "1006"; }
         if(vc >= t.ChestMedalLimit) { throw "1007"; }
-        
         if(vc + amount > t.ChestMedalLimit) { amount = t.ChestMedalLimit - vc; }
         
         var stcR = server.GetPlayerStatistics( {PlayFabId: cId, StatisticNames: [ args.mode ]} );
@@ -115,7 +98,6 @@ handlers.SubUpdate = function (args, context) {
         return retObj;
     }
 }
-
 handlers.MedalChestOpen = function (args, context) {
     try {
         var cId = currentPlayerId;
@@ -128,9 +110,7 @@ handlers.MedalChestOpen = function (args, context) {
                 throw "lack:" + customD.costs[i].vc;
             }
         }
-        if(GetChestCnt(cSupID) == 0) {
-            server.GrantItemsToUser({ PlayFabId: cId, ItemIds: [cMedID] });
-        }
+        if(GetChestCnt(cSupID) == 0) { server.GrantItemsToUser({ PlayFabId: cId, ItemIds: [cMedID] }); }
         var pull = server.UnlockContainerItem( { PlayFabId: cId, ContainerItemId: cMedID } );
         var items = MakeItemData(pull.GrantedItems);
         for(var i in customD.costs) {
