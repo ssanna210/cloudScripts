@@ -1,5 +1,6 @@
 var REF_REW = "premiumStarterPack";
 var REF_BADGE = "referralBadge";
+var REF_MAX = 10;
 
 handlers.RedeemReferral = function(args) {
 
@@ -7,11 +8,11 @@ handlers.RedeemReferral = function(args) {
         
         var cId = currentPlayerId;
         
-        if(args == null || typeof args.referralCode === undefined || args.referralCode === "")
+        if(args == null || typeof args.code === undefined || args.code === "")
         {
             throw "1000";
         }
-        else if(args.referralCode === cId)
+        else if(args.code === cId)
         {
             throw "1001";
         }
@@ -22,27 +23,27 @@ handlers.RedeemReferral = function(args) {
             if(invR.Inventory[i].ItemId === REF_BADGE) throw "1002";
         }
         
-        var rData = server.GetUserReadOnlyData({ "PlayFabId": args.referralCode, "Keys": [ "Referrals" ] });
+        var rData = server.GetUserReadOnlyData({ "PlayFabId": args.code, "Keys": [ "Referrals" ] });
         var rValues = [];
 
         if(!rData.Data.hasOwnProperty("Referrals"))
         {
             rValues.push(cId);
-            ProcessReferrer(args.referralCode, rValues);
+            ProcessReferrer(args.code, rValues);
         }
         else
         {
             rValues = JSON.parse(rData.Data["Referrals"].Value);
             if(Array.isArray(rValues))
             {
-                if(rValues.length < 10)
+                if(rValues.length < REF_MAX)
                 {
                     rValues.push(cId);
-                    ProcessReferrer(args.referralCode, rValues);
+                    ProcessReferrer(args.code, rValues);
                 }
                 else
                 {
-                    log.info("Player:" + args.referralCode + " has hit the maximum number of referrals (" + 10 + ")." );
+                    log.info("Player:" + args.code + " max REFs (" + REF_MAX + ")." );
                 }
             }
             else
@@ -51,7 +52,7 @@ handlers.RedeemReferral = function(args) {
             }
         }
         
-        return GrantReferralBonus(args.referralCode);
+        return GrantReferralBonus(args.code);
         
     } catch(e) {
         var retObj = {};
