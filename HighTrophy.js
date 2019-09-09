@@ -9,8 +9,7 @@ handlers.HTCheck = function (args, context) {
         tStc.StatisticName = "TotalTier";
         tStc.Value = 1;
         for(var i in stcR.Statistics) {
-            if(stcR.Statistics[i].StatisticName == "TotalTier") 
-                tStc = stcR.Statistics[i];
+            if(stcR.Statistics[i].StatisticName == "TotalTier") tStc = stcR.Statistics[i];
         }
         var verR = server.GetPlayerStatisticVersions({"StatisticName": HTN});
         var hTVer = verR.StatisticVersions[0] - 1;
