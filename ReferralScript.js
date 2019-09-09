@@ -3,19 +3,11 @@ var REF_BADGE = "referralBadge";
 var REF_MAX = 10;
 
 handlers.RedeemRef = function(args) {
-
     try{
-        
         var cId = currentPlayerId;
         
-        if(args == null || typeof args.code === undefined || args.code === "")
-        {
-            throw "1000";
-        }
-        else if(args.code === cId)
-        {
-            throw "1001";
-        }
+        if(args == null || typeof args.code === undefined || args.code === ""){ throw "1000"; }
+        else if(args.code === cId) { throw "1001"; }
         
         var invR = server.GetUserInventory({ "PlayFabId": cId });
         for(var i in invR.Inventory)
