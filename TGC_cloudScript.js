@@ -5,11 +5,9 @@ var RND_TIER = 3;
 
 handlers.unlockChest = function (args, context) {
     try {
-        
         var ItemR = GetItemData([args.InstanceId]);
         if(ItemR.length == 0) { throw "Item instance not found"; }
         var chestR = ItemR[0];
-        
         if(chestR.CustomData.hasOwnProperty("openTime")) {
             var uDate = new Date( chestR.CustomData.openTime );
             var ctime = new Date();
@@ -20,46 +18,35 @@ handlers.unlockChest = function (args, context) {
         }else {
             throw "not have key : openTime ";
         }
-        
         var r = server.UnlockContainerInstance({ PlayFabId: currentPlayerId, ContainerItemInstanceId: args.InstanceId });  
         
-        // make item data
         return MakeItemData(r.GrantedItems);
-        
     } catch(e) {
         var retObj = {};
         retObj["errorDetails"] = "Error: " + e;
         return retObj;
     }
-
 };
 
 function MakeItemData(items) {
     try {
         var cId = currentPlayerId;
         var StcR = server.GetPlayerStatistics({ "PlayFabId": cId, "StatisticNames": [ "TotalTier" ] });
-
         var tierStc = {};
         tierStc.StatisticName = "TotalTier";
         tierStc.Value = 1;
-        
         if(StcR.Statistics.length > 0) {
             for(var index in StcR.Statistics) {
-                if(StcR.Statistics[index].StatisticName == "TotalTier") 
-                    tierStc = StcR.Statistics[index];
+                if(StcR.Statistics[index].StatisticName == "TotalTier") tierStc = StcR.Statistics[index];
             }
         }
-        
         var totalTier = tierStc.Value;
         var tier = parseInt(totalTier % 100);
         var rebirth = parseInt( totalTier / 100 );
-        
         var TitleR = server.GetTitleData( { "Keys" : [ "ItemStatTable", "TierTable", "SkillTable" ] } );
-
         var itemT = JSON.parse( TitleR.Data["ItemStatTable"] );
         var tierT = JSON.parse( TitleR.Data["TierTable"] );
         var skillT = JSON.parse( TitleR.Data["SkillTable"] );
-        
         var equipA = [];
         var equipLD = {};
         
@@ -70,23 +57,19 @@ function MakeItemData(items) {
         }
         
         var CatalR = server.GetCatalogItems({ "PlayFabId": cId });
-        
         var equipD = [];
         
         for(var key in items) {
-            
             var tierI = {};
             var rndTier = 1;
             if(items[key].CustomData !== undefined && items[key].CustomData.hasOwnProperty("tier")) { 
                 rndTier = items[key].CustomData["tier"]; 
             }else { rndTier = GetRandomTier ( tier ); }
-            
             for(var i in tierT.TierInfos) {
                 if(tierT.TierInfos[i].Tier == rndTier) {
                     tierI = tierT.TierInfos[i];    
                 }
             }
-            
             var catalD = {};
             for(var i in CatalR.Catalog)
             {
@@ -95,14 +78,9 @@ function MakeItemData(items) {
                     catalD = CatalR.Catalog[i];
                 }
             }
-            if(catalD == null){
-                throw "catalog not found";
-            }
-            if(catalD.CustomData === undefined){
-                throw "catalD.CustomData is undefined";
-            }
+            if(catalD == null) throw "catalog not found";
+            if(catalD.CustomData === undefined) throw "catalD.CustomData is undefined";
             var customObj = JSON.parse(catalD.CustomData);
-            
             if(!equipLD.hasOwnProperty(items[key].ItemClass)) {
                 var tempList = [];
                 for(var i=0; i< equipA.length; i++) {
@@ -116,7 +94,6 @@ function MakeItemData(items) {
             var equipList = equipLD[items[key].ItemClass].split(",");
             var rndV = parseInt(Math.random() * equipList.length);
             var itemId = equipList[rndV];
-            //
             var t = {};
             var info = {};
             var stat = {};
@@ -128,9 +105,7 @@ function MakeItemData(items) {
             equipD[key].Tier = rndTier.toString();
             // set stat
             for(var i in itemT.Equipments) {
-                if(itemT.Equipments[i].ItemID == itemId) {
-                    t = CopyObj( itemT.Equipments[i] );
-                }
+                if(itemT.Equipments[i].ItemID == itemId) t = CopyObj( itemT.Equipments[i] );
             }
             //Lev, Atk, Hp
             stat.Lev = 1;
@@ -152,21 +127,14 @@ function MakeItemData(items) {
             if(t.hasOwnProperty("Wg")) {
                 stat.Wg = t.Wg;
             }
-            
             if(customObj.grade == "rare" || customObj.grade == "legend") {
-                
                 skill = GetRandomSkill( t.ItemClass, skillT.SkillInfos, equipLD, equipA );
-                
                 if(customObj.grade == "rare") { skill.Lev = 20 + (parseInt(Math.random() * 10) - 8); }
                 if(customObj.grade == "legend") { skill.Lev = skill.Limit; }
-                
             }
-            
             info.ItemID = t.ItemID;
-            
             // set character
             if(t.ItemClass == "character") {
-                
                 info.hc = parseInt(Math.random() * 6); // hair color
                 info.sc = parseInt(Math.random() * 3); // skin color
                 var hairIdList = t["HairRange"].split(",");
@@ -175,17 +143,14 @@ function MakeItemData(items) {
                 if( parseInt(Math.random() * 100) < 2 ) { info.slot = "2,3,4,4"; }
                 else { info.slot = "2,3,4"; }
             }
-            
+
             equipD[key].Info = JSON.stringify( info );
             equipD[key].Stat = JSON.stringify( stat );
-            equipD[key].Skill = JSON.stringify( skill );
-            
+            equipD[key].Skill = JSON.stringify( skill );            
             server.UpdateUserInventoryItemCustomData( { PlayFabId: cId, ItemInstanceId: items[key].ItemInstanceId, Data: equipD[key] } );
-            
         }
         
-        return equipD;
-  
+        return equipD;  
     } catch(e) {
         var retObj = {};
         retObj["errorDetails"] = "Error: " + e;
@@ -199,40 +164,28 @@ handlers.openStartChest = function (args, context) {
         var ItemD = GetItemData([args.InstanceId]);
         if(ItemD.length == 0) { throw "Item instance not found"; }
         var chestD = ItemD[0];
-        
         var catalD = GetItemCatalogData(chestD.ItemId);
-        
-        if(catalD == null) {
-            throw "catalog not found";
-        }
+        if(catalD == null) throw "catalog not found";
         
         var StcR = server.GetPlayerStatistics( { "PlayFabId": cId, "StatisticNames": [ "TotalTier" ] } );
-
         var tierStc = {};
         tierStc.StatisticName = "TotalTier";
         tierStc.Value = 1;
-        
         if(StcR.Statistics.length > 0) {
             for(var index in StcR.Statistics) {
-                if(StcR.Statistics[index].StatisticName == "TotalTier") 
-                    tierStc = StcR.Statistics[index];
+                if(StcR.Statistics[index].StatisticName == "TotalTier") tierStc = StcR.Statistics[index];
             }
         }
         
         var totalTier = tierStc.Value;
         var tier = parseInt( totalTier % 100 );
-
         var ranTier = GetRandomTier( tier );
         ranTier = ranTier.toString();
-        
         var customObj = JSON.parse(catalD.CustomData);
-        
         var uD = new Date();
         var cT = new Date();
         var wT = parseInt(customObj.time);
-                
         uD.setTime(cT.getTime() + (wT * 1000 * 60));
-
         var req= { 
             PlayFabId: cId,
             ItemInstanceId: args.InstanceId,
@@ -245,123 +198,84 @@ handlers.openStartChest = function (args, context) {
         }
 
         return server.UpdateUserInventoryItemCustomData(req);
-        
     } catch(e) {
         var retObj = {};
         retObj["errorDetails"] = "Error: " + e;
         return retObj;
     }
-    
-
 };
 
 handlers.videoChest = function (args, context) {
     try {
-
         var ItemR = GetItemData([args.InstanceId]);
         if(ItemR.length == 0) { throw "Item instance not found"; }
         var chestD = ItemR[0];
-        
         var uD = new Date( chestD.CustomData.openTime );
         var sT = new Date( chestD.CustomData.startTime );
         var rT = REDUCETIME_AD * 60 * 1000;
-            
         uD.setTime(uD.getTime() - rT);
-            
-        if(uD.getTime() < sT.getTime()) {
-            uD.setTime(sT.getTime());
-        }
-            
+        if(uD.getTime() < sT.getTime()) uD.setTime(sT.getTime());
         var req = { 
             PlayFabId: currentPlayerId,
             ItemInstanceId: args.InstanceId,
-            Data: {
-                "openTime" : uD
-            }
+            Data: { "openTime" : uD }
         }
 
         return server.UpdateUserInventoryItemCustomData(req);
-        
     } catch(e) {
         var retObj = {};
         retObj["errorDetails"] = "Error: " + e;
         return retObj;
     }
-    
-
 };
 
 handlers.openGem = function (args, context) {
     try {
         var cId = currentPlayerId;
         var inv = server.GetUserInventory( { "PlayFabId": cId } );
-        
         var chestD;
         
         for(var i in inv.Inventory)
         {
-            if(inv.Inventory[i].ItemInstanceId === args.InstanceId)
-            {
-                chestD = inv.Inventory[i];
-            }
+            if(inv.Inventory[i].ItemInstanceId === args.InstanceId) chestD = inv.Inventory[i];
         }
-        
-        if(chestD == null) {
-            throw "Item instance not found";
-        }
+        if(chestD == null) throw "Item instance not found";
         
         var uD = new Date();
         var cT = new Date();
-        
         var customD = {};
-        if(chestD.CustomData != null)
-            customD = chestD.CustomData;
+        if(chestD.CustomData != null) customD = chestD.CustomData;
         
         if("openTime" in customD) {
-            
             uD = new Date( customD.openTime );
-            
         }else {
-            
             var catalD = GetItemCatalogData(chestD.ItemId);
-        
-            if(catalD == null) {
-                throw "catalog not found";
-            }
-            
+            if(catalD == null) throw "catalog not found";
             var cusObj = JSON.parse(catalD.CustomData);
-            
             var wT = parseInt(cusObj.time);
             uD.setTime(cT.getTime() + (wT * 1000 * 60));
         }
         
         var lT = uD - cT;
         var needGem = Math.ceil(lT / (MinPerGem * 60 * 1000));
-                                
         if(inv.VirtualCurrency.GE < needGem) {
             throw "lack of GEM";
         }else {
             server.SubtractUserVirtualCurrency( { PlayFabId: cId, VirtualCurrency: "GE", Amount: needGem } ); 
         }
-        
         var r = server.UnlockContainerInstance({ PlayFabId: cId, ContainerItemInstanceId: args.InstanceId });  
         
         return MakeItemData(r.GrantedItems);
-        
     } catch(e) {
         var retObj = {};
         retObj["errorDetails"] = "Error: " + e;
         return retObj;
     }
-    
-
 };
 
 function grantChest () {
     try {
-
         var inv = server.GetUserInventory({ "PlayFabId": currentPlayerId });
-
         var _cnt = 0;
         for(var i in inv.Inventory)
         {
@@ -369,7 +283,6 @@ function grantChest () {
         }
 
         var r = "NONE";
-
         if(_cnt < 4) {
             r = ProcessGrantChest();   
         }else {
@@ -377,20 +290,16 @@ function grantChest () {
         }
 
         return r;
-        
     } catch(e) {
         var retObj = {};
         retObj["errorDetails"] = "Error: " + e;
         return retObj;
     }
-    
-
 }
 
 function ProcessGrantChest()
 {
     var dT = server.EvaluateRandomResultTable({ TableId : "dropTable_battleChest" });
-    
     var pull = server.GrantItemsToUser({ 
         PlayFabId: currentPlayerId, 
         ItemIds: [dT.ResultItemId]
@@ -407,12 +316,10 @@ handlers.BattleResult = function (args, context) {
         var cId = currentPlayerId;
         var r = {};
         var stcR = server.GetPlayerStatistics({ PlayFabId: cId, StatisticNames: [ "Trophy", "TotalTier" ] });
-
         var trophyStc = {};
         var tierStc = {};
         trophyStc.StatisticName = "Trophy"; trophyStc.Value = 0;
-        tierStc.StatisticName = "TotalTier"; tierStc.Value = 1;
-        
+        tierStc.StatisticName = "TotalTier"; tierStc.Value = 1;      
         if(stcR.Statistics.length > 0) {
             for(var index in stcR.Statistics) {
                 if(stcR.Statistics[index].StatisticName == "Trophy") 
@@ -425,17 +332,13 @@ handlers.BattleResult = function (args, context) {
         var totalTier = tierStc.Value;
         var tier = parseInt(totalTier % 100);
         var rebirth = parseInt( totalTier / 100 );
-        
         var internalD = server.GetUserInternalData( {PlayFabId : cId, Keys : [ "WinCount", "WinningStreak", "BeforeWin" ]} );
-        
         var userD = {};
-        
         if(internalD.Data.hasOwnProperty("WinCount")) {
             userD.WinCount = parseInt( internalD.Data["WinCount"].Value );
         }else {
             userD.WinCount = 0;
         }
-        
         if(internalD.Data.hasOwnProperty("WinningStreak")) {
             userD.WinningStreak = parseInt( internalD.Data["WinningStreak"].Value );
         }else {
@@ -451,7 +354,6 @@ handlers.BattleResult = function (args, context) {
         var TitleR = server.GetTitleData( { Keys : [ "TierTable", "General"  ] } );
         var tierT = JSON.parse( TitleR.Data["TierTable"] );
         var generalT = JSON.parse( TitleR.Data["General"] );
-        
         var tierInfo = {};
         for(var i in tierT.TierInfos) {
             if( tierT.TierInfos[i].Tier == tierStc.Value) {
@@ -468,15 +370,12 @@ handlers.BattleResult = function (args, context) {
                     userD.WinningStreak += 1;
                 }
                 if(trophyStc.Value < parseInt(tierInfo.TrophyLimit)) {
-                
                     if(userD.WinningStreak > parseInt(tierT.StreakLimit)) {
                         trpAmnt = parseInt(tierT.Unit) + parseInt(tierT.StreakLimit);
                     }else {
                         trpAmnt = parseInt(tierT.Unit) + userD.WinningStreak;
                     }
-                
                     trophyStc.Value += trpAmnt;
-                
                     if(trophyStc.Value > parseInt(tierInfo.TrophyLimit)) {
                         trophyStc.Value = parseInt(tierInfo.TrophyLimit);
                     }
@@ -486,11 +385,9 @@ handlers.BattleResult = function (args, context) {
                 if(userD.WinCount >= generalT.PerWinChest) {
                     r.chestValue = grantChest();
                     delete r.chestValue;
-                
                     userD.WinCount = 0;
                 }
                 userD.BeforeWin = 1;
-
             }else {
                 // fail
                 userD.BeforeWin = 0; // 0: false
@@ -498,22 +395,16 @@ handlers.BattleResult = function (args, context) {
             }   
         }
         
-        
         var promoD = {};
         promoD.isPromotion = false;
         promoD.beforeTier = tier;
         promoD.afterTier = 0;
         promoD.gold = 0;
         promoD.gem = 0;
-        
         if(args.mode == 1) {
             // check
-            if(trophyStc.Value < parseInt(tierInfo.TrophyLimit)) {
-                throw "lack of Trophy";
-            }
-            if(tier >= parseInt(tierInfo.TierLimit)) {
-                throw "tier Max";
-            }
+            if(trophyStc.Value < parseInt(tierInfo.TrophyLimit)) throw "lack of Trophy";
+            if(tier >= parseInt(tierInfo.TierLimit)) throw "tier Max";
             
             if(args.isVictory) {
                 // victory
@@ -522,18 +413,15 @@ handlers.BattleResult = function (args, context) {
                 tierStc.Value = totalTier;
                 promoD.afterTier = totalTier;
                 promoD.isPromotion = true;
-                
                 promoD.gold = parseInt( parseInt(tierInfo.StatAmount) * tierT.GoldX );
                 promoD.gem = generalT.PromoReward.Gem;
                 promoD.sp = generalT.PromoReward.SP;
-                
                 trpAmnt = 1;
                 trophyStc.Value += trpAmnt;
                 
                 server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: promoD.gold, VirtualCurrency: "GO" });
                 server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: promoD.gem, VirtualCurrency: "GE" });
                 server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: promoD.sp, VirtualCurrency: "SP" });
-                
             }else {
                 // fail
                 trpAmnt = generalT.Promopenalty;
@@ -541,10 +429,8 @@ handlers.BattleResult = function (args, context) {
                 if(trophyStc.Value < 0) trophyStc.Value = 0;
             }
         }
-        
         server.UpdatePlayerStatistics({ PlayFabId: cId, Statistics: [trophyStc, tierStc] });
         server.UpdateUserInternalData({ PlayFabId : cId, Data : userD });
-        
         r.mode = args.mode;
         r.totalTier = tierStc.Value;
         r.trophy = tierStc.Value;
@@ -554,13 +440,11 @@ handlers.BattleResult = function (args, context) {
         r.promoData = promoD;
         
         return r;
-        
     } catch(e) {
         var retObj = {};
         retObj["errorDetails"] = "Error: " + e;
         return retObj;
     }
-
 }
 
 
