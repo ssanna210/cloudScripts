@@ -1,4 +1,4 @@
-HTN = "HighTrophy";
+var HTN = "HighTrophy";
 handlers.HTCheck = function (args, context) {
     try {
         var cId = currentPlayerId;
