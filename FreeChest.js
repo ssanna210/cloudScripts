@@ -27,11 +27,10 @@ handlers.GetFreeChestInfo = function (args, context) {
         var cId = currentPlayerId;
         var cTime = new Date();
         var uDate = new Date();
-        var wTime = 240 * (1000 * 60);
+        var wTime = 360 * (1000 * 60);
         var lTime = 0;
         var chest = {};
-        chest.uDate = new Date();
-        chest.lTime = 0;
+        chest.uDate = new Date(); chest.lTime = 0;
         var cnt = 0;
         var rData = server.GetUserReadOnlyData( { PlayFabId: cId, Keys: [cKey] } );
         if(rData.Data.hasOwnProperty(cKey)) {
