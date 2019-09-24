@@ -12,7 +12,7 @@ handlers.HTCheck = function (args, context) {
             if(stcR.Statistics[i].StatisticName == "TotalTier") tStc = stcR.Statistics[i];
         }
         var verR = server.GetPlayerStatisticVersions({"StatisticName": HTN});
-        var hTVer = verR.StatisticVersions[0] - 1;
+        var hTVer = verR.StatisticVersions[0].Version - 1;
         var TitleR = server.GetTitleData( { "Keys" : [ "General" ] } );
         var gT = JSON.parse( TitleR.Data["General"] );
         if(hTVer < 0 || tStc.Value < gT.TierForHighTrophy) { return lp; }
