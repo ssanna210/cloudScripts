@@ -29,7 +29,7 @@ handlers.HTCheck = function (args, context) {
         var uData = {};
         uData.HTBVer = hTVer;
         lp = hTStc.Value * gT.HTtoLPx;
-        server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: lp, VirtualCurrency: "LP" });
+        if(lp > 0) server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: lp, VirtualCurrency: "LP" });
         server.UpdateUserInternalData({ PlayFabId : cId, Data : uData });
         
         return lp;
