@@ -30,29 +30,20 @@ handlers.GetFreeChestInfo = function (args, context) {
         var wTime = 360 * (1000 * 60);
         var lTime = 0;
         var chest = {};
-        chest.uDate = new Date(); chest.lTime = 0;
+        chest.uDate = new Date();
         var cnt = 0;
         var rData = server.GetUserReadOnlyData( { PlayFabId: cId, Keys: [cKey] } );
         if(rData.Data.hasOwnProperty(cKey)) {
             chest = JSON.parse(rData.Data[cKey].Value);
-            if(chest.lTime === undefined) {
-                cnt = cLimit;
-                chest.lTime = 0;
-            }
             uDate = new Date(chest.uDate);
-            lTime = cTime.getTime() - uDate.getTime() - chest.lTime;
+            lTime = cTime.getTime() - uDate.getTime();
             if(lTime < 0) lTime = 0;
-            for(var i=0; i<cLimit; i++){
-                lTime -= wTime;
-                if(lTime >= 0) cnt += 1
-                else { lTime += wTime; break; }
-            }
+            cnt = parseInt(lTime / wTime);
             if(cnt >= cLimit) {
                 cnt = cLimit;
                 lTime = 0;
             }
         }else { cnt = cLimit; }
-        chest.lTime = lTime;
         var chestCnt = GetChestCnt(cSupID);
         cnt -= chestCnt;
         var iIds = [];
