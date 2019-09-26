@@ -15,9 +15,9 @@ handlers.FreeChestOpen = function (args, context) {
         items = MakeItemData(pull.GrantedItems);
         chest.uDate = new Date();
         rdUpdate(cKey,chest);
-        if(items.length == 0) { throw "1005"; }
-
-        return items;
+        if(items.length == 0) throw "1005";
+        chest.items = items; chest.cnt = cnt-1;
+        return chest;
     }catch(e) {
         var retObj = {}; retObj["errorDetails"] = "Error: " + e; return retObj;
     }
@@ -30,7 +30,7 @@ handlers.GetFreeChestInfo = function (args, context) {
         var wTime = 360 * (1000 * 60);
         var lTime = 0;
         var chest = {};
-        chest.uDate = new Date(); chest.lTime = 0;
+        chest.uDate = new Date(); chest.lTime = 0; chest.cnt = 0
         var cnt = 0;
         var rData = server.GetUserReadOnlyData( { PlayFabId: cId, Keys: [cKey] } );
         if(rData.Data.hasOwnProperty(cKey)) {
@@ -51,12 +51,14 @@ handlers.GetFreeChestInfo = function (args, context) {
                 lTime = 0;
             }
         }else { cnt = cLimit; }
-        cnt -= GetChestCnt(cSupID);
+        chest.lTime = lTime;
+        var chestCnt = GetChestCnt(cSupID);
+        cnt -= chestCnt;
         var iIds = [];
         for(var i=0; i<cnt; i++) iIds.push(cSupID);
         if(cnt > 0) server.GrantItemsToUser({ PlayFabId: cId, ItemIds: iIds });
         rdUpdate(cKey,chest);
-        
+        chest.cnt = chestCnt;
         return chest;
     }catch(e) { var retObj = {}; retObj["errorDetails"] = "Error: " + e; return retObj; }
 }
