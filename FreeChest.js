@@ -50,7 +50,7 @@ handlers.GetFreeChestInfo = function (args, context) {
         for(var i=0; i<cnt; i++) iIds.push(cSupID);
         if(cnt > 0) server.GrantItemsToUser({ PlayFabId: cId, ItemIds: iIds });
         rdUpdate(cKey,chest);
-        chest.cnt = chestCnt;
+        chest.cnt = GetChestCnt(cSupID);
         return chest;
     }catch(e) { var retObj = {}; retObj["errorDetails"] = "Error: " + e; return retObj; }
 }
