@@ -17,9 +17,7 @@ handlers.HTCheck = function (args, context) {
         var gT = JSON.parse( TitleR.Data["General"] );
         if(hTVer < 0 || tStc.Value < gT.TierForHighTrophy) { return lp; }
         var iD = server.GetUserInternalData( {PlayFabId : cId} );
-        if(iD.Data.hasOwnProperty("HTBVer")){
-            if(iD.Data.HTBVer >= hTVer) return lp;
-        }
+        if(iD.Data.hasOwnProperty("HTBVer")){ if(iD.Data.HTBVer >= hTVer) return lp; }
         var stcR2 = server.GetPlayerStatistics
             ({ "PlayFabId": cId, "StatisticNameVersions":[{"StatisticName":HTN, "Version": hTVer }] });
         for(var i in stcR2.Statistics){
@@ -34,8 +32,6 @@ handlers.HTCheck = function (args, context) {
         
         return lp;
     }catch(e) {
-        var r = {};
-        r["errorDetails"] = "Error: " + e;
-        return r;
+        var r = {}; r["errorDetails"] = "Error: " + e; return r;
     }
 }
