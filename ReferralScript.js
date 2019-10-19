@@ -1,5 +1,5 @@
-var REF_REW = "premiumStarterPack";
-var REF_BADGE = "referralBadge";
+var REF_REW = "bundle_referral";
+var REF_BADGE = "badge_referral";
 var REF_MAX = 10;
 handlers.RedeemRef = function(args) {
     try{
@@ -19,32 +19,31 @@ handlers.RedeemRef = function(args) {
                 if(rValues.length < REF_MAX) {
                     rValues.push(cId);
                     ProcessRef(args.code, rValues);
-                } else {
-                    log.info("Player:" + args.code + " max REFs (" + REF_MAX + ")." );
-                }
+                } else { log.info("Player:" + args.code + " max REFs (" + REF_MAX + ")." ); }
             } else {
                 throw "1003";
             }
         }
-        return GrantRefBonus(args.code);
+        return GrantRefBonus(cId, args.code);
     } catch(e) {
         var retObj = {};
         retObj["errorDetails"] = "Error: " + e;
         return retObj;
     }
-};
+}
 function ProcessRef(id, referrals)
 {
     var rdReq = { "PlayFabId": id, "Data": {} };
     rdReq.Data["Referrals"] = JSON.stringify(referrals);
     var rdR = server.UpdateUserReadOnlyData(rdReq);
-    var vcReq = { "PlayFabId" : id, "VirtualCurrency": "GE", "Amount": 10 };
-    var result = server.AddUserVirtualCurrency(vcReq);
+    var r = server.AddUserVirtualCurrency({ "PlayFabId" : id, "VirtualCurrency": "GE", "Amount": 10 });
     log.info(vcReq.Amount + " " + "GE" + " granted to " + id);
 }
-function GrantRefBonus(code)
+function GrantRefBonus(id, code)
 {
-    var req = { "PlayFabId" : currentPlayerId, "ItemIds" : [ REF_BADGE, REF_REW ], "Annotation" : "Referred by: " + code };
-    var r = server.GrantItemsToUser(req);
-    return r.ItemGrantResults;
+    var r ={};
+    var req = { "PlayFabId" : id, "ItemIds" : [ REF_BADGE ], "Annotation" : "Referred by: " + code };
+    r.iR = server.GrantItemsToUser(req);
+    r.vR = server.AddUserVirtualCurrency({ "PlayFabId" : id, "VirtualCurrency": "GE", "Amount": 100 });
+    return r;
 }
