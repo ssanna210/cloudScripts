@@ -41,9 +41,8 @@ function ProcessRef(id, referrals)
 }
 function GrantRefBonus(id, code)
 {
-    var r ={};
     var req = { "PlayFabId" : id, "ItemIds" : [ REF_BADGE ], "Annotation" : "Referred by: " + code };
-    r.iR = server.GrantItemsToUser(req);
-    r.vR = server.AddUserVirtualCurrency({ "PlayFabId" : id, "VirtualCurrency": "GE", "Amount": 100 });
-    return r;
+    server.GrantItemsToUser(req);
+    var vR = server.AddUserVirtualCurrency({ "PlayFabId" : id, "VirtualCurrency": "GE", "Amount": 100 });
+    return vR.BalanceChange;
 }
