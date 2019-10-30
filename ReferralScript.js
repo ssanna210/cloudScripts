@@ -15,14 +15,12 @@ handlers.RedeemRef = function(args) {
         } else {
             rValues = JSON.parse(rData.Data["Referrals"].Value);
             if(Array.isArray(rValues)) {
-                for(var i in rValues) { if(rValues[i] == args.code) throw "1008"; }
+                for(var i in rValues) { if(rValues[i] == cId) throw "1008"; }
                 if(rValues.length < pT.Limit) {
                     rValues.push(cId);
-                    ProcessRef(args.code, rValues);
+                    ProcessRef(args.code, rValues, pT.RefOtherGem);
                 } else { log.info("Player:" + args.code + " max REFs (" + REF_MAX + ")." ); }
-            } else {
-                throw "1003";
-            }
+            } else { throw "1003"; }
         }
         return GrantRefBonus(cId, args.code, pT.RefMyGem, pT.Badge);
     } catch(e) {
