@@ -15,6 +15,7 @@ handlers.RedeemRef = function(args) {
         } else {
             rValues = JSON.parse(rData.Data["Referrals"].Value);
             if(Array.isArray(rValues)) {
+                for(var i in rValues) { if(rValues[i] == args.code) throw "1008"; }
                 if(rValues.length < pT.Limit) {
                     rValues.push(cId);
                     ProcessRef(args.code, rValues);
