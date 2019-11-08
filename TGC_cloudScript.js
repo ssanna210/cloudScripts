@@ -316,17 +316,17 @@ handlers.BattleResult = function (args, context) {
         var cId = currentPlayerId;
         var r = {};
         var stcR = server.GetPlayerStatistics({ PlayFabId: cId });
-        var trophyStc = {};
-        var tierStc = {};
-        var hTrpStc = {};
+        var trophyStc = {}; var tierStc = {}; var hTrpStc = {}; var BPStc = {};
         trophyStc.StatisticName = "Trophy"; trophyStc.Value = 0;
         tierStc.StatisticName = "TotalTier"; tierStc.Value = 1;
         hTrpStc.StatisticName = HTN; hTrpStc.Value = 0;
+        BPStc.StatisticName = "BP"; BPStc.Value = 0;
         if(stcR.Statistics.length > 0) {
             for(var index in stcR.Statistics) {
                 if(stcR.Statistics[index].StatisticName == "Trophy") trophyStc = stcR.Statistics[index];
                 if(stcR.Statistics[index].StatisticName == "TotalTier") tierStc = stcR.Statistics[index];
                 if(stcR.Statistics[index].StatisticName == HTN) hTrpStc = stcR.Statistics[index];
+                if(stcR.Statistics[index].StatisticName == "BP") BPStc = stcR.Statistics[index];
             }
         }
         var totalTier = tierStc.Value;
@@ -347,9 +347,7 @@ handlers.BattleResult = function (args, context) {
         var tierT = JSON.parse( TitleR.Data["TierTable"] );
         var generalT = JSON.parse( TitleR.Data["General"] );
         var tierInfo = {};
-        for(var i in tierT.TierInfos) {
-            if( tierT.TierInfos[i].Tier == tierStc.Value) tierInfo = tierT.TierInfos[i];
-        }
+        for(var i in tierT.TierInfos) { if( tierT.TierInfos[i].Tier == tierStc.Value) tierInfo = tierT.TierInfos[i]; }
         var trpAmnt = 0;
         var trpLimit = parseInt(tierInfo.TrophyLimit);
         var tierLimit = tierT.TierLimit;
@@ -376,6 +374,7 @@ handlers.BattleResult = function (args, context) {
                     userD.WinCount = 0;
                 }
                 userD.BeforeWin = 1;
+                BPStc.Value += 1;
             }else {
                 userD.BeforeWin = 0; // 0: false
                 userD.WinningStreak = 0;
@@ -383,6 +382,7 @@ handlers.BattleResult = function (args, context) {
                     hTrpStc.Value -= Math.ceil(trpUnit * tierT.HTLoseX);
                     if(hTrpStc.Value < 0) hTrpStc = 0;
                 }
+                BPStc.Value -= 1;
             }   
         }
         var promoD = {};
@@ -408,13 +408,14 @@ handlers.BattleResult = function (args, context) {
                 server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: promoD.gold, VirtualCurrency: "GO" });
                 server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: promoD.gem, VirtualCurrency: "GE" });
                 server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: promoD.sp, VirtualCurrency: "SP" });
+                BPStc.Value = 0;
             }else {
                 trpAmnt = generalT.Promopenalty;
                 trophyStc.Value -= trpAmnt;
                 if(trophyStc.Value < 0) trophyStc.Value = 0;
             }
         }
-        server.UpdatePlayerStatistics({ PlayFabId: cId, Statistics: [trophyStc, tierStc, hTrpStc] });
+        server.UpdatePlayerStatistics({ PlayFabId: cId, Statistics: [trophyStc, tierStc, hTrpStc, BPStc] });
         server.UpdateUserInternalData({ PlayFabId : cId, Data : userD });
         r.mode = args.mode;
         r.totalTier = tierStc.Value;
@@ -423,12 +424,9 @@ handlers.BattleResult = function (args, context) {
         r.trophyAmount = trpAmnt;
         r.perWinChest = generalT.PerWinChest;
         r.promoData = promoD;
-        
         return r;
     } catch(e) {
-        var retObj = {};
-        retObj["errorDetails"] = "Error: " + e;
-        return retObj;
+        var retObj = {}; retObj["errorDetails"] = "Error: " + e; return retObj;
     }
 }
 
@@ -442,13 +440,14 @@ handlers.Rebirth = function (args, context) {
         var tierStc = {};
         trophyStc.StatisticName = "Trophy"; trophyStc.Value = 0;
         tierStc.StatisticName = "TotalTier"; tierStc.Value = 1;
+        BPStc.StatisticName = "BP"; BPStc.Value = 0;
         if(stcR.Statistics.length > 0) {
             for(var i in stcR.Statistics) {
                 if(stcR.Statistics[i].StatisticName == "Trophy") trophyStc = stcR.Statistics[i];
                 if(stcR.Statistics[i].StatisticName == "TotalTier") tierStc = stcR.Statistics[i];
+                if(stcR.Statistics[i].StatisticName == "BP") BPStc = stcR.Statistics[i];
             }
         }
-        
         var totalTier = tierStc.Value;
         var tier = parseInt(totalTier % 100);
         var rebirth = parseInt( totalTier / 100 );
@@ -466,15 +465,12 @@ handlers.Rebirth = function (args, context) {
         server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: generalT.RebirthReward.Gem, VirtualCurrency: "GE" });
         server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: generalT.RebirthReward.SP, VirtualCurrency: "SP" });
         trophyStc.Value += tierT.RebirthTrophy;
-        
+        BPStc.Value = 0;
         r.isRebirth = true;
-        server.UpdatePlayerStatistics({ PlayFabId: cId, Statistics: [trophyStc, tierStc] });
-        
+        server.UpdatePlayerStatistics({ PlayFabId: cId, Statistics: [trophyStc, tierStc, BPStc] });
         return r;
     } catch(e) {
-        var retObj = {};
-        retObj["errorDetails"] = "Error: " + e;
-        return retObj;
+        var retObj = {}; retObj["errorDetails"] = "Error: " + e; return retObj;
     }
 }
 
