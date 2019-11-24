@@ -782,8 +782,9 @@ handlers.FirstCheck = function (args) {
         r.isFirstGift = d.Data["isFirstGift"].Value;
     }else {
         // first gift
-        var pull = server.GrantItemsToUser({ PlayFabId: cId, ItemIds: ["bundle_firstGift"] });
-        MakeItemData(pull.ItemGrantResults);
+        server.GrantItemsToUser({ PlayFabId: cId, ItemIds: ["chest_first"] });
+        var pull = server.UnlockContainerItem( { PlayFabId: cId, ContainerItemId: "chest_first" } );
+        r.items = MakeItemData(pull.GrantedItems);
         server.UpdateUserInternalData( { PlayFabId: cId, Data: {"isFirstGift": "true"} } );
         r.isFirstGift = true;
         // mastery init
@@ -795,18 +796,15 @@ handlers.FirstCheck = function (args) {
         rdata.Mastery = JSON.stringify(mObj);
         // slot init
         var slotObj = ResetUpgradeSlot(generalD);
-        
         Object.assign(rdata, slotObj);
         
         server.UpdateUserReadOnlyData( {  PlayFabId: cId, Data : rdata, Permission : "Public" } );
-        
     }
     if(d.Data.hasOwnProperty("isTutoComplete") && isTrue( d.Data["isTutoComplete"].Value )) {
         r.isTutoComplete = d.Data["isTutoComplete"].Value;
     }else {
         r.isTutoComplete = false;
     }
-    
     return r;
 }
 
