@@ -342,12 +342,14 @@ handlers.BattleResult = function (args, context) {
         // 1 : true, 0 : false
         if(internalD.Data.hasOwnProperty("BeforeWin")) userD.BeforeWin = parseInt( internalD.Data["BeforeWin"].Value );
         else userD.BeforeWin = 0;
-        
         var TitleR = server.GetTitleData( { Keys : [ "TierTable", "General"  ] } );
         var tierT = JSON.parse( TitleR.Data["TierTable"] );
         var generalT = JSON.parse( TitleR.Data["General"] );
-        var tierInfo = {};
-        for(var i in tierT.TierInfos) { if( tierT.TierInfos[i].Tier == tierStc.Value) tierInfo = tierT.TierInfos[i]; }
+        var tierInfo = {}; var befTierInfo = {}; befTierInfo.TrophyLimit = 0;
+        for(var i in tierT.TierInfos) { 
+            if( tierT.TierInfos[i].Tier == tierStc.Value) tierInfo = tierT.TierInfos[i]; 
+            if(totalTier > 1 && tierT.TierInfos[i].Tier == totalTier-1) befTierInfo = tierT.TierInfos[i];                    
+        }
         var trpAmnt = 0;
         var trpLimit = parseInt(tierInfo.TrophyLimit);
         var tierLimit = tierT.TierLimit;
@@ -374,7 +376,7 @@ handlers.BattleResult = function (args, context) {
                     userD.WinCount = 0;
                 }
                 userD.BeforeWin = 1;
-                BPStc.Value += 1;
+                if(BPStc.Value < trpLimit) BPStc.Value += 1;
             }else {
                 userD.BeforeWin = 0; // 0: false
                 userD.WinningStreak = 0;
@@ -382,7 +384,7 @@ handlers.BattleResult = function (args, context) {
                     hTrpStc.Value -= Math.ceil(trpUnit * tierT.HTLoseX);
                     if(hTrpStc.Value < 0) hTrpStc = 0;
                 }
-                BPStc.Value -= 1;
+                if(BPStc.Value > befTierInfo.trpLimit +1) BPStc.Value -= 1;
             }   
         }
         var promoD = {};
