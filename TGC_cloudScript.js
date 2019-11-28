@@ -408,7 +408,7 @@ handlers.BattleResult = function (args, context) {
                 server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: promoD.gold, VirtualCurrency: "GO" });
                 server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: promoD.gem, VirtualCurrency: "GE" });
                 server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: promoD.sp, VirtualCurrency: "SP" });
-                BPStc.Value = 0;
+                BPStc.Value = trophyStc.Value;
             }else {
                 trpAmnt = generalT.Promopenalty;
                 trophyStc.Value -= trpAmnt;
@@ -465,7 +465,7 @@ handlers.Rebirth = function (args, context) {
         server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: generalT.RebirthReward.Gem, VirtualCurrency: "GE" });
         server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: generalT.RebirthReward.SP, VirtualCurrency: "SP" });
         trophyStc.Value += tierT.RebirthTrophy;
-        BPStc.Value = 0;
+        BPStc.Value = trophyStc.Value;
         r.isRebirth = true;
         server.UpdatePlayerStatistics({ PlayFabId: cId, Statistics: [trophyStc, tierStc, BPStc] });
         return r;
