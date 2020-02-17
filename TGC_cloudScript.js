@@ -2,7 +2,6 @@ var IC_CHEST_BATTLE = "BattleChest";
 var MinPerGem = 12;
 var REDUCETIME_AD = 30;
 var RND_TIER = 3;
-
 handlers.unlockChest = function (args, context) {
     try {
         var ItemR = GetItemData([args.InstanceId]);
@@ -997,78 +996,60 @@ handlers.ItemUpgradeFinish = function (args) {
 // args.isRestore, args.slotID
 handlers.FailedItemRestore = function (args) {
     try {
-        
         if(!args.hasOwnProperty("isRestore")) { throw "isRestore not found"; }
         var cId = currentPlayerId;
         var r = {};
         r.isLackGem = false;
         r.isSuccess = false;
-        
         var userD = server.GetUserReadOnlyData( { PlayFabId: cId, Keys: [args.slotID] } );
         var tD = server.GetTitleData( { Keys : [ "General", "WorthTable" ] } );
         var generalT = JSON.parse( tD.Data["General"] );
         var worthT = JSON.parse( tD.Data.WorthTable );
-        
         if(!userD.Data.hasOwnProperty(args.slotID)) { throw "slot not found"; }
         var slot = {};
         slot = JSON.parse( userD.Data[args.slotID].Value );
-        //get items
         var items = [];
         items = GetItemData(slot.itemIds);
         if(items.length == 0) { throw "Item instance not found"; }
-        
         var itemIds = [];
         for(var i in slot.itemIds) {
             itemIds.push( { ItemInstanceId : slot.itemIds[i], PlayFabId : cId  } );
         }
-        
         var inv = server.GetUserInventory({PlayFabId : cId});
         var needGem = 0;
         for(var index in items) {
             needGem += Math.ceil(CalculItemWorth( items[index].CustomData, worthT ) / generalT.WorthPerGem);
         }
-        
         var upData = {};
-        
         if(args.isRestore) {
-            
             if(inv.VirtualCurrency["GE"] < needGem) { 
                 r.isLackGem = true;
                 return r;
             }
-            
             r.isSuccess = true;
             server.SubtractUserVirtualCurrency({ PlayFabId: cId, Amount: needGem, VirtualCurrency: "GE" });
-            
         }else {
             server.RevokeInventoryItems({ Items : itemIds }); 
         }
-        
         slot.state = "NONE";
         slot.itemIds = null;
         slot.openTime = null;
-        
         upData[args.slotID] = JSON.stringify(slot);
-        
         server.UpdateUserReadOnlyData( {  PlayFabId: cId, Data : upData, Permission : "Public" } );;
         
         return r;
-        
     }catch(e) {
-        var retObj = {};
-        retObj["errorDetails"] = "Error: " + e;
-        return retObj;
+        var r = {};
+        r["errorDetails"] = "Error: " + e;
+        return r;
     }
 }
 
 function GetRandomSkill( itemClass, SkillInfos, EquipListData, EquipArray ) {
-    
     var skill = {};
     var sIdL = [];
     for(var i in SkillInfos) {
-        if(SkillInfos[i].ItemClass == itemClass) {
-            sIdL.push( SkillInfos[i].Skill );
-        }
+        if(SkillInfos[i].ItemClass == itemClass) sIdL.push( SkillInfos[i].Skill );
     }
     var rndSId = sIdL[parseInt( Math.random() * sIdL.length )];
     for(var i in SkillInfos) {
@@ -1076,54 +1057,39 @@ function GetRandomSkill( itemClass, SkillInfos, EquipListData, EquipArray ) {
             skill = CopyObj( SkillInfos[i] );
         }
     }
-    
     skill.Lev = 1;
-    
-    // random
     if(!EquipListData.hasOwnProperty(skill.TargetClass)) {
         var tempList = [];
         for(var i=0; i< EquipArray.length; i++) {
-            if(EquipArray[i].hasOwnProperty(skill.TargetClass)) {
-                tempList.push(EquipArray[i][skill.TargetClass]);
-            }
+            if(EquipArray[i].hasOwnProperty(skill.TargetClass)) tempList.push(EquipArray[i][skill.TargetClass]);
         }
         EquipListData[skill.TargetClass] = tempList.join(',');
     }
     var equipIdList = EquipListData[skill.TargetClass].split(",");
     skill.TargetId = equipIdList[ parseInt(Math.random() * equipIdList.length) ];
-    
-    
     delete skill.ItemClass;
     delete skill.Skill;
     delete skill.TargetClass;
     
     return skill;
-    
 }
 
 function resetMasteryValue(t){
-    
     var r = {};
-    for(var i in t.Mastery) {
-        r[String(t.Mastery[i].ID)] = String(0);
-    }
+    for(var i in t.Mastery) r[String(t.Mastery[i].ID)] = String(0);
     return r;
 }
 
 // string -> bool
 function isTrue(value){
-    if (typeof(value) === 'string'){
-        value = value.trim().toLowerCase();
-    }
+    if (typeof(value) === 'string') value = value.trim().toLowerCase();
     switch(value){
         case true:
         case "true":
         case 1:
         case "1":
         case "on":
-        case "yes":
-            return true;
-        default: 
-            return false;
+        case "yes": return true;
+        default: return false;
     }
 }
