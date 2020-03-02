@@ -20,12 +20,9 @@ handlers.ItemUpgradeStart = function (args) { // args.slotID, args.itemIds, stat
         slot.openTime = uD;
         slot.itemIds = args.itemIds;
         slot.state = "ING";
-        
         var upD = {};
         upD[slotD.ID] = JSON.stringify(slot);
-        
-        return server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : upD, Permission : "Public" } );;
-        
+        return server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : upD, Permission : "Public" } );
     } catch(e) {
         var r = {}; r["errorDetails"] = "Error: " + e; return r;
     }
@@ -63,7 +60,6 @@ handlers.ItemUpgradeFinish = function (args) { // args.slotID
                     tierStc = StcR.Statistics[i];
             }
         }
-        
         var totalTier = tierStc.Value;
         var tier = parseInt(totalTier % 100);
         var rebirth = parseInt( totalTier / 100 );
@@ -175,6 +171,30 @@ handlers.FailedItemRestore = function (args) { // args.isRestore, args.slotID
         upData[args.slotID] = JSON.stringify(slot);
         server.UpdateUserReadOnlyData( {  PlayFabId: cId, Data : upData, Permission : "Public" } );;
         return r;
+    }catch(e) {
+        var r = {}; r["errorDetails"] = "Error: " + e; return r;
+    }
+}
+handlers.CheckGhostItems = function (args) { // args.itemIds, args.slotID
+    try {
+        var cId = currentPlayerId;
+        var userD = server.GetUserReadOnlyData( { PlayFabId: cId, Keys: [args.slotID] } );
+        if(!userD.Data.hasOwnProperty(args.slotID)) { throw "slot not found"; }
+        var slot = {};
+        slot = JSON.parse( userD.Data[args.slotID].Value );
+        var pos = 0;
+        for(var i in args.itemIds){
+            pos = slot.itemIds.indexOf(args.itemIds[i]);
+            if(pos >= 0) slot.itemIds.splice(pos,1);
+        }
+        if(slot.itemIds.length == 0){
+            slot.state = "NONE";
+            slot.itemIds = null;
+            slot.openTime = null;
+        }
+        var upD = {};
+        upD[args.slotID] = JSON.stringify(slot);
+        return server.UpdateUserReadOnlyData({PlayFabId: cId, Data : upD, Permission : "Public"});
     }catch(e) {
         var r = {}; r["errorDetails"] = "Error: " + e; return r;
     }
