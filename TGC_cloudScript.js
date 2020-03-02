@@ -594,9 +594,7 @@ handlers.SellItem = function (args) {
     return SellItem_internal(args.soldItemInstanceId, "GO");
 };
 
-function CalculItemWorth ( cData, wTable ) {
-    
-    // stat : Atk, Hp, Sta
+function CalculItemWorth ( cData, wTable ) { // stat : Atk, Hp, Sta
     var tier = parseInt( cData.Tier );
     var grade = (tier - 1) / 5;
     var stat = JSON.parse( cData.Stat );
@@ -607,15 +605,11 @@ function CalculItemWorth ( cData, wTable ) {
     if(stat.hasOwnProperty("Hp")) hp = stat.Hp;
     if(stat.hasOwnProperty("Sta")) sta = Math.ceil(stat.Sta);
     if(!skill.hasOwnProperty("Lev")) skill.Lev = 0;
-    
     var r = (wTable.Grade * grade) + (wTable.Tier * tier) + ( wTable.Stat * (atk + hp + sta) ) + (wTable.SkillLev * skill.Lev) * lev;
-    
     return r;
-    
 }
 
 handlers.ExpUp = function (args) {
-    
      if (!args || !args.targetItemInstanceId || !args.rawItemInstanceId)
         throw "Invalid input parameters";
     return ExpUp_internal(args.targetItemInstanceId, args.rawItemInstanceId);  
@@ -647,14 +641,12 @@ function ExpUp_internal ( targeInstId, rawInstId ) {
     targetStat = JSON.parse( targetItem.CustomData.Stat );
     rawStat = JSON.parse( rawItem.CustomData.Stat );
     if(targetStat.Lev >= levLimit) { targetStat.Lev = levLimit;  throw "item level MAX"; }
-    
-    // 아이템 가치 계산
+    // worth
     var targetWorth = CalculItemWorth(targetItem.CustomData, worthT);
     var rawWorth = CalculItemWorth(rawItem.CustomData, worthT);
     var exp = Math.ceil(rawWorth * worthT.ExpX);
     var levUpCost = Math.ceil( rawWorth * worthT.LevUpCostX );
     if(levUpCost > inv.VirtualCurrency["GO"]) throw "lack of Gold";
-    
     // Exp Up
     targetStat.Exp += exp;
     if(targetStat.Exp >= targetWorth) { 
@@ -663,16 +655,12 @@ function ExpUp_internal ( targeInstId, rawInstId ) {
         if(targetStat.hasOwnProperty("Atk")) targetStat.Atk += Math.ceil( targetStat.Atk * levT.XperLevel );
         if(targetStat.hasOwnProperty("Hp")) targetStat.Hp += Math.ceil( targetStat.Hp * levT.XperLevel );
         if(targetStat.hasOwnProperty("Sta")) targetStat.Sta += Math.ceil( targetStat.Sta * levT.XperLevel );
-        
         if(targetStat.Lev >= levLimit) { targetStat.Lev = levLimit; }
     }
     targetItem.CustomData.Stat = JSON.stringify( targetStat );
-    
     server.UpdateUserInventoryItemCustomData( {PlayFabId: cId, ItemInstanceId: targeInstId, Data: targetItem.CustomData} );
-    
     server.SubtractUserVirtualCurrency({ PlayFabId: cId, Amount: levUpCost, VirtualCurrency: "GO" });
     server.RevokeInventoryItem({ PlayFabId: cId, ItemInstanceId: rawInstId });
-    
     return exp;
 }
 
@@ -689,7 +677,6 @@ handlers.UpdatePartyTabData = function (args) {
     if (!args || !args.tab1 || !args.tab2 || !args.tab3 || !args.lastTab)
         throw "Invalid input parameters";
     server.UpdateUserData( {  PlayFabId: cId, Data : args } );
-    
     if(!args.hasOwnProperty(args.lastTab)) { throw "args not have key : args.lastTab"; }
     var equipI = JSON.parse( args[args.lastTab] );
     var cD = [];
@@ -711,21 +698,17 @@ handlers.UpdatePartyTabData = function (args) {
             else cD.push(item.CustomData);
         }
     }
-    
     var cInfo = JSON.stringify(cD);
     server.UpdateUserReadOnlyData( {  PlayFabId: cId, Data : { "CharacterInfo" : cInfo }, Permission : "Public" } );
-    
 }
 
-// args.ID : mastery ID
-handlers.MasteryUpgrade = function (args) {
+handlers.MasteryUpgrade = function (args) { // args.ID : mastery ID
     try {
         var cId = currentPlayerId;
         var userD = server.GetUserReadOnlyData( { PlayFabId: cId, Keys: ["Mastery"] } );
         var inv = server.GetUserInventory( { PlayFabId: cId } );
         var TitleR = server.GetTitleData( { Keys: ["MasteryTable"] } );
         var tableD = JSON.parse( TitleR.Data["MasteryTable"] );
-        
         var mObj = {};
         if(userD.Data.hasOwnProperty("Mastery")) {
             mObj = JSON.parse( userD.Data["Mastery"].Value );
@@ -737,43 +720,31 @@ handlers.MasteryUpgrade = function (args) {
         if(!mObj.hasOwnProperty(String(args.ID))) {
             mObj[String(args.ID)] = "0";
         }
-        
         var value = parseInt(mObj[String(args.ID)]);
-        
         var mD = {};
         for(var i in tableD.Mastery) {
             if(tableD.Mastery[i].ID == args.ID) {
                 mD = tableD.Mastery[i];
             }
         }
-        
         if(value >= mD.Limit) {
             throw "mastery lev full";
         }
-        
         var needSP = 0;
         needSP = mD.Cost * (value + 1);
         if( inv.VirtualCurrency.SP < needSP ) {
             throw "SP lack";
         }else {
-            // skill up
-            value += 1;
+            value += 1;// skill up
             mObj[String(args.ID)] = String(value);
-            // cost
-            var costR = server.SubtractUserVirtualCurrency( {PlayFabId: cId, VirtualCurrency: "SP", Amount: needSP} ); 
+            var costR = server.SubtractUserVirtualCurrency( {PlayFabId: cId, VirtualCurrency: "SP", Amount: needSP} ); // cost
         }
-        
         var value = JSON.stringify(mObj);
-        
         return server.UpdateUserReadOnlyData( {  PlayFabId: cId, Data : { "Mastery" : value }, Permission : "Public" } );
-        
     } catch(e) {
-        var retObj = {};
-        retObj["errorDetails"] = "Error: " + e;
-        return retObj;
+        var r = {}; r["errorDetails"] = "Error: " + e; return r;
     }
-};
-
+}
 
 handlers.FirstCheck = function (args) {
     var cId = currentPlayerId;
@@ -798,7 +769,6 @@ handlers.FirstCheck = function (args) {
         // slot init
         var slotObj = ResetUpgradeSlot(generalD);
         Object.assign(rdata, slotObj);
-        
         server.UpdateUserReadOnlyData( {  PlayFabId: cId, Data : rdata, Permission : "Public" } );
     }
     if(d.Data.hasOwnProperty("isTutoComplete") && isTrue( d.Data["isTutoComplete"].Value )) {
@@ -810,15 +780,13 @@ handlers.FirstCheck = function (args) {
 }
 
 function ResetUpgradeSlot(t) {
-    
     var slot = {};
     var r = {};
     for(var i in t.ItemUpgradeSlot) {
         slot.state = t.ItemUpgradeSlot[i].Default;
         r[t.ItemUpgradeSlot[i].ID] = JSON.stringify(slot);
     }
-    return r;
-    
+    return r;   
 }
 
 function GetRandomSkill( itemClass, SkillInfos, EquipListData, EquipArray ) {
@@ -846,7 +814,6 @@ function GetRandomSkill( itemClass, SkillInfos, EquipListData, EquipArray ) {
     delete skill.ItemClass;
     delete skill.Skill;
     delete skill.TargetClass;
-    
     return skill;
 }
 
@@ -855,9 +822,7 @@ function resetMasteryValue(t){
     for(var i in t.Mastery) r[String(t.Mastery[i].ID)] = String(0);
     return r;
 }
-
-// string -> bool
-function isTrue(value){
+function isTrue(value){ // string -> bool
     if (typeof(value) === 'string') value = value.trim().toLowerCase();
     switch(value){
         case true:
