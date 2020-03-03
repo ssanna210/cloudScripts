@@ -10,11 +10,7 @@ handlers.unlockChest = function (args, context) {
         if(chestR.CustomData.hasOwnProperty("openTime")) {
             var uDate = new Date( chestR.CustomData.openTime );
             var ctime = new Date();
-            if(ctime.getTime() < uDate.getTime()) {
-                throw "Time is shot yet";
-            }
-        }else {
-            throw "not have key : openTime ";
+            if(ctime.getTime() < uDate.getTime()) { throw "Time is short yet"; }
         }
         var r = server.UnlockContainerInstance({ PlayFabId: currentPlayerId, ContainerItemInstanceId: args.InstanceId });  
         return MakeItemData(r.GrantedItems);
