@@ -7,7 +7,7 @@ handlers.unlockChest = function (args, context) {
         var ItemR = GetItemData([args.InstanceId]);
         if(ItemR.length == 0) { throw "Item instance not found"; }
         var chestR = ItemR[0];
-        if(chestR.CustomData.hasOwnProperty("openTime")) {
+        if(chestR.CustomData !== undefined && chestR.CustomData.hasOwnProperty("openTime")) {
             var uDate = new Date( chestR.CustomData.openTime );
             var ctime = new Date();
             if(ctime.getTime() < uDate.getTime()) { throw "Time is short yet"; }
