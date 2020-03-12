@@ -272,7 +272,8 @@ handlers.BattleResult = function (args, context) { // 0: normal 1: promotion
         var r = {};
         var stcR = server.GetPlayerStatistics({ PlayFabId: cId });
         var trophyStc = findStc(stcR,"Trophy"); var tierStc = findStc(stcR,"TotalTier");
-        var hTrpStc = findStc(stcR,HTN); var BPStc = findStc(stcR,"BP"); var WinStc = findStc(stcR,"TotalWin");
+        var hTrpStc = findStc(stcR,HTN); var BPStc = findStc(stcR,"BP"); var WinStc = findStc(stcR,"TotalWin"); var wmStc = findStc(stcR,"WeadowMaker");
+        if(tierStc.Value == 0) tierStc.Value = 1;
         var totalTier = tierStc.Value;
         var tier = parseInt(totalTier % 100);
         var rebirth = parseInt( totalTier / 100 );
@@ -413,7 +414,8 @@ handlers.Rebirth = function (args, context) {
         trophyStc.Value += tierT.RebirthTrophy;
         BPStc.Value = trophyStc.Value;
         r.isRebirth = true;
-        server.UpdatePlayerStatistics({ PlayFabId: cId, Statistics: [trophyStc, tierStc, BPStc] });
+        wmStc.Value += args.wmShot;
+        server.UpdatePlayerStatistics({ PlayFabId: cId, Statistics: [trophyStc,tierStc,BPStc,wmStc] });
         return r;
     } catch(e) {
         var retObj = {}; retObj["errorDetails"] = "Error: " + e; return retObj;
