@@ -271,17 +271,19 @@ handlers.BattleResult = function (args, context) { // 0: normal 1: promotion
         var cId = currentPlayerId;
         var r = {};
         var stcR = server.GetPlayerStatistics({ PlayFabId: cId });
-        var trophyStc = {}; var tierStc = {}; var hTrpStc = {}; var BPStc = {};
+        var trophyStc = {}; var tierStc = {}; var hTrpStc = {}; var BPStc = {}; var WinStc = {};
         trophyStc.StatisticName = "Trophy"; trophyStc.Value = 0;
         tierStc.StatisticName = "TotalTier"; tierStc.Value = 1;
         hTrpStc.StatisticName = HTN; hTrpStc.Value = 0;
         BPStc.StatisticName = "BP"; BPStc.Value = 0;
+        WinStc.StatisticName = "TotalWin"; WinStc.Value = 0;
         if(stcR.Statistics.length > 0) {
-            for(var index in stcR.Statistics) {
-                if(stcR.Statistics[index].StatisticName == "Trophy") trophyStc = stcR.Statistics[index];
-                if(stcR.Statistics[index].StatisticName == "TotalTier") tierStc = stcR.Statistics[index];
-                if(stcR.Statistics[index].StatisticName == HTN) hTrpStc = stcR.Statistics[index];
-                if(stcR.Statistics[index].StatisticName == "BP") BPStc = stcR.Statistics[index];
+            for(var i in stcR.Statistics) {
+                if(stcR.Statistics[i].StatisticName == "Trophy") trophyStc = stcR.Statistics[i];
+                if(stcR.Statistics[i].StatisticName == "TotalTier") tierStc = stcR.Statistics[i];
+                if(stcR.Statistics[i].StatisticName == HTN) hTrpStc = stcR.Statistics[i];
+                if(stcR.Statistics[i].StatisticName == "BP") BPStc = stcR.Statistics[i];
+                if(stcR.Statistics[i].StatisticName == "TotalWin") WinStc = stcR.Statistics[i];
             }
         }
         var totalTier = tierStc.Value;
@@ -323,7 +325,7 @@ handlers.BattleResult = function (args, context) { // 0: normal 1: promotion
                 }else{
                     if(tier == tierLimit && rebirth == rebLimit) hTrpStc.Value += trpAmnt;
                 }
-                // check win cnt
+                WinStc.Value++;
                 userD.WinCount += 1;
                 if(userD.WinCount >= generalT.PerWinChest) {
                     r.chestValue = grantChest();
@@ -372,7 +374,7 @@ handlers.BattleResult = function (args, context) { // 0: normal 1: promotion
                 if(trophyStc.Value < 0) trophyStc.Value = 0;
             }
         }
-        server.UpdatePlayerStatistics({ PlayFabId: cId, Statistics: [trophyStc, tierStc, hTrpStc, BPStc] });
+        server.UpdatePlayerStatistics({ PlayFabId: cId, Statistics: [trophyStc,tierStc,hTrpStc,BPStc,WinStc] });
         server.UpdateUserInternalData({ PlayFabId : cId, Data : userD });
         r.mode = args.mode;
         r.totalTier = tierStc.Value;
@@ -495,7 +497,6 @@ function GetItemCatalogData(id) {
 function GetRandomTier (tier) {
     var r = tier - parseInt(Math.random() * RND_TIER);   
     if(r < 1) { r = 1; }
-
     return r;
 }
 
@@ -514,8 +515,9 @@ function CopyObj(obj) {
 }
 
 function SellItem_internal(soldInstId, vcType) {
-    
     var cId = currentPlayerId;
+    var stcR = server.GetPlayerStatistics({ PlayFabId: cId });
+    var sellStc = findStc(stcR,"TotalSell");
     var TitleR = server.GetTitleData( { Keys : [ "WorthTable" ] } );
     var worthT = JSON.parse( TitleR.Data.WorthTable );
     if(!worthT) throw "WorthTable not found";
@@ -530,11 +532,11 @@ function SellItem_internal(soldInstId, vcType) {
     }
     stat = JSON.parse(itemD.CustomData.Stat);
     var worth = CalculItemWorth(itemD.CustomData, worthT);
-    
     var price = Math.ceil(worth * worthT.SellGoldX);
     server.AddUserVirtualCurrency({ PlayFabId: cId, Amount: price, VirtualCurrency: vcType });
     server.RevokeInventoryItem({ PlayFabId: cId, ItemInstanceId: soldInstId });
-    
+    sellStc.Value++;
+    server.UpdatePlayerStatistics({ PlayFabId: cId, Statistics: [sellStc] });
     return price;
 }
 
@@ -564,29 +566,24 @@ handlers.ExpUp = function (args) {
         throw "Invalid input parameters";
     return ExpUp_internal(args.targetItemInstanceId, args.rawItemInstanceId);  
 }
-
 function ExpUp_internal ( targeInstId, rawInstId ) {
     var cId = currentPlayerId;
+    var stcR = server.GetPlayerStatistics({ PlayFabId: cId });
+    var levUpStc = findStc(stcR,"ItemLevelUp");
     var TitleR = server.GetTitleData( { Keys : [ "LevelTable", "WorthTable" ] } );
     var worthT = JSON.parse( TitleR.Data.WorthTable );
     var levT = JSON.parse( TitleR.Data.LevelTable );
-    // check item
     var inv = server.GetUserInventory({ PlayFabId: cId });
-    var targetItem = null;
-    var rawItem = null;
+    var targetItem = null; var rawItem = null;
     for (var i = 0; i < inv.Inventory.length; i++) {
-        if (inv.Inventory[i].ItemInstanceId === targeInstId)
-            targetItem = inv.Inventory[i];
-        else if (inv.Inventory[i].ItemInstanceId === rawInstId)
-            rawItem = inv.Inventory[i];
+        if (inv.Inventory[i].ItemInstanceId === targeInstId) targetItem = inv.Inventory[i];
+        else if (inv.Inventory[i].ItemInstanceId === rawInstId) rawItem = inv.Inventory[i];
     }
-    if (!targetItem || !rawItem)
-        throw "Item instance not found";
+    if (!targetItem || !rawItem) throw "Item instance not found";
     if(targetItem.CustomData === undefined || rawItem.CustomData === undefined){
         throw "itemInstance.CustomData is undefined";
     }
-    var targetStat = {};
-    var rawStat = {};
+    var targetStat = {}; var rawStat = {};
     var levLimit = CalculLevLimit( parseInt( targetItem.CustomData.Tier ), levT );
     targetStat = JSON.parse( targetItem.CustomData.Stat );
     rawStat = JSON.parse( rawItem.CustomData.Stat );
@@ -606,11 +603,13 @@ function ExpUp_internal ( targeInstId, rawInstId ) {
         if(targetStat.hasOwnProperty("Hp")) targetStat.Hp += Math.ceil( targetStat.Hp * levT.XperLevel );
         if(targetStat.hasOwnProperty("Sta")) targetStat.Sta += Math.ceil( targetStat.Sta * levT.XperLevel );
         if(targetStat.Lev >= levLimit) { targetStat.Lev = levLimit; }
+        levUpStc.Value++;
     }
     targetItem.CustomData.Stat = JSON.stringify( targetStat );
     server.UpdateUserInventoryItemCustomData( {PlayFabId: cId, ItemInstanceId: targeInstId, Data: targetItem.CustomData} );
     server.SubtractUserVirtualCurrency({ PlayFabId: cId, Amount: levUpCost, VirtualCurrency: "GO" });
     server.RevokeInventoryItem({ PlayFabId: cId, ItemInstanceId: rawInstId });
+    server.UpdatePlayerStatistics({ PlayFabId: cId, Statistics: [levUpStc] });
     return exp;
 }
 
@@ -783,4 +782,9 @@ function isTrue(value){ // string -> bool
         case "yes": return true;
         default: return false;
     }
+}
+function findStc(stc,name){
+    var r = {}; r.StatisticName = name; r.Value = 0;
+    for(var i in stc.Statistics) if(stc.Statistics[i].StatisticName == name) { r = CopyObj(stc.Statistics[i]); break; }
+    return r;
 }
