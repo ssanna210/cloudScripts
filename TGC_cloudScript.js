@@ -271,21 +271,8 @@ handlers.BattleResult = function (args, context) { // 0: normal 1: promotion
         var cId = currentPlayerId;
         var r = {};
         var stcR = server.GetPlayerStatistics({ PlayFabId: cId });
-        var trophyStc = {}; var tierStc = {}; var hTrpStc = {}; var BPStc = {}; var WinStc = {};
-        trophyStc.StatisticName = "Trophy"; trophyStc.Value = 0;
-        tierStc.StatisticName = "TotalTier"; tierStc.Value = 1;
-        hTrpStc.StatisticName = HTN; hTrpStc.Value = 0;
-        BPStc.StatisticName = "BP"; BPStc.Value = 0;
-        WinStc.StatisticName = "TotalWin"; WinStc.Value = 0;
-        if(stcR.Statistics.length > 0) {
-            for(var i in stcR.Statistics) {
-                if(stcR.Statistics[i].StatisticName == "Trophy") trophyStc = stcR.Statistics[i];
-                if(stcR.Statistics[i].StatisticName == "TotalTier") tierStc = stcR.Statistics[i];
-                if(stcR.Statistics[i].StatisticName == HTN) hTrpStc = stcR.Statistics[i];
-                if(stcR.Statistics[i].StatisticName == "BP") BPStc = stcR.Statistics[i];
-                if(stcR.Statistics[i].StatisticName == "TotalWin") WinStc = stcR.Statistics[i];
-            }
-        }
+        var trophyStc = findStc(stcR,"Trophy"); var tierStc = findStc(stcR,"TotalTier");
+        var hTrpStc = findStc(stcR,HTN); var BPStc = findStc(stcR,"BP"); var WinStc = findStc(stcR,"TotalWin");
         var totalTier = tierStc.Value;
         var tier = parseInt(totalTier % 100);
         var rebirth = parseInt( totalTier / 100 );
