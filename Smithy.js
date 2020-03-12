@@ -50,16 +50,10 @@ handlers.ItemUpgradeFinish = function (args) { // args.slotID
         var items = [];
         items = GetItemData(slot.itemIds);
         if(items.length == 0) { throw "Item instance not found"; }
-        var StcR = server.GetPlayerStatistics({ PlayFabId: cId, StatisticNames: [ "TotalTier" ] });
-        var tierStc = {};
-        tierStc.StatisticName = "TotalTier";
-        tierStc.Value = 1;
-        if(StcR.Statistics.length > 0) {
-            for(var i in StcR.Statistics) {
-                if(StcR.Statistics[i].StatisticName == "TotalTier") 
-                    tierStc = StcR.Statistics[i];
-            }
-        }
+        var stcR = server.GetPlayerStatistics({ PlayFabId: cId });
+        var upStc = findStc(stcR,"ItemUpgrade");
+        var tierStc = findStc(stcR,"TotalTier");
+        if(tierStc.Value == 0) tierStc.Value = 1;
         var totalTier = tierStc.Value;
         var tier = parseInt(totalTier % 100);
         var rebirth = parseInt( totalTier / 100 );
@@ -90,28 +84,23 @@ handlers.ItemUpgradeFinish = function (args) { // args.slotID
             if(skill.hasOwnProperty("Lev")) {
                 skill.Lev += slotData.Amount;
                 // limit check
-                if(skill.Lev >= skill.Limit) { 
-                    skill.Lev = skill.Limit;
-                }
+                if(skill.Lev >= skill.Limit) { skill.Lev = skill.Limit;}
             }else {
                 var tableD = {};
                 for(var j in itemT.Equipments) {
-                    if(itemT.Equipments[j].ItemID == itemInfo.ItemID) {
-                        tableD = CopyObj( itemT.Equipments[j] );
-                    }
+                    if(itemT.Equipments[j].ItemID == itemInfo.ItemID) { tableD = CopyObj(itemT.Equipments[j]); }
                 }
                 var EquipArray = [];
                 var EquipListData = {};
                 for(var i = 0; i < tierT.EquipList.length; i++) {
-                    if(tierT.EquipList[i].Tier <= totalTier) {
-                        EquipArray.push(tierT.EquipList[i]);
-                    }
+                    if(tierT.EquipList[i].Tier <= totalTier) { EquipArray.push(tierT.EquipList[i]); }
                 }
                 skill = GetRandomSkill( tableD.ItemClass, skillT.SkillInfos, EquipListData, EquipArray );
             }
             items[index].CustomData.Skill = JSON.stringify(skill);
             server.UpdateUserInventoryItemCustomData
             ( {PlayFabId: cId, ItemInstanceId: items[index].ItemInstanceId, Data: items[index].CustomData} );
+            upStc.Value++;
         }
         slot.state = "NONE";
         slot.itemIds = null;
@@ -120,7 +109,7 @@ handlers.ItemUpgradeFinish = function (args) { // args.slotID
         server.UpdateUserReadOnlyData( {  PlayFabId: cId, Data : upData, Permission : "Public" } );;
         r.isUp = true;
         r.items = items;
-        
+        server.UpdatePlayerStatistics({ PlayFabId: cId, Statistics: [upStc] });
         return r;
     } catch(e) {
         var retObj = {};
