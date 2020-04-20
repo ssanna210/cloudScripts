@@ -627,10 +627,7 @@ handlers.UpdatePartyTabData = function (args) {
             item = null;
             for(var j in invR.Inventory)
             {
-                if(invR.Inventory[j].ItemInstanceId === equipI[i])
-                {
-                    item = invR.Inventory[j];
-                }
+                if(invR.Inventory[j].ItemInstanceId === equipI[i]) { item = invR.Inventory[j]; }
             }
             if(item == null) cD.push(null);
             else cD.push(item.CustomData);
@@ -717,6 +714,12 @@ handlers.FirstCheck = function (args) {
     return r;
 }
 
+handlers.TutoUpdate = function (args) {
+    try {
+        return server.UpdateUserReadOnlyData( {  PlayFabId: currentPlayerId, Data : { "Tutorial" : args.Value }, Permission : "Public" } );
+    } catch(e) { var r = {}; r["errorDetails"] = "Error: " + e; return r; }
+}
+
 function ResetUpgradeSlot(t) {
     var slot = {};
     var r = {};
@@ -726,7 +729,6 @@ function ResetUpgradeSlot(t) {
     }
     return r;   
 }
-
 function GetRandomSkill( itemClass, SkillInfos, EquipListData, EquipArray ) {
     var skill = {};
     var sIdL = [];
@@ -754,7 +756,6 @@ function GetRandomSkill( itemClass, SkillInfos, EquipListData, EquipArray ) {
     delete skill.TargetClass;
     return skill;
 }
-
 function resetMasteryValue(t){
     var r = {};
     for(var i in t.Mastery) r[String(t.Mastery[i].ID)] = String(0);
